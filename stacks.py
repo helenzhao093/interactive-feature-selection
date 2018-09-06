@@ -51,12 +51,8 @@ def get_histogram_data():
     predicted = convert_csv_to_array('static/predicted.csv', 1)
     target = convert_csv_to_array('static/target.csv', 1)
     proba = convert_csv_to_array('static/proba.csv', 0)
-    display = dict()
-    for classification in Histogram.CLASSIFICATIONS:
-        display[classification] = 1
-    display[Histogram.TN_KEY] = 0
     global HISTOGRAM
-    HISTOGRAM = Histogram(predicted, target, proba, display)
+    HISTOGRAM = Histogram(predicted, target, proba)
     #num_example = len(proba)
     #if (num_example > 0):
     #    num_classes = len(proba[0])
@@ -65,10 +61,17 @@ def get_histogram_data():
     return jsonify(HISTOGRAM.histogram_info)
 
 @app.route("/postHistogramZoom", methods=['POST'])
-def update_histogram_info():
+def update_histogram_info_range():
     if request.method == 'POST':
         new_range = request.get_json(data)
         HISTOGRAM.set_range(new_range['selection'])
+    return jsonify(HISTOGRAM.histogram_info)
+
+@app.route("/postHistogramDisplay", methods=['POST'])
+def update_histogram_info_display():
+    if request.method == 'POST':
+        new_display = request.get_json(data)
+        HISTOGRAM.update_display(new_display['classification'])
     return jsonify(HISTOGRAM.histogram_info)
 
 

@@ -1,4 +1,30 @@
 /*** @jsx React.DOM */
+class ZoomButton extends React.Component{
+  constructor(props) {
+    super(props)
+    this.onClick = this.onClick.bind(this)
+  }
+
+  componentDidMount() {
+    //d3.selectAll(".histogram").call(this.props.brush)
+    //d3.selectAll(".selection").attr("width", 0)
+  }
+
+  componentDidUpdate() {
+  }
+
+  onClick() {
+    d3.selectAll(".histogram").call(this.props.brush)
+    d3.selectAll(".selection").attr("width", 0)
+  }
+
+  render(){
+    return (
+      <button onClick={this.onClick}>{"Zoom"}</button>
+    )
+  }
+}
+
 class Interface extends React.Component {
   constructor(props) {
     super(props)
@@ -15,6 +41,8 @@ class Interface extends React.Component {
     //this.setState({brush: brush})
     this.calculateNewRange = this.calculateNewRange.bind(this)
     this.zoom = this.zoom.bind(this)
+    this.sendData = this.sendData.bind(this)
+    this.onClick = this.onClick.bind(this)
   }
 
   componentDidMount() {
@@ -30,13 +58,19 @@ class Interface extends React.Component {
     * (this.props.data.range[1] - this.props.data.range[0]) + this.props.data.range[0];
   }
 
+  onClick(classification) {
+    this.sendData('/postHistogramDisplay',
+      { "classification": classification }
+    )
+  }
+
   zoom() {
     //console.log(d3.event.selection)
-
-    var new_range = d3.event.selection.map((data) => this.calculateNewRange(data))
-    fetch('/postHistogramZoom', {
+    var newRange = d3.event.selection.map((data) => this.calculateNewRange(data))
+    this.sendData('/postHistogramZoom', { "selection": newRange })
+    /*fetch('/postHistogramZoom', {
       method: 'POST',
-      body: JSON.stringify({ "selection": new_range})
+      body: JSON.stringify({ "selection": new_range })
     }).then(function(response) {
       return response.json();
     }).then(data =>
@@ -45,15 +79,25 @@ class Interface extends React.Component {
       console.log(error)
     })
     //d3.event.target.move([0, 0], [300, 300])
-    console.log(d3.selectAll(".selection").attr("width", 0))
+    console.log(d3.selectAll(".selection").attr("width", 0)) */
   }
 
-
-  // sends to zoom in
+  sendData(url, dataToSend) {
+    fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(dataToSend)
+    }).then(function(response) {
+      return response.json();
+    }).then(data =>
+      this.setState({data: data})
+    ).catch(function(error) {
+      console.log(error)
+    })
+  }
 
   render() {
     console.log('render interface')
-
+    console.log(this.state.data)
     //var width = this.state.data.histogramTotalWidth
     //var brushHeight = this.state.data.histogramTotalHeight - 35
 
@@ -79,13 +123,24 @@ class Interface extends React.Component {
     //console.log(brush)
     brush.on("end", this.zoom)
     console.log(brush)
-    var histograms = this.state.data.histogramData.map((data, index) =>
-      <Histogram data={data} max={this.props.data.range[1]} min={this.props.data.range[0]}
+    /*var histograms = this.state.data.histogramData.map((data, index) =>
+      <Histogram data={data} max={this.props.data.range[0]} min={this.props.data.range[1]}
         size={[this.state.histogramTotalWidth, this.state.histogramTotalHeight]} margin={this.state.margin}
         maxNeg={this.state.data.maxNeg} maxPos={this.state.data.maxPos} brush={brush} index={index} />
-    )
+    )*/
     return (
-      <div className="histograms">{histograms}</div>
+      <div className={"interface"}>
+        <Settings display={this.state.data.display} onClick={(c) => this.onClick(c)}/>
+        <ZoomButton brush={brush}/>
+        <div className={"histograms"}>
+          {this.state.data.histogramData.map((data, index) =>
+            <Histogram data={data} max={this.state.data.range[0]} min={this.state.data.range[1]}
+              size={[this.state.histogramTotalWidth, this.state.histogramTotalHeight]} margin={this.state.margin}
+              maxNeg={this.state.data.maxNeg} maxPos={this.state.data.maxPos} brush={brush} index={index} />
+            )
+          }
+        </div>
+      </div>
     )
   }
 }

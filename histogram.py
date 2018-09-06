@@ -7,6 +7,7 @@ class Histogram:
     FP_KEY = 'fp'
     FN_KEY = 'fn'
     CLASSIFICATIONS = [FP_KEY, FN_KEY, TP_KEY, TN_KEY]
+    DEFAULT_DISPLAY = dict()
 
     # histogram data dictionary keys
     CLASS_NAME_KEY = 'className'
@@ -16,13 +17,20 @@ class Histogram:
     COUNT_KEY = 'count'
     PREVIOUS_SUM_KEY = 'previousSum'
 
-    def __init__(self, predicted, target, proba, display):
+    def __init__(self, predicted, target, proba):
         self.predicted = predicted
         self.target = target
         self.proba = proba
-        self.display = display
 
         self.histogram_info = dict()
+        self.histogram_info['display'] = dict()
+        for classification in Histogram.CLASSIFICATIONS:
+            self.histogram_info['display'][classification] = True
+        self.histogram_info['display'][Histogram.TN_KEY] = False
+        Histogram.DEFAULT_DISPLAY = self.histogram_info['display']
+
+        #self.histogram_info['classifications'] = Histogram.CLASSIFICATIONS
+
         self.num_instances = self.get_num_instances()
         self.num_classes = self.get_num_classes()
         self.histogram_info['range'] = [1.0, 0.0]
@@ -78,22 +86,22 @@ class Histogram:
             target = self.target[i][0]
             predicted = self.predicted[i][0]
             if target == predicted: # tp
-                if self.display[Histogram.TP_KEY]:
+                if self.histogram_info['display'][Histogram.TP_KEY]:
                     self.increment_pred(i, target, Histogram.TP_KEY, 0)
                 #self.histogram_info['histogramData'][target][self.data_key][self.bin_nums[i][target]][self.tp_key][0][self.count_key] += 1
-                if self.display[Histogram.TN_KEY]:
+                if self.histogram_info['display'][Histogram.TN_KEY]:
                     for j in range(self.num_classes): # tn
                         if j != target:
                             self.increment_pred(i, j, Histogram.TN_KEY, 0)
                         #self.histogram_info['histogramData'][j][self.data_key][self.bin_nums[i][j]][self.tn_key][0][self.count_key] += 1
             if target != predicted:
-                if self.display[Histogram.FN_KEY]:
+                if self.histogram_info['display'][Histogram.FN_KEY]:
                     self.increment_pred(i, target, Histogram.FN_KEY, predicted)
-                if self.display[Histogram.FP_KEY]:
+                if self.histogram_info['display'][Histogram.FP_KEY]:
                     self.increment_pred(i, predicted, Histogram.FP_KEY, target)
                 # self.histogram_info['histogramData'][target][self.data_key][self.bin_nums[i][target]][self.fn_key][predicted][self.count_key] += 1
                 # self.histogram_info['histogramData'][predicted][self.data_key][self.bin_nums[i][predicted]][self.fp_key][target][self.count_key] += 1
-                if self.display[Histogram.TN_KEY]:
+                if self.histogram_info['display'][Histogram.TN_KEY]:
                     for j in range(self.num_classes):
                         if j != target or j != predicted:
                             self.increment_pred(i, j, Histogram.TN_KEY, 0)
@@ -143,4 +151,8 @@ class Histogram:
     def set_range(self, new_range):
         print(new_range)
         self.histogram_info['range'] = new_range
+        self.create_histogram_data()
+
+    def update_display(self, classification):
+        self.histogram_info['display'][classification] =  not self.histogram_info['display'][classification]
         self.create_histogram_data()

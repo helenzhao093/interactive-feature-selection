@@ -34,7 +34,12 @@ class HistogramYAxis extends React.Component {
     d3.selectAll(".y-axis").call(this.props.axis)
   }
 
+  componentDidUpdate() {
+    d3.selectAll(".y-axis").call(this.props.axis)
+  }
+
   render() {
+    console.log('render axis')
     return(
       <g className={"y-axis"} transform={`translate(${this.props.left},${this.props.top})` }/>
     )
@@ -55,7 +60,6 @@ class HistogramBin extends React.Component {
   render(){
     //console.log('render bin');
     //console.log(this.props)
-    console.log(this.props.index)
 
     return(
       <g className={`bin${this.props.data.bin}`}>
@@ -64,12 +68,12 @@ class HistogramBin extends React.Component {
             className={`TP${bar.className}`}
             width={this.props.xScaleCount(bar.count)}
             height={this.props.yScale.bandwidth()}
-            x={this.props.xScale(bar.previousSum) + this.props.yAxisStrokeWidth/2}
+            x={this.props.xScale(bar.previousSum)}
             y={this.props.yScale(bar.bin)}
             fill={this.props.color(bar.className)} stroke={"none"} stroke-width={0}
             onMouseEnter={() => this.props.onMouseEnter(bar.count,
               this.props.xScale(bar.previousSum) + this.props.yAxisStrokeWidth/2 + this.props.xScaleCount(bar.count),
-              this.props.yScale(bar.bin) + this.props.tooltipIncrement * this.props.index
+              this.props.yScale(bar.bin) + 305 * this.props.index
             )}
           />
         )}
@@ -106,13 +110,14 @@ class HistogramBin extends React.Component {
             className={`FN${bar.className}`}
             width={this.props.xScaleCount(bar.count) - this.props.fnStrokeWidth}
             height={this.props.yScale.bandwidth() - this.props.fnStrokeWidth}
-            x={this.props.xScale(0) - this.props.xScaleCount(bar.previousSum) - this.props.xScaleCount(bar.count) - this.props.yAxisStrokeWidth/2 + this.props.fnStrokeWidth/2}
+            x={this.props.xScale(-bar.previousSum - bar.count) - this.props.fnStrokeWidth}
             y={this.props.yScale(bar.bin) + this.props.fnStrokeWidth/2}
             fill={"white"} stroke={this.props.color(bar.className)} stroke-width={this.props.fnStrokeWidth}
             onMouseEnter={() => this.props.onMouseEnter(bar.count,
               this.props.xScale(0) - this.props.xScaleCount(bar.previousSum) - this.props.xScaleCount(bar.count) - this.props.yAxisStrokeWidth/2 + this.props.fnStrokeWidth/2,
               this.props.yScale(bar.bin)
             )}
+            text={this.props.xScale(0)}
           />
         )}
       </g>
@@ -132,7 +137,7 @@ class Histogram extends React.Component {
       margin: { top: 5, right: 0, bottom: 5, left: 0 },
       histogramHeight : this.props.size[1] - this.props.margin.top - this.props.margin.bottom,
       yAxisStrokeWidth : 2,
-      fnStrokeWidth : 4,
+      fnStrokeWidth : 1,
       textLength : 40
     }
     console.log(this.state)
@@ -143,13 +148,12 @@ class Histogram extends React.Component {
   }
 
   componentDidUpdate() {
-    this.createHistogram()
+    d3.selectAll(".selection").attr("width", 0)
   }
 
   createHistogram() {
     //d3.selectAll(".histogram").call(this.props.brush)
     //d3.selectAll(".selection").attr("width", 0)
-
   }
 
   onMouseEnter(data, x, y) {
@@ -191,11 +195,11 @@ class Histogram extends React.Component {
     var textLength = 40 */
 
     //TODO: calculate tick marks
-    console.log(this.props.min)
-    var axisTicks = [this.props.min, this.props.min + (this.props.max - this.props.min)/2, this.props.max]
+    var axisTicks = [this.props.max, this.props.min + (this.props.max - this.props.min)/2, this.props.min]
+    console.log(axisTicks)
     var axisScale = d3.scalePoint().domain(axisTicks).range([0, this.state.histogramHeight])
     var axis = d3.axisLeft(axisScale).tickFormat(d3.format(".2f"))
-
+    //console.log(this.props)
     return (
       // TODO: convert to tooltip component
       <div className={"histogram-div"}>
@@ -205,7 +209,7 @@ class Histogram extends React.Component {
           {this.props.data.data.map( bin =>
             <HistogramBin data={bin} xScale={xScale} xScaleCount={xScaleCount} yScale={yScale} color={color}
               yAxisStrokeWidth={this.state.yAxisStrokeWidth} fnStrokeWidth={this.state.fnStrokeWidth} index={this.props.index}
-              tooltipIncrement={this.props.size[1] + this.margin.top}
+              tooltipIncrement={this.props.size[1] + this.state.margin.top}
               onMouseEnter={(d, x, y) => this.onMouseEnter(d, x, y)}
             />
           )}
