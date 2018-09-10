@@ -1,5 +1,5 @@
 .histogram-tooltip {
-    position: absolute;
+    position: relative;
     text-align: center;
     width: 30px;
     padding: 2px;
@@ -9,4 +9,8 @@
     border-radius: 8px;
     pointer-events: none;
     color: #fff;
+ }
+
+ .hidden {
+     visibility: hidden;
 }
