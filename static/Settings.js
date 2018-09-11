@@ -3,8 +3,9 @@
 
 function Button(props) {
   console.log('render button')
+  var background = props.display ? "turquoise" : "white"
   return (
-    <button onClick={props.onClick}>{props.text}</button>
+    <button onClick={props.onClick} style={{background: background}}>{props.text}</button>
   )
 }
 
@@ -28,7 +29,7 @@ class Settings extends React.Component {
     return (
       <div className={"histogram-buttons"}>
         {this.state.classifications.map((classification) =>
-          <Button onClick={() => this.props.onClick(classification)}
+          <Button onClick={() => this.props.onClick(classification, this.props.display[classification])}
             display={this.props.display[classification]}
             text={classification} />
           )

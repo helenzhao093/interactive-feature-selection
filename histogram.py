@@ -6,7 +6,7 @@ class Histogram:
     TN_KEY = 'tn'
     FP_KEY = 'fp'
     FN_KEY = 'fn'
-    CLASSIFICATIONS = [FP_KEY, FN_KEY, TP_KEY, TN_KEY]
+    CLASSIFICATIONS = [TN_KEY, FN_KEY, FP_KEY, TP_KEY]
     DEFAULT_DISPLAY = dict()
 
     # Histogram data dictionary keys
@@ -209,6 +209,7 @@ class Histogram:
         self.Histogram_info['range'] = new_range
         self.create_Histogram_data()
 
-    def update_display(self, classification):
-        self.Histogram_info['display'][classification] =  not self.Histogram_info['display'][classification]
-        self.create_Histogram_data()
+    def update_display(self, classification, display):
+        if self.Histogram_info['display'][classification] == display:
+            self.Histogram_info['display'][classification] = not display
+            self.create_Histogram_data()

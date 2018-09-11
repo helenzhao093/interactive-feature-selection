@@ -101,7 +101,9 @@ class Interface extends React.Component {
       data:this.props.data,
       featureData:this.props.featureData,
       summaryData: this.props.summaryData,
-      summaryHistogram: summaryHistogram
+      summaryHistogram: summaryHistogram,
+      histogramHistory: [{ data: this.props.data }],
+      histogramUpdateStep: 0
     }
     //var brush = d3.brushY().extent([[0, this.state.margin.top],
     //  [this.state.histogramTotalWidth, this.state.histogramTotalHeight - this.state.margin.bottom]])//.on("end", zoom);
@@ -110,6 +112,9 @@ class Interface extends React.Component {
     this.zoom = this.zoom.bind(this)
     this.sendData = this.sendData.bind(this)
     this.onClick = this.onClick.bind(this)
+    this.updateData = this.updateData.bind(this)
+    this.undo = this.undo.bind(this)
+    this.clear = this.clear.bind(this)
   }
 
   componentDidMount() {
@@ -124,9 +129,10 @@ class Interface extends React.Component {
     return brushY/(this.state.histogramTotalHeight - this.state.margin.top - this.state.margin.bottom) * (this.props.data.range[1] - this.props.data.range[0]) + this.props.data.range[0];
   }
 
-  onClick(classification) {
+  onClick(classification, display) {
     this.sendData('/postHistogramDisplay',
-      { "classification": classification }
+      { "classification": classification,
+        "display": display}
     )
   }
 
@@ -143,9 +149,34 @@ class Interface extends React.Component {
     }).then(function(response) {
       return response.json();
     }).then(data =>
-      this.setState({data: data})
+      this.updateData(data)
+      //this.setState({data: data})
     ).catch(function(error) {
       console.log(error)
+    })
+  }
+
+  updateData(data) {
+    const currentHistory = this.state.histogramHistory.splice(0, this.state.histogramUpdateStep + 1)
+
+    this.setState({
+      //data: data,
+      histogramHistory: currentHistory.concat([ { data: data } ]),
+      histogramUpdateStep: currentHistory.length
+    })
+  }
+
+  undo() {
+    if (this.state.histogramUpdateStep > 0) {
+      this.setState({
+        histogramUpdateStep: this.state.histogramUpdateStep - 1
+      })
+    }
+  }
+
+  clear() {
+    this.setState({
+      histogramUpdateStep: 0
     })
   }
 
@@ -156,11 +187,14 @@ class Interface extends React.Component {
     //console.log(brush)
     brush.on("end", this.zoom)
     console.log(brush)
+
+    const currentHistogramData = this.state.histogramHistory[this.state.histogramUpdateStep]
     /*var histograms = this.state.data.histogramData.map((data, index) =>
       <Histogram data={data} max={this.props.data.range[0]} min={this.props.data.range[1]}
         size={[this.state.histogramTotalWidth, this.state.histogramTotalHeight]} margin={this.state.margin}
         maxNeg={this.state.data.maxNeg} maxPos={this.state.data.maxPos} brush={brush} index={index} />
     )*/
+    console.log(currentHistogramData)
     return (
       <div className={"interface"}>
 
@@ -184,14 +218,17 @@ class Interface extends React.Component {
           size={[1000,400]}
           featureRanges={this.state.featureData.featureRanges}
           colorFunction={this.state.colorFunction} />
-        <Settings display={this.state.data.display} onClick={(c) => this.onClick(c)}/>
+        <Settings display={currentHistogramData.data.display} onClick={(c, d) => this.onClick(c, d)}/>
 
         <ZoomButton brush={brush} />
+        <button onClick={this.undo}>{"Undo"}</button>
+        <button onClick={this.clear}>{"Clear"}</button>
+
         <div className={"histograms"}>
-          {this.state.data.HistogramData.map((data, index) =>
-            <Histogram data={data} max={this.state.data.range[0]} min={this.state.data.range[1]}
+          {currentHistogramData.data.HistogramData.map((data, index) =>
+            <Histogram data={data} max={currentHistogramData.data.range[0]} min={currentHistogramData.data.range[1]}
               size={[this.state.histogramTotalWidth, this.state.histogramTotalHeight]} margin={this.state.margin}
-              maxNeg={this.state.data.maxNeg} maxPos={this.state.data.maxPos}
+              maxNeg={currentHistogramData.data.maxNeg} maxPos={currentHistogramData.data.maxPos}
               brush={brush} index={index}
               colorRange={this.state.colorRange}
               colorFunction={this.state.colorFunction}

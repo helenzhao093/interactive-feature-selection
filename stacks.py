@@ -90,7 +90,7 @@ def update_histogram_info_range():
 def update_histogram_info_display():
     if request.method == 'POST':
         new_display = request.get_json(data)
-        HISTOGRAM.update_display(new_display['classification'])
+        HISTOGRAM.update_display(new_display['classification'], new_display['display'])
     return jsonify(HISTOGRAM.Histogram_info)
 
 

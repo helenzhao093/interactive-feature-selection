@@ -80,7 +80,6 @@ class VerticalHistogram extends React.Component {
  constructor(props) {
    super(props)
    this.state = {
-     data: props.data,
      max: props.max,
      tooltip: { count: 0, left: 0, top: 0},
      histogramHeight : props.size[1] - props.margin.top - props.margin.bottom,
@@ -91,8 +90,7 @@ class VerticalHistogram extends React.Component {
      xAxis: props.xAxis,
      yAxis: props.yAxis,
      xScale: props.xScale,
-     yScale: props.yScale,
-     yAxisLeftTranslate: 30
+     yScale: props.yScale
    }
    console.log(this.state)
  }
@@ -115,7 +113,7 @@ class VerticalHistogram extends React.Component {
  render() {
    console.log('render vertical histogram')
 
-   var bins = this.state.data.map( bin =>
+   var bins = this.props.data.map( bin =>
      <VerticalHistogramBin
       bottom={this.props.margin.bottom}
       data={bin} xScale={this.state.xScale}
