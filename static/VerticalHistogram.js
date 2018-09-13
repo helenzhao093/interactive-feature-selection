@@ -50,7 +50,7 @@ class VerticalHistogramBin extends React.Component {
    console.log('render bin')
    return(
      <g className={'bin'}>
-       {this.props.data.tp.map(bar =>
+       {this.props.data.TP.map(bar =>
          <VerticalHistogramBar
            className={'TP'}
            width={this.props.xScale.bandwidth()}
@@ -60,7 +60,7 @@ class VerticalHistogramBin extends React.Component {
            fill={this.props.color(bar.className)}
          />
        )}
-       {this.props.data.fn.map(bar=>
+       {this.props.data.FN.map(bar=>
          <VerticalHistogramBar
            className={'FN'}
            width={this.props.xScale.bandwidth()}

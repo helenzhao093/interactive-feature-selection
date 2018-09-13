@@ -201,6 +201,20 @@ class Interface extends React.Component {
 
     return (
       <div className={"interface"}>
+        <VerticalHistogram
+          data={this.state.summaryData.data}
+          max={this.state.summaryData.maxClassTotal}
+          colorFunction={this.state.colorFunction}
+          size={this.state.summaryHistogram.size}
+          margin={this.state.summaryHistogram.margin}
+          xScale={this.state.summaryHistogram.xScale}
+          yScale={this.state.summaryHistogram.yScale}
+          yScaleAxis={this.state.summaryHistogram.yScaleAxis}
+          yAxis={this.state.summaryHistogram.yAxis}
+          xAxis={this.state.summaryHistogram.xAxis}
+          name={this.state.summaryHistogram.name}
+          domain={this.state.summaryHistogram.domain}
+          />
 
         {this.state.featureDistribution.map((feature, index) =>
           <FeatureHistogram

@@ -12,48 +12,48 @@ class FeatureHistogramBin extends React.Component {
   render(){
     //console.log(Object.keys(this.props.data.tp))
     //console.log(this.props.data.tp["awesome"]["awesome"])
-    var tp = Object.keys(this.props.data.tp).map((key, index) =>
+    var TP = Object.keys(this.props.data.TP).map((key, index) =>
       <VerticalHistogramBar
         className={'hi'}
         width={this.props.xScale.bandwidth()}
-        height={this.props.yScale(this.props.data.tp[key][key].count)}
+        height={this.props.yScale(this.props.data.TP[key][key].count)}
         x={this.props.xScale(this.props.binNum)}
-        y={this.props.height - this.props.yScale(this.props.data.tp[key][key].count + this.props.data.tp[key][key].previousSum)}
-        fill={this.props.color(this.props.data.tp[key][key].target)}
+        y={this.props.height - this.props.yScale(this.props.data.TP[key][key].count + this.props.data.TP[key][key].previousSum)}
+        fill={this.props.color(this.props.data.TP[key][key].target)}
         />
     )
 
-    var fp = Object.keys(this.props.data.fp).map((predicted_key) =>
-      Object.keys(this.props.data.fp[predicted_key]).map((target_key) =>
+    var FP = Object.keys(this.props.data.FP).map((predicted_key) =>
+      Object.keys(this.props.data.FP[predicted_key]).map((target_key) =>
         <VerticalHistogramBar
           className={'hi'}
           width={this.props.xScale.bandwidth()}
-          height={this.props.yScale(this.props.data.fp[predicted_key][target_key].count)}
+          height={this.props.yScale(this.props.data.FP[predicted_key][target_key].count)}
           x={this.props.xScale(this.props.binNum)}
-          y={this.props.height - this.props.yScale(this.props.data.fp[predicted_key][target_key].count + this.props.data.fp[predicted_key][target_key].previousSum)}
-          fill={ 6 == 7 ? this.props.color(this.props.data.fp[predicted_key][target_key].predicted) : this.props.color(this.props.data.fp[predicted_key][target_key].target)}
+          y={this.props.height - this.props.yScale(this.props.data.FP[predicted_key][target_key].count + this.props.data.FP[predicted_key][target_key].previousSum)}
+          fill={ 6 == 7 ? this.props.color(this.props.data.FP[predicted_key][target_key].predicted) : this.props.color(this.props.data.FP[predicted_key][target_key].target)}
           />
         )
     )
 
-    var fn = Object.keys(this.props.data.fn).map((target_key) =>
-      Object.keys(this.props.data.fn[target_key]).map((predicted_key) =>
+    var FN = Object.keys(this.props.data.FN).map((target_key) =>
+      Object.keys(this.props.data.FN[target_key]).map((predicted_key) =>
         <VerticalHistogramBar
           className={'hi'}
           width={this.props.xScale.bandwidth()}
-          height={this.props.yScale(this.props.data.fn[target_key][predicted_key].count)}
+          height={this.props.yScale(this.props.data.FN[target_key][predicted_key].count)}
           x={this.props.xScale(this.props.binNum)}
-          y={this.props.height - this.props.yScale(this.props.data.fn[target_key][predicted_key].count + this.props.data.fn[target_key][predicted_key].previousSum)}
-          fill={ 7== 7 ? this.props.color(this.props.data.fn[target_key][predicted_key].predicted) : this.props.color(this.props.data.fn[target_key][predicted_key].target)}
+          y={this.props.height - this.props.yScale(this.props.data.FN[target_key][predicted_key].count + this.props.data.FN[target_key][predicted_key].previousSum)}
+          fill={ 7== 7 ? this.props.color(this.props.data.FN[target_key][predicted_key].predicted) : this.props.color(this.props.data.FN[target_key][predicted_key].target)}
           />
         )
     )
 
     return (
       <g className={'bin'}>
-        {tp}
-        {fp}
-        {fn}
+        {TP}
+        {FP}
+        {FN}
       </g>
     )
   }
@@ -79,7 +79,7 @@ class FeatureHistogram extends React.Component {
   }
 
   render(){
-    //console.log('render feature histogram')
+    console.log('render feature histogram')
     var xAxisDomain = this.props.data.map((bin, index) =>
       (this.props.featureRange[1] - this.props.featureRange[0]) / this.props.numBins * index + this.props.featureRange[0]
     )

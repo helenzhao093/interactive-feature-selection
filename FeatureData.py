@@ -1,10 +1,10 @@
 import math
 
 class FeatureData:
-    TP_KEY = 'tp'
-    TN_KEY = 'tn'
-    FP_KEY = 'fp'
-    FN_KEY = 'fn'
+    TP_KEY = 'TP'
+    TN_KEY = 'TN'
+    FP_KEY = 'FP'
+    FN_KEY = 'FN'
     CLASSIFICATIONS = [FP_KEY, FN_KEY, TP_KEY, TN_KEY]
     DEFAULT_NUM_BINS = 10
 
