@@ -2,10 +2,10 @@ import math
 
 class Histogram:
     NUM_BINS = 10
-    TP_KEY = 'tp'
-    TN_KEY = 'tn'
-    FP_KEY = 'fp'
-    FN_KEY = 'fn'
+    TP_KEY = 'TP'
+    TN_KEY = 'TN'
+    FP_KEY = 'FP'
+    FN_KEY = 'FN'
     CLASSIFICATIONS = [TN_KEY, FN_KEY, FP_KEY, TP_KEY]
     DEFAULT_DISPLAY = dict()
 

@@ -39,8 +39,8 @@ class HistogramBinHorizontal extends React.Component {
 
   render(){
     console.log('render bin');
-    //console.log(this.props)x
-    var tp = this.props.data.tp.map(bar =>
+    console.log(this.props)
+    var tp = this.props.data.TP.map(bar =>
       <HistogramBar
         className={`TP${bar.className}`}
         width={this.props.xScaleCount(bar.count)}
@@ -59,7 +59,7 @@ class HistogramBinHorizontal extends React.Component {
     return(
       <g className={`bin${this.props.data.bin}`}>
         {tp}
-        {this.props.data.fp.map(bar =>
+        {this.props.data.FP.map(bar =>
           <HistogramBar
             className={`FP${bar.className}`}
             width={this.props.xScaleCount(bar.count)}
@@ -74,7 +74,7 @@ class HistogramBinHorizontal extends React.Component {
             onMouseLeave={() => this.props.onMouseLeave()}
           />
         )}
-        {this.props.data.tn.map(bar=>
+        {this.props.data.TN.map(bar=>
           <HistogramBar
             className={`TN${bar.className}`}
             width={this.props.xScaleCount(bar.count)}
@@ -89,7 +89,7 @@ class HistogramBinHorizontal extends React.Component {
             onMouseLeave={() => this.props.onMouseLeave()}
           />
         )}
-        {this.props.data.fn.map(bar=>
+        {this.props.data.FN.map(bar=>
           <HistogramBar
             className={`FN${bar.className}`}
             width={this.props.xScaleCount(bar.count) - this.props.fnStrokeWidth}
@@ -157,7 +157,7 @@ class Histogram extends React.Component {
 
   render() {
     console.log('render histogram')
-
+    console.log(this.props)
     var xDomainScale = Math.max(this.props.maxNeg, this.props.maxPos)
 
     var xScale = d3.scaleLinear()

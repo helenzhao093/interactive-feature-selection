@@ -64,6 +64,7 @@ def get_histogram_data():
     interface_data['histogramData'] = HISTOGRAM.Histogram_info
     interface_data['summaryData'] = HISTOGRAM.summary_data
     interface_data['featureData'] = FEATURE_DATA.feature_data
+    interface_data['featureDistribution'] = FEATURE_DATA.feature_distribution
     #num_example = len(proba)
     #if (num_example > 0):
     #    num_classes = len(proba[0])

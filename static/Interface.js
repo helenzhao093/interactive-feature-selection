@@ -92,6 +92,9 @@ class Interface extends React.Component {
     summaryHistogram.yAxis = d3.axisLeft(summaryHistogram.yScaleAxis)
     summaryHistogram.name = "summary"
     console.log(summaryHistogram)
+
+
+
     this.state = {
       colorRange: colorRange,
       colorFunction: color,
@@ -102,6 +105,7 @@ class Interface extends React.Component {
       featureData:this.props.featureData,
       summaryData: this.props.summaryData,
       summaryHistogram: summaryHistogram,
+      featureDistribution: this.props.featureDistribution,
       histogramHistory: [{ data: this.props.data }],
       histogramUpdateStep: 0
     }
@@ -150,7 +154,6 @@ class Interface extends React.Component {
       return response.json();
     }).then(data =>
       this.updateData(data)
-      //this.setState({data: data})
     ).catch(function(error) {
       console.log(error)
     })
@@ -158,7 +161,6 @@ class Interface extends React.Component {
 
   updateData(data) {
     const currentHistory = this.state.histogramHistory.splice(0, this.state.histogramUpdateStep + 1)
-
     this.setState({
       //data: data,
       histogramHistory: currentHistory.concat([ { data: data } ]),
@@ -186,7 +188,7 @@ class Interface extends React.Component {
       [this.state.histogramTotalWidth, this.state.histogramTotalHeight - this.state.margin.bottom]])
     //console.log(brush)
     brush.on("end", this.zoom)
-    console.log(brush)
+    //console.log(brush)
 
     const currentHistogramData = this.state.histogramHistory[this.state.histogramUpdateStep]
     /*var histograms = this.state.data.histogramData.map((data, index) =>
@@ -194,36 +196,33 @@ class Interface extends React.Component {
         size={[this.state.histogramTotalWidth, this.state.histogramTotalHeight]} margin={this.state.margin}
         maxNeg={this.state.data.maxNeg} maxPos={this.state.data.maxPos} brush={brush} index={index} />
     )*/
+
     console.log(currentHistogramData)
+
     return (
       <div className={"interface"}>
 
-        <VerticalHistogram
-          data={this.state.summaryData.data}
-          max={this.state.summaryData.maxClassTotal}
-          colorFunction={this.state.colorFunction}
-          size={this.state.summaryHistogram.size}
-          margin={this.state.summaryHistogram.margin}
-          xScale={this.state.summaryHistogram.xScale}
-          yScale={this.state.summaryHistogram.yScale}
-          yScaleAxis={this.state.summaryHistogram.yScaleAxis}
-          yAxis={this.state.summaryHistogram.yAxis}
-          xAxis={this.state.summaryHistogram.xAxis}
-          name={this.state.summaryHistogram.name}
-          domain={this.state.summaryHistogram.domain}
-          />
-
+        {this.state.featureDistribution.map((feature, index) =>
+          <FeatureHistogram
+            data={feature.data}
+            numBins={feature.data.length}
+            size={[300,300]}
+            featureName={this.state.featureData.features[index].featureName}
+            featureRange={this.state.featureData.features[index].range}
+            colorFunction={this.state.colorFunction}
+            margin={this.state.summaryHistogram.margin}
+            max={155}
+            />
+        )}
         <FeatureParallelCoordinates data={this.state.featureData.data}
-          featureNames={this.state.featureData.featureNames}
+          features={this.state.featureData.features}
           size={[1000,400]}
-          featureRanges={this.state.featureData.featureRanges}
           colorFunction={this.state.colorFunction} />
-        <Settings display={currentHistogramData.data.display} onClick={(c, d) => this.onClick(c, d)}/>
 
+        <Settings display={currentHistogramData.data.display} onClick={(c, d) => this.onClick(c, d)}/>
         <ZoomButton brush={brush} />
         <button onClick={this.undo}>{"Undo"}</button>
         <button onClick={this.clear}>{"Clear"}</button>
-
         <div className={"histograms"}>
           {currentHistogramData.data.HistogramData.map((data, index) =>
             <Histogram data={data} max={currentHistogramData.data.range[0]} min={currentHistogramData.data.range[1]}
@@ -241,3 +240,7 @@ class Interface extends React.Component {
     )
   }
 }
+
+
+/*
+*/

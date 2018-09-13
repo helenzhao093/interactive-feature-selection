@@ -15,7 +15,10 @@ function getData(){
 getData()
   .then(function(data) {
     ReactDOM.render(
-      <Interface data={data.histogramData} featureData={data.featureData} summaryData={data.summaryData} />,
+      <Interface data={data.histogramData}
+      featureData={data.featureData}
+      summaryData={data.summaryData}
+      featureDistribution={data.featureDistribution}/>,
       document.getElementById('root')
     );
   })
