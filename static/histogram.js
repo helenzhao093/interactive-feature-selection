@@ -38,8 +38,8 @@ class HistogramBinHorizontal extends React.Component {
   }
 
   render(){
-    console.log('render bin');
-    console.log(this.props)
+    //console.log('render bin');
+    //console.log(this.props)
     var tp = this.props.data.TP.map(bar =>
       <HistogramBar
         className={`TP${bar.className}`}

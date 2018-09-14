@@ -15,6 +15,7 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 APP_STATIC = os.path.join(APP_ROOT, 'static')
 HISTOGRAM = None
 FEATURE_DATA = None
+INTERFACE_DATA = None
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -60,17 +61,13 @@ def get_histogram_data():
     HISTOGRAM = Histogram(predicted, target, proba, class_names)
     global FEATURE_DATA
     FEATURE_DATA = FeatureData(predicted, target, features, proba, HISTOGRAM.num_classes, feature_names, HISTOGRAM.Histogram_info['classNames'])
-    interface_data = dict()
-    interface_data['histogramData'] = HISTOGRAM.Histogram_info
-    interface_data['summaryData'] = HISTOGRAM.summary_data
-    interface_data['featureData'] = FEATURE_DATA.feature_data
-    interface_data['featureDistribution'] = FEATURE_DATA.feature_distribution
-    #num_example = len(proba)
-    #if (num_example > 0):
-    #    num_classes = len(proba[0])
-    #print num_classes
-    #histogramData = initHistogramData(num_classes)
-    return jsonify(interface_data)
+    global INTERFACE_DATA
+    INTERFACE_DATA = dict()
+    INTERFACE_DATA['histogramData'] = HISTOGRAM.Histogram_info
+    INTERFACE_DATA['summaryData'] = HISTOGRAM.summary_data
+    INTERFACE_DATA['featureData'] = FEATURE_DATA.feature_data
+    INTERFACE_DATA['featureDistribution'] = FEATURE_DATA.feature_distribution
+    return jsonify(INTERFACE_DATA)
 
 def create_names(names_array):
     if len(names_array) >= 2:
@@ -80,20 +77,35 @@ def create_names(names_array):
     else:
         return [], []
 
+def create_interface_data_to_send():
+    interface_data = dict()
+
+
 @app.route("/postHistogramZoom", methods=['POST'])
 def update_histogram_info_range():
     if request.method == 'POST':
         new_range = request.get_json(data)
         HISTOGRAM.set_range(new_range['selection'])
-    return jsonify(HISTOGRAM.Histogram_info)
+    return jsonify(INTERFACE_DATA)
 
 @app.route("/postHistogramDisplay", methods=['POST'])
 def update_histogram_info_display():
     if request.method == 'POST':
         new_display = request.get_json(data)
         HISTOGRAM.update_display(new_display['classification'], new_display['display'])
-    return jsonify(HISTOGRAM.Histogram_info)
+    return jsonify(INTERFACE_DATA)
 
+
+@app.route('/classSelected', methods=['POST'])
+def update_class_selection():
+    if request.method == 'POST':
+        class_selected = request.get_json(data)
+        FEATURE_DATA.update_class_selection(class_selected['className'])
+        interface_data = dict()
+        interface_data['histogramData'] = HISTOGRAM.Histogram_info
+        interface_data['featureData'] = FEATURE_DATA.feature_data
+        interface_data['featureDistribution'] = FEATURE_DATA.feature_distribution
+    return jsonify(interface_data)
 
 def convert_csv_to_array(csv_filename, convert_to_int, quoting):
     arr = []
@@ -108,7 +120,6 @@ def convert_csv_to_array(csv_filename, convert_to_int, quoting):
     except IOError:
         pass
     return arr
-
 
 @app.route('/static/<path:path>')
 def send_js(path):

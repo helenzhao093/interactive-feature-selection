@@ -14,7 +14,7 @@ class FeatureHistogramBin extends React.Component {
     //console.log(this.props.data.tp["awesome"]["awesome"])
     var TP = Object.keys(this.props.data.TP).map((key, index) =>
       <VerticalHistogramBar
-        className={'hi'}
+        className={'bin' + this.props.binNum}
         width={this.props.xScale.bandwidth()}
         height={this.props.yScale(this.props.data.TP[key][key].count)}
         x={this.props.xScale(this.props.binNum)}
@@ -26,7 +26,7 @@ class FeatureHistogramBin extends React.Component {
     var FP = Object.keys(this.props.data.FP).map((predicted_key) =>
       Object.keys(this.props.data.FP[predicted_key]).map((target_key) =>
         <VerticalHistogramBar
-          className={'hi'}
+          className={'bin' + this.props.binNum}
           width={this.props.xScale.bandwidth()}
           height={this.props.yScale(this.props.data.FP[predicted_key][target_key].count)}
           x={this.props.xScale(this.props.binNum)}
@@ -90,7 +90,7 @@ class FeatureHistogram extends React.Component {
 
     var xScale = d3.scaleBand()
       .domain(xScaleDomain)
-      .rangeRound([0, this.state.histogramWidth]).padding(0.2)
+      .rangeRound([0, this.state.histogramWidth]).padding(0.1)
 
     var xScaleAxis = d3.scaleBand()
       .domain(xAxisDomain)
@@ -104,7 +104,7 @@ class FeatureHistogram extends React.Component {
       .domain([this.props.max, 0])
       .rangeRound([0, this.state.histogramHeight])
 
-    var xAxis = d3.axisBottom(xScale)
+    var xAxis = d3.axisBottom(xScaleAxis).tickFormat(d3.format(".2f"))
     var yAxis = d3.axisLeft(yScaleAxis)
 
     var bins = this.props.data.map((bin, index) =>
@@ -120,8 +120,16 @@ class FeatureHistogram extends React.Component {
     )
 
     return (
-      <svg className={'featureDistribution'} width={300} height={300}>
-        {bins}
+      <svg className={'featureDistribution'} width={this.props.size[0]} height={this.props.size[1]}>
+        <g transform={`translate(${this.props.margin.left},${this.props.margin.top})`}>
+          {bins}
+        </g>
+        <HistogramYAxis name={'x-axis-' + this.props.featureName} axis={xAxis} left={this.props.margin.left } top={this.props.margin.top + this.state.histogramHeight}/>
+        <HistogramYAxis name={'y-axis-' + this.props.featureName} axis={yAxis} left={this.props.margin.left } top={this.props.margin.top}/>
+        <text
+          x={this.props.size[0]/2 - 10}
+          y={this.props.size[1]}
+        >{this.props.featureName}</text>
       </svg>
     )
   }

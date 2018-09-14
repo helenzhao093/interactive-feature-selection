@@ -65,7 +65,7 @@ class Interface extends React.Component {
     super(props)
     //var brush = d3.brushY().extent([[0, 0], [300, 265]])//.on("end", zoom);
 
-    var colorRange = ["#00649b", "#bc4577", "#ff7e5a", "#b2bae4", "#a97856", "#a3a6af", "#48322e", "#ad8a85"]
+    var colorRange = ["#00649b", "#bc4577", "#ff7e5a", "#b2bae4", "#c0392b", "#f1c40f", "#16a085", "#3498db" ]
     var color = d3.scaleOrdinal()
         .range(colorRange)
         .domain(props.data.classNames) //TODO: LET USERS SET CLASS NAMES
@@ -93,8 +93,6 @@ class Interface extends React.Component {
     summaryHistogram.name = "summary"
     console.log(summaryHistogram)
 
-
-
     this.state = {
       colorRange: colorRange,
       colorFunction: color,
@@ -119,6 +117,7 @@ class Interface extends React.Component {
     this.updateData = this.updateData.bind(this)
     this.undo = this.undo.bind(this)
     this.clear = this.clear.bind(this)
+    this.classSelected = this.classSelected.bind(this)
   }
 
   componentDidMount() {
@@ -153,6 +152,7 @@ class Interface extends React.Component {
     }).then(function(response) {
       return response.json();
     }).then(data =>
+      //console.log(data)
       this.updateData(data)
     ).catch(function(error) {
       console.log(error)
@@ -163,9 +163,12 @@ class Interface extends React.Component {
     const currentHistory = this.state.histogramHistory.splice(0, this.state.histogramUpdateStep + 1)
     this.setState({
       //data: data,
-      histogramHistory: currentHistory.concat([ { data: data } ]),
-      histogramUpdateStep: currentHistory.length
+      histogramHistory: currentHistory.concat([ { data: data.histogramData } ]),
+      histogramUpdateStep: currentHistory.length,
+      featureData: data.featureData,
+      featureDistribution: data.featureDistribution,
     })
+
   }
 
   undo() {
@@ -180,6 +183,11 @@ class Interface extends React.Component {
     this.setState({
       histogramUpdateStep: 0
     })
+  }
+
+  classSelected(className){
+    console.log(className)
+    this.sendData("/classSelected", { "className": className } )
   }
 
   render() {
@@ -201,31 +209,20 @@ class Interface extends React.Component {
 
     return (
       <div className={"interface"}>
-        <VerticalHistogram
-          data={this.state.summaryData.data}
-          max={this.state.summaryData.maxClassTotal}
-          colorFunction={this.state.colorFunction}
-          size={this.state.summaryHistogram.size}
-          margin={this.state.summaryHistogram.margin}
-          xScale={this.state.summaryHistogram.xScale}
-          yScale={this.state.summaryHistogram.yScale}
-          yScaleAxis={this.state.summaryHistogram.yScaleAxis}
-          yAxis={this.state.summaryHistogram.yAxis}
-          xAxis={this.state.summaryHistogram.xAxis}
-          name={this.state.summaryHistogram.name}
-          domain={this.state.summaryHistogram.domain}
-          />
+        {currentHistogramData.data.classNames.map((className) =>
+          <button className={className + 'button'} onClick={() => this.classSelected(className)}>{className}</button>
+         )}
 
         {this.state.featureDistribution.map((feature, index) =>
           <FeatureHistogram
             data={feature.data}
             numBins={feature.data.length}
-            size={[300,300]}
+            size={[300,200]}
             featureName={this.state.featureData.features[index].featureName}
             featureRange={this.state.featureData.features[index].range}
             colorFunction={this.state.colorFunction}
             margin={this.state.summaryHistogram.margin}
-            max={155}
+            max={feature.max}
             />
         )}
         <FeatureParallelCoordinates data={this.state.featureData.data}
@@ -257,4 +254,18 @@ class Interface extends React.Component {
 
 
 /*
+<VerticalHistogram
+  data={this.state.summaryData.data}
+  max={this.state.summaryData.maxClassTotal}
+  colorFunction={this.state.colorFunction}
+  size={this.state.summaryHistogram.size}
+  margin={this.state.summaryHistogram.margin}
+  xScale={this.state.summaryHistogram.xScale}
+  yScale={this.state.summaryHistogram.yScale}
+  yScaleAxis={this.state.summaryHistogram.yScaleAxis}
+  yAxis={this.state.summaryHistogram.yAxis}
+  xAxis={this.state.summaryHistogram.xAxis}
+  name={this.state.summaryHistogram.name}
+  domain={this.state.summaryHistogram.domain}
+  />
 */

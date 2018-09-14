@@ -92,7 +92,7 @@ class FeatureParallelCoordinates extends React.Component {
             }
           </g>
           {displayFeatures.map((feature, index) =>
-              <Axis name={name} axis={yScales[index]} transform={`translate(${xScale(index)})`}/>
+              <Axis name={feature.featureName} axis={yScales[index]} transform={`translate(${xScale(index)})`}/>
           )}
         </g>
       </svg>

@@ -15,12 +15,14 @@ class FeatureData:
         self.proba = proba
         self.class_names = class_names
         self.num_classes = num_classes
-        self.num_bins = 10
+        self.num_bins = FeatureData.DEFAULT_NUM_BINS
         self.num_features = self.get_num_features()
         self.feature_data = dict()
 
         feature_names = self.create_feature_names(feature_names)
+
         self.init_feature_dict(feature_names)
+
         self.create_default_class_display()
         self.set_default_feature_range()
         self.set_default_feature_display()
@@ -30,18 +32,19 @@ class FeatureData:
         self.populate_feature_distribution()
         self.calculate_previous_sum_feature_distribution()
 
+    # self.feature_data['classDisplay'][class_name][classification]['di']
     def create_default_class_display(self):
-        self.feature_data['settings'] = dict()
+        self.feature_data['classDisplay'] = dict()
         for class_name in self.class_names:
-            self.feature_data['settings'][class_name] = dict()
+            self.feature_data['classDisplay'][class_name] = dict()
             for classification in FeatureData.CLASSIFICATIONS:
-                self.feature_data['settings'][class_name][classification] = dict()
+                self.feature_data['classDisplay'][class_name][classification] = dict()
                 if classification == FeatureData.TP_KEY:
-                    self.feature_data['settings'][class_name][classification]['display'] = True
+                    self.feature_data['classDisplay'][class_name][classification]['display'] = True
                 else:
-                    self.feature_data['settings'][class_name][classification]['display'] = False
-                self.feature_data['settings'][class_name][classification]['range'] = [1.0, 0.0] #[max, min]
-        #self.feature_data['settings']['cool']['fp']['display'] = True
+                    self.feature_data['classDisplay'][class_name][classification]['display'] = False
+                self.feature_data['classDisplay'][class_name][classification]['range'] = [1.0, 0.0] #[max, min]
+        #self.feature_data['classDisplay']['cool']['fp']['display'] = True
 
     def get_num_features(self):
         if len(self.features) > 0:
@@ -85,19 +88,10 @@ class FeatureData:
             predicted = self.predicted[i][0]
             if target == predicted:
                 self.add_data(i, target, FeatureData.TP_KEY, predicted, target, feature)
-                #proba = self.proba[i][target]
-                #if self.includeData(target, FeatureData.TP_KEY, proba): # tp is ON
-                #    data.append(self.create_data_dict(predicted, target, feature))
             if target != predicted:
                 self.add_data(i, target, FeatureData.FN_KEY, predicted, target, feature)
                 self.add_data(i, predicted, FeatureData.FP_KEY, predicted, target, feature)
-                #proba = self.proba[i][target] # fn
-                #if self.includeData(target, FeatureData.FN_KEY, proba):
-                #    data.append(self.create_data_dict(predicted, target, feature))
 
-                #proba = self.proba[i][predicted] #fp
-                #if self.includeData(predicted, FeatureData.FP_KEY, proba):
-                #    data.append(self.create_data_dict(predicted, target, feature))
 
     def init_feature_distributions(self):
         self.feature_distribution = []
@@ -164,9 +158,9 @@ class FeatureData:
                         self.feature_distribution[feature_num]['data'][bin_num][FeatureData.TP_KEY][target_class_name][target_class_name]['count'] += 1
 
                     if predicted_class_name != target_class_name:
-                        if self.feature_data['settings'][predicted_class_name][FeatureData.FP_KEY]['display']:
+                        if self.feature_data['classDisplay'][predicted_class_name][FeatureData.FP_KEY]['display']:
                             self.feature_distribution[feature_num]['data'][bin_num][FeatureData.FP_KEY][predicted_class_name][target_class_name]['count'] += 1
-                        if self.feature_data['settings'][target_class_name][FeatureData.FN_KEY]['display']:
+                        if self.feature_data['classDisplay'][target_class_name][FeatureData.FN_KEY]['display']:
                             self.feature_distribution[feature_num]['data'][bin_num][FeatureData.FN_KEY][target_class_name][predicted_class_name]['count'] += 1
 
     def calculate_previous_sum_feature_distribution(self):
@@ -174,13 +168,18 @@ class FeatureData:
             tp_classes = self.get_display_classes(FeatureData.TP_KEY, feature_num)
             fp_classes = self.get_display_classes(FeatureData.FP_KEY, feature_num)
             fn_classes = self.get_display_classes(FeatureData.FN_KEY, feature_num)
+            feature_max_bin = 0
             for bin_num in range(self.num_bins):
                 for i, tp_class in enumerate(tp_classes):
                     current_max = self.set_previous_sum_tp(feature_num['data'][bin_num], FeatureData.TP_KEY, i, tp_classes)
+
                 for i, fp_class in enumerate(fp_classes):
                     current_max = self.set_previous_sum(feature_num['data'][bin_num], FeatureData.FP_KEY, fp_classes[i], current_max)
                 for i, fn_class in enumerate(fn_classes):
-                    current_max = self.set_previous_sum(feature_num['data'][bin_num], FeatureData.FN_KEY, fn_classes[i])
+                    current_max = self.set_previous_sum(feature_num['data'][bin_num], FeatureData.FN_KEY, fn_classes[i], current_max)
+                if current_max > feature_max_bin:
+                    feature_max_bin = current_max
+            feature_num['max'] = feature_max_bin
 
     def get_display_classes(self, classification, feature_num):
         if classification in feature_num['data'][0]:
@@ -244,7 +243,19 @@ class FeatureData:
         return feature_value >= feature_range[0] and feature_value <= feature_range[1]
 
     def should_display(self, class_name, classification):
-        return self.feature_data['settings'][class_name][classification]['display']
+        return self.feature_data['classDisplay'][class_name][classification]['display']
 
     def in_range(self, class_name, classification, proba):
-        return proba <= self.feature_data['settings'][class_name][classification]['range'][0] and proba >= self.feature_data['settings'][class_name][classification]['range'][1]
+        return proba <= self.feature_data['classDisplay'][class_name][classification]['range'][0] and proba >= self.feature_data['classDisplay'][class_name][classification]['range'][1]
+
+    def update_class_selection(self, update_class_name):
+        for name in self.class_names:
+            for classification in FeatureData.CLASSIFICATIONS:
+                if classification == FeatureData.TP_KEY and name == update_class_name:
+                    self.feature_data['classDisplay'][name][classification]['display'] = True
+                else:
+                    self.feature_data['classDisplay'][name][classification]['display'] = False
+        self.init_data()
+        self.init_feature_distributions()
+        self.populate_feature_distribution()
+        self.calculate_previous_sum_feature_distribution()
