@@ -100,7 +100,7 @@ def update_histogram_info_display():
 def update_class_selection():
     if request.method == 'POST':
         class_selected = request.get_json(data)
-        FEATURE_DATA.update_class_selection(class_selected['className'])
+        FEATURE_DATA.update_class_selection(class_selected['className'], class_selected['currentDisplay'])
         interface_data = dict()
         interface_data['histogramData'] = HISTOGRAM.Histogram_info
         interface_data['featureData'] = FEATURE_DATA.feature_data

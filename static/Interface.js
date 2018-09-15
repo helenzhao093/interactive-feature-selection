@@ -117,7 +117,7 @@ class Interface extends React.Component {
     this.updateData = this.updateData.bind(this)
     this.undo = this.undo.bind(this)
     this.clear = this.clear.bind(this)
-    this.classSelected = this.classSelected.bind(this)
+    this.handleClassSelection = this.handleClassSelection.bind(this)
   }
 
   componentDidMount() {
@@ -185,9 +185,9 @@ class Interface extends React.Component {
     })
   }
 
-  classSelected(className){
-    console.log(className)
-    this.sendData("/classSelected", { "className": className } )
+  handleClassSelection(className, currentDisplay){
+    console.log(className, currentDisplay)
+    this.sendData("/classSelected", { "className": className, "currentDisplay": currentDisplay })
   }
 
   render() {
@@ -209,9 +209,11 @@ class Interface extends React.Component {
 
     return (
       <div className={"interface"}>
-        {currentHistogramData.data.classNames.map((className) =>
-          <button className={className + 'button'} onClick={() => this.classSelected(className)}>{className}</button>
-         )}
+         <CheckboxMultiSelect options={this.state.featureData.classDisplay} handleChange={(c,d) => this.handleClassSelection(c,d)} />
+        {Object.keys(this.state.featureData.classDisplay).map((className) =>
+          <button className={className + 'button'}
+            onClick={() => this.classSelected(className, this.state.featureData.classDisplay[className].TP.display)}>{className}</button>
+        )}
 
         {this.state.featureDistribution.map((feature, index) =>
           <FeatureHistogram
@@ -268,4 +270,9 @@ class Interface extends React.Component {
   name={this.state.summaryHistogram.name}
   domain={this.state.summaryHistogram.domain}
   />
+
+  {currentHistogramData.data.classNames.map((className) =>
+    <button className={className + 'button'} onClick={() => this.classSelected(className)}>{className}</button>
+  )}
+
 */

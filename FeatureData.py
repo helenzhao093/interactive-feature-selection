@@ -248,13 +248,15 @@ class FeatureData:
     def in_range(self, class_name, classification, proba):
         return proba <= self.feature_data['classDisplay'][class_name][classification]['range'][0] and proba >= self.feature_data['classDisplay'][class_name][classification]['range'][1]
 
-    def update_class_selection(self, update_class_name):
-        for name in self.class_names:
-            for classification in FeatureData.CLASSIFICATIONS:
-                if classification == FeatureData.TP_KEY and name == update_class_name:
-                    self.feature_data['classDisplay'][name][classification]['display'] = True
-                else:
-                    self.feature_data['classDisplay'][name][classification]['display'] = False
+    def update_class_selection(self, update_class_name, current_display):
+        new_display = not current_display
+        self.feature_data['classDisplay'][update_class_name][FeatureData.TP_KEY]['display'] = new_display
+        #for name in self.class_names:
+        #    for classification in FeatureData.CLASSIFICATIONS:
+        #        if classification == FeatureData.TP_KEY and name == update_class_name:
+        #            self.feature_data['classDisplay'][name][classification]['display'] = True
+        #        else:
+        #            self.feature_data['classDisplay'][name][classification]['display'] = False
         self.init_data()
         self.init_feature_distributions()
         self.populate_feature_distribution()
