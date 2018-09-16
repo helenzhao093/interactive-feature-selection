@@ -210,10 +210,6 @@ class Interface extends React.Component {
     return (
       <div className={"interface"}>
          <CheckboxMultiSelect options={this.state.featureData.classDisplay} handleChange={(c,d) => this.handleClassSelection(c,d)} />
-        {Object.keys(this.state.featureData.classDisplay).map((className) =>
-          <button className={className + 'button'}
-            onClick={() => this.classSelected(className, this.state.featureData.classDisplay[className].TP.display)}>{className}</button>
-        )}
 
         {this.state.featureDistribution.map((feature, index) =>
           <FeatureHistogram
@@ -231,6 +227,21 @@ class Interface extends React.Component {
           features={this.state.featureData.features}
           size={[1000,400]}
           colorFunction={this.state.colorFunction} />
+
+        <VerticalHistogram
+          data={this.state.summaryData.data}
+          max={this.state.summaryData.maxClassTotal}
+          colorFunction={this.state.colorFunction}
+          size={this.state.summaryHistogram.size}
+          margin={this.state.summaryHistogram.margin}
+          xScale={this.state.summaryHistogram.xScale}
+          yScale={this.state.summaryHistogram.yScale}
+          yScaleAxis={this.state.summaryHistogram.yScaleAxis}
+          yAxis={this.state.summaryHistogram.yAxis}
+          xAxis={this.state.summaryHistogram.xAxis}
+          name={this.state.summaryHistogram.name}
+          domain={this.state.summaryHistogram.domain}
+          />
 
         <Settings display={currentHistogramData.data.display} onClick={(c, d) => this.onClick(c, d)}/>
         <ZoomButton brush={brush} />
@@ -256,23 +267,13 @@ class Interface extends React.Component {
 
 
 /*
-<VerticalHistogram
-  data={this.state.summaryData.data}
-  max={this.state.summaryData.maxClassTotal}
-  colorFunction={this.state.colorFunction}
-  size={this.state.summaryHistogram.size}
-  margin={this.state.summaryHistogram.margin}
-  xScale={this.state.summaryHistogram.xScale}
-  yScale={this.state.summaryHistogram.yScale}
-  yScaleAxis={this.state.summaryHistogram.yScaleAxis}
-  yAxis={this.state.summaryHistogram.yAxis}
-  xAxis={this.state.summaryHistogram.xAxis}
-  name={this.state.summaryHistogram.name}
-  domain={this.state.summaryHistogram.domain}
-  />
+
 
   {currentHistogramData.data.classNames.map((className) =>
     <button className={className + 'button'} onClick={() => this.classSelected(className)}>{className}</button>
   )}
-
+  {Object.keys(this.state.featureData.classDisplay).map((className) =>
+    <button className={className + 'button'}
+      onClick={() => this.classSelected(className, this.state.featureData.classDisplay[className].TP.display)}>{className}</button>
+  )}
 */

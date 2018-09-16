@@ -1,0 +1,60 @@
+1. Title: Network Flow Spam Classification
+
+2. Source:
+    Tu Ouyang, Soumya Ray, Michael Rabinovich, and Mark Allman. 2011.  Can
+      network characteristics detect spam effectively in a stand-alone
+      enterprise?.  In Proceedings of the 12th International Conference on
+      Passive and Active Measurement (PAM'11), Neil Spring and George F. Riley
+      (Eds.).  Springer-Verlag, Berlin, Heidelberg, 92--101.
+
+3. Relevant Information:
+    The source paper attempts to classify email as "spam" or "ham" (the
+    opposite of spam) based solely on the properties of the network interaction
+    transmitting the message. This is in contrast to traditional spam
+    filterning methods that use message content for classification.
+
+    The emails used for this dataset were received by a single organization,
+    the International Computer Science Institute (ICSI). Some message filtering
+    is performed via a DNS blacklist before the messages in this dataset are
+    observed. Ground truth labelings are performed via automated tools and a
+    subset of the results have been verified by a human, so some labeling error
+    is expected.
+
+4. Number of instances: 74739 emails (46739 spam, 27997 ham)
+
+5. Attributes:
+    1. Example index
+    2. geoDistance: Geographical distance between sender and ICSI, based on
+         the MaxMind GeoIP database.
+    3. senderHour: The hour of packet arrival in sender's timezone.
+    4. AverageIPNeighborDistance: Avg. numerical dist. from sender’s IP to the
+	 nearest 20 IPs of other senders of remote host as determined by p0f
+         tool from SYN packet.
+    5. fngr_wss: Advertised window size from SYN received from remote host.
+    6. fngr_ttl: IP TTL ﬁeld from SYN received from remote host.
+    7. OS: OS of remote host as determined by p0f tool from SYN packet.
+           {Windows, Solaris, Linux, UNKNOWN, FreeBSD, Others}
+    8. pkts_sunk/pkts_sourced: Ratio of the number of packets sent by the local
+         host to the number of packets received from the remote host.
+    9. rxmt_sourced: Approximate number of retransmissions sent by the remote
+         host.
+   10. rxmt_sunk: Number of retransmissions sent by the local mail server.
+   11. rsts_sourced: Number of segments with "RST" bit set received from remote
+         host.
+   12. rsts_sunk: Number of segments with "RST" bit set sent by the local mail
+         server.
+   13. fins_sourced: Number of TCP segments with "FIN" bit set received from
+         the remote host.
+   14. fins_sunk: Number of TCP segments with "FIN" bit set sent by the local
+         mail server.
+   15. idle: Maximum time between two successive packet arrivals from remote
+         host.
+   16. 3whs: Time between the arrival of the SYN from the remote host and
+         arrival of ACK of the SYN/ACK sent by the local host.
+   17. jvar: The variance of the inter-packet arrival times from the remote
+         host.
+   18. rttv: Variance of RTT from local mail server to remote host.
+   19. bytecount: Number of (non-retransmitted) bytes received from the
+         remote host.
+   20. throughput: "bytecount" divided by the connection duration.
+   21. Class label (1 = spam, 0 = ham)
