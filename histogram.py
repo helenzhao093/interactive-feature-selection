@@ -8,6 +8,9 @@ class Histogram:
     FN_KEY = 'FN'
     CLASSIFICATIONS = [TN_KEY, FN_KEY, FP_KEY, TP_KEY]
     DEFAULT_DISPLAY = dict()
+    DEFAULT_RANGE = [1.0, 0.0]
+    MAX_INDEX = 0
+    MIN_INDEX = 1
 
     # Histogram data dictionary keys
     CLASS_NAME_KEY = 'className'
@@ -23,13 +26,8 @@ class Histogram:
         self.proba = proba
 
         self.Histogram_info = dict()
-        self.Histogram_info['display'] = dict()
-        for classification in Histogram.CLASSIFICATIONS:
-            self.Histogram_info['display'][classification] = True
-        self.Histogram_info['display'][Histogram.TN_KEY] = False
-        Histogram.DEFAULT_DISPLAY = self.Histogram_info['display']
 
-        #self.Histogram_info['classifications'] = Histogram.CLASSIFICATIONS
+        self.set_default_class_display()
 
         self.num_instances = self.get_num_instances()
         self.num_classes = self.get_num_classes()
@@ -37,13 +35,18 @@ class Histogram:
 
         self.Histogram_info['range'] = [1.0, 0.0]
 
-        self.create_Histogram_data()
+        self.create_histogram_data()
         self.create_summary_data()
 
+    def set_default_class_display(self):
+        for classification in Histogram.CLASSIFICATIONS:
+            Histogram.DEFAULT_DISPLAY[classification] = True
+        Histogram.DEFAULT_DISPLAY[Histogram.TN_KEY] = False
+        self.Histogram_info['display'] = Histogram.DEFAULT_DISPLAY
 
-    def create_Histogram_data(self):
-        self.init_Histogram_data()
-        self.populate_Histogram_data()
+    def create_histogram_data(self):
+        self.init_histogram_data()
+        self.populate_histogram_data()
         self.calculate_previous_sum()
 
     def create_summary_data(self):
@@ -67,7 +70,10 @@ class Histogram:
     def get_num_instances(self):
         return len(self.proba)
 
-    def init_Histogram_data(self):
+    def set_display(self, display):
+        self.Histogram_info['display'] = display
+
+    def init_histogram_data(self):
         self.Histogram_info['HistogramData'] = []
         for i in range(self.num_classes):
             new_class = dict()
@@ -110,8 +116,8 @@ class Histogram:
     def populate_summary_data(self):
         self.total_per_class = [0.0] * self.num_classes
         for i, ex in enumerate(self.proba):
-            target = self.target[i][0]
-            predicted = self.predicted[i][0]
+            target = self.target[i]
+            predicted = self.predicted[i]
             self.total_per_class[target] += 1.0
             if target == predicted: # tp
                 self.summary_data['data'][target][Histogram.TP_KEY][0][Histogram.COUNT_KEY] += 1
@@ -135,32 +141,40 @@ class Histogram:
             count = self.summary_data['data'][class_num][Histogram.TP_KEY][0][Histogram.COUNT_KEY]
             self.summary_data['data'][class_num][Histogram.TP_KEY][0]['percentage'] = count/self.total_per_class[class_num]
 
-    def populate_Histogram_data(self):
+    def populate_histogram_data(self):
         self.Histogram_info['binRange'] = (self.Histogram_info['range'][0] - self.Histogram_info['range'][1]) / Histogram.NUM_BINS
-        self.bin_nums = [[self.calculate_bin(proba) for proba in ex] for ex in self.proba]
+        #self.bin_nums = [[self.calculate_bin(proba) for proba in ex] for ex in self.proba]
         for i, ex in enumerate(self.proba):
-            target = self.target[i][0]
-            predicted = self.predicted[i][0]
+            target = self.target[i]
+            predicted = self.predicted[i]
             if target == predicted: # tp
                 if self.Histogram_info['display'][Histogram.TP_KEY]:
-                    self.increment_pred(i, target, Histogram.TP_KEY, 0)
+                    bin_num = self.calculate_bin(ex[target])
+                    if self.bin_in_range(bin_num):
+                        self.increment_pred(i, target, Histogram.TP_KEY, 0, bin_num)
                 #self.Histogram_info['HistogramData'][target][self.data_key][self.bin_nums[i][target]][self.tp_key][0][self.count_key] += 1
                 if self.Histogram_info['display'][Histogram.TN_KEY]:
                     for j in range(self.num_classes): # tn
-                        if j != target:
-                            self.increment_pred(i, j, Histogram.TN_KEY, 0)
+                        bin_num = self.calculate_bin(ex[j])
+                        if j != target and self.bin_in_range(bin_num):
+                            self.increment_pred(i, j, Histogram.TN_KEY, 0, bin_num)
                         #self.Histogram_info['HistogramData'][j][self.data_key][self.bin_nums[i][j]][self.tn_key][0][self.count_key] += 1
             if target != predicted:
                 if self.Histogram_info['display'][Histogram.FN_KEY]:
-                    self.increment_pred(i, target, Histogram.FN_KEY, predicted)
+                    bin_num = self.calculate_bin(ex[target])
+                    if self.bin_in_range(bin_num):
+                        self.increment_pred(i, target, Histogram.FN_KEY, predicted, bin_num)
                 if self.Histogram_info['display'][Histogram.FP_KEY]:
-                    self.increment_pred(i, predicted, Histogram.FP_KEY, target)
+                    bin_num = self.calculate_bin(ex[predicted])
+                    if self.bin_in_range(bin_num):
+                        self.increment_pred(i, predicted, Histogram.FP_KEY, target, bin_num)
                 # self.Histogram_info['HistogramData'][target][self.data_key][self.bin_nums[i][target]][self.fn_key][predicted][self.count_key] += 1
                 # self.Histogram_info['HistogramData'][predicted][self.data_key][self.bin_nums[i][predicted]][self.fp_key][target][self.count_key] += 1
                 if self.Histogram_info['display'][Histogram.TN_KEY]:
                     for j in range(self.num_classes):
-                        if j != target or j != predicted:
-                            self.increment_pred(i, j, Histogram.TN_KEY, 0)
+                        bin_num = self.calculate_bin(ex[j])
+                        if j != target or j != predicted and self.bin_in_range(bin_num):
+                            self.increment_pred(i, j, Histogram.TN_KEY, 0, bin_num)
 
     def calculate_previous_sum(self):
         maxFN = self.calculate_previous_sum_false_preds_and_max(Histogram.FN_KEY)
@@ -193,10 +207,10 @@ class Histogram:
             return True
         return False
 
-    def increment_pred(self, instance_num, class_num, class_key, predicted):
+    def increment_pred(self, instance_num, class_num, class_key, predicted, bin_num):
         #print (self.bin_nums[instance_num][class_num])
-        if self.bin_in_range(self.bin_nums[instance_num][class_num]):
-            self.Histogram_info['HistogramData'][class_num][Histogram.DATA_KEY][self.bin_nums[instance_num][class_num]][class_key][predicted][Histogram.COUNT_KEY] += 1
+        #if self.bin_in_range(self.bin_nums[instance_num][class_num]):
+        self.Histogram_info['HistogramData'][class_num][Histogram.DATA_KEY][bin_num][class_key][predicted][Histogram.COUNT_KEY] += 1
 
     def calculate_bin(self, proba):
         bin_num = int(math.floor((proba - self.Histogram_info['range'][1])/self.Histogram_info['binRange']))
@@ -207,9 +221,9 @@ class Histogram:
     def set_range(self, new_range):
         print(new_range)
         self.Histogram_info['range'] = new_range
-        self.create_Histogram_data()
+        self.create_histogram_data()
 
     def update_display(self, classification, display):
         if self.Histogram_info['display'][classification] == display:
             self.Histogram_info['display'][classification] = not display
-            self.create_Histogram_data()
+            self.create_histogram_data()

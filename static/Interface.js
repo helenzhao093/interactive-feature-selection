@@ -65,7 +65,7 @@ class Interface extends React.Component {
     super(props)
     //var brush = d3.brushY().extent([[0, 0], [300, 265]])//.on("end", zoom);
 
-    var colorRange = ["#00649b", "#bc4577", "#ff7e5a", "#b2bae4", "#c0392b", "#f1c40f", "#16a085", "#3498db" ]
+    var colorRange = ["#00649b", "#bc4577", "#ff7e5a", "#b2bae4", "#c0392b", "#f1c40f", "#16a085", "#3498db", '#e88c5d', '#23a393' ]
     var color = d3.scaleOrdinal()
         .range(colorRange)
         .domain(props.data.classNames) //TODO: LET USERS SET CLASS NAMES
@@ -99,8 +99,8 @@ class Interface extends React.Component {
       histogramTotalWidth: 300,
       histogramTotalHeight: 300,
       margin: {top: 5, right: 5, bottom: 15, left: 0},
-      data:this.props.data,
-      featureData:this.props.featureData,
+      data: this.props.data,
+      featureData: this.props.featureData,
       summaryData: this.props.summaryData,
       summaryHistogram: summaryHistogram,
       featureDistribution: this.props.featureDistribution,
@@ -173,6 +173,20 @@ class Interface extends React.Component {
 
   undo() {
     if (this.state.histogramUpdateStep > 0) {
+      const previousState = this.state.histogramHistory[this.state.histogramUpdateStep - 1]
+      const previousDisplay = previousState.data.display
+      fetch('/updateDiplay', {
+        method: 'POST',
+        body: JSON.stringify(previousDisplay)
+      }).then(function(response) {
+        return response.json();
+      }).then(data =>
+        console.log(data)
+        //this.updateData(data)
+      ).catch(function(error) {
+        console.log(error)
+      })
+
       this.setState({
         histogramUpdateStep: this.state.histogramUpdateStep - 1
       })
@@ -180,6 +194,20 @@ class Interface extends React.Component {
   }
 
   clear() {
+    const firstState = this.state.histogramHistory[0]
+    const firstDisplay = firstState.data.display
+    fetch('/updateDiplay', {
+      method: 'POST',
+      body: JSON.stringify(firstDisplay)
+    }).then(function(response) {
+      return response.json();
+    }).then(data =>
+      console.log(data)
+      //this.updateData(data)
+    ).catch(function(error) {
+      console.log(error)
+    })
+
     this.setState({
       histogramUpdateStep: 0
     })
@@ -192,6 +220,7 @@ class Interface extends React.Component {
 
   render() {
     console.log('render interface')
+    console.log(this.state)
     var brush = d3.brushY().extent([[0, this.state.margin.top],
       [this.state.histogramTotalWidth, this.state.histogramTotalHeight - this.state.margin.bottom]])
     //console.log(brush)
@@ -205,7 +234,7 @@ class Interface extends React.Component {
         maxNeg={this.state.data.maxNeg} maxPos={this.state.data.maxPos} brush={brush} index={index} />
     )*/
 
-    console.log(currentHistogramData)
+    //console.log(currentHistogramData)
 
     return (
       <div className={"interface"}>
@@ -223,7 +252,8 @@ class Interface extends React.Component {
             max={feature.max}
             />
         )}
-        <FeatureParallelCoordinates data={this.state.featureData.data}
+        <FeatureParallelCoordinates
+          data={this.state.featureData.data}
           features={this.state.featureData.features}
           size={[1000,400]}
           colorFunction={this.state.colorFunction} />

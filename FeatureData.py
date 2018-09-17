@@ -28,7 +28,13 @@ class FeatureData:
         self.set_default_feature_display()
 
         self.init_data()
+        #self.init_included_example_index_array()
+        self.calculate_feature_distribution_graph_data()
+
+    def calculate_feature_distribution_graph_data(self):
+        self.init_data()
         self.init_feature_distributions()
+        #self.filter_for_included_data()
         self.populate_feature_distribution()
         self.calculate_previous_sum_feature_distribution()
 
@@ -44,7 +50,6 @@ class FeatureData:
                 else:
                     self.feature_data['classDisplay'][class_name][classification]['display'] = False
                 self.feature_data['classDisplay'][class_name][classification]['range'] = [1.0, 0.0] #[max, min]
-        #self.feature_data['classDisplay']['cool']['fp']['display'] = True
 
     def get_num_features(self):
         if len(self.features) > 0:
@@ -55,7 +60,7 @@ class FeatureData:
         if self.num_features == len(names):
             feature_names = names
         else:
-            feature_names = ['feature' + str(i) for i in range(self.num_classes)]
+            feature_names = ['feature' + str(i) for i in range(self.num_features)]
         return feature_names
 
     def init_feature_dict(self, names):
@@ -80,12 +85,40 @@ class FeatureData:
         for i in range(self.num_features):
             self.feature_data['features'][i]['display'] = True
 
+    def init_included_example_index_array(self):
+        self.feature_data['includeData'] = [False] * len(self.features)
+        self.feature_data['featureValues'] = self.features
+        self.feature_data['target'] = self.target
+
+    def filter_for_included_data(self):
+        for i, feature in enumerate(self.features):
+            #print i
+            target = self.target[i]
+            predicted = self.predicted[i]
+            if target == predicted:
+                a = self.add_data_index(i, target, FeatureData.TP_KEY, predicted, target, feature)
+                #print target, predicted, a
+            if target != predicted:
+                self.add_data_index(i, target, FeatureData.FN_KEY, predicted, target, feature)
+                self.add_data_index(i, predicted, FeatureData.FP_KEY, predicted, target, feature)
+
+    def add_data_index(self, i, class_num, classification, predicted, target, feature_vector):
+        proba = self.proba[i][class_num]
+        class_name = self.class_names[class_num]
+        if self.include_data(class_name, classification, proba) and self.features_are_in_range(feature_vector):
+            self.feature_data['includeData'][i] = True
+            return True
+        else:
+            self.feature_data['includeData'][i] = False
+            return False
+                #self.feature_data['data'].append(self.create_data_dict(predicted, target, feature_vector))
+
     def init_data(self):
         self.feature_data['data'] = []
         for i, feature in enumerate(self.features):
             #print i
-            target = self.target[i][0]
-            predicted = self.predicted[i][0]
+            target = self.target[i]
+            predicted = self.predicted[i]
             if target == predicted:
                 self.add_data(i, target, FeatureData.TP_KEY, predicted, target, feature)
             if target != predicted:
@@ -147,21 +180,24 @@ class FeatureData:
             if feature_info['display']:
                 feature_bin_range = self.calculate_feature_bin_range(feature_info['range'])
                 for example in self.feature_data['data']:
-                    predicted_class_name = example['predicted']
-                    target_class_name = example['target']
+                    #feature_value = self.features[i][feature_num]
+                    predicted_class_name = example['predicted'] #self.class_names[self.predicted[i]]#
+                    target_class_name = example['target']#self.class_names[self.target[i]]#
                     feature_value = example['features'][feature_num]
+                    #print predicted_class_name, target_class_name
                     bin_num = self.calculate_bin_num_for_feature_value(feature_value, feature_info['range'][0], feature_bin_range)#int(math.floor((feature_value - feature_info['range'][0])/self.num_bins))
-                    if bin_num == self.num_bins:
-                        bin_num -= 1
-                    #print bin_num, feature_value, feature_num
-                    if predicted_class_name == target_class_name:
-                        self.feature_distribution[feature_num]['data'][bin_num][FeatureData.TP_KEY][target_class_name][target_class_name]['count'] += 1
+                    if bin_num >= 0:
+                        if bin_num == self.num_bins:
+                            bin_num -= 1
+                        #print bin_num, feature_value, feature_num
+                        if predicted_class_name == target_class_name:
+                            self.feature_distribution[feature_num]['data'][bin_num][FeatureData.TP_KEY][target_class_name][target_class_name]['count'] += 1
 
-                    if predicted_class_name != target_class_name:
-                        if self.feature_data['classDisplay'][predicted_class_name][FeatureData.FP_KEY]['display']:
-                            self.feature_distribution[feature_num]['data'][bin_num][FeatureData.FP_KEY][predicted_class_name][target_class_name]['count'] += 1
-                        if self.feature_data['classDisplay'][target_class_name][FeatureData.FN_KEY]['display']:
-                            self.feature_distribution[feature_num]['data'][bin_num][FeatureData.FN_KEY][target_class_name][predicted_class_name]['count'] += 1
+                        if predicted_class_name != target_class_name:
+                            if self.feature_data['classDisplay'][predicted_class_name][FeatureData.FP_KEY]['display']:
+                                self.feature_distribution[feature_num]['data'][bin_num][FeatureData.FP_KEY][predicted_class_name][target_class_name]['count'] += 1
+                            if self.feature_data['classDisplay'][target_class_name][FeatureData.FN_KEY]['display']:
+                                self.feature_distribution[feature_num]['data'][bin_num][FeatureData.FN_KEY][target_class_name][predicted_class_name]['count'] += 1
 
     def calculate_previous_sum_feature_distribution(self):
         for feature_num in self.feature_distribution:
@@ -207,6 +243,8 @@ class FeatureData:
         return (feature_range[1] - feature_range[0]) / self.num_bins
 
     def calculate_bin_num_for_feature_value(self, feature_value, feature_range_min, bin_range):
+        if bin_range <= 0:
+            return -1
         bin_num = int(math.floor((feature_value - feature_range_min)/ bin_range))
         if bin_num == self.num_bins:
             bin_num -= 1
@@ -257,7 +295,5 @@ class FeatureData:
         #            self.feature_data['classDisplay'][name][classification]['display'] = True
         #        else:
         #            self.feature_data['classDisplay'][name][classification]['display'] = False
-        self.init_data()
-        self.init_feature_distributions()
-        self.populate_feature_distribution()
-        self.calculate_previous_sum_feature_distribution()
+        #self.init_data()
+        self.calculate_feature_distribution_graph_data()

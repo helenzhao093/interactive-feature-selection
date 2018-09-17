@@ -6,7 +6,7 @@ class Axis extends React.Component {
 
   componentDidMount() {
     var className = ".feature-axis-" + this.props.name
-    var axisG = d3.selectAll(className).call(d3.axisRight(this.props.axis).tickFormat(d3.format(".2f")))
+    var axisG = d3.selectAll(className).call(d3.axisRight(this.props.axis).tickFormat(d3.format(".3n")))
   }
 
   componentDidUpdate() {
@@ -16,7 +16,7 @@ class Axis extends React.Component {
     console.log('feature-axis')
     return (
       <g className={'feature-axis-' + this.props.name} transform={this.props.transform} style={{fontSize: 9}}>
-        <text x={0} y={-5} fill={"black"} textLength={40}>{this.props.name}</text>
+        <text x={0} y={-5} fill={"black"} >{this.props.name}</text>
       </g>
     )
   }
@@ -24,6 +24,7 @@ class Axis extends React.Component {
 
 class FeatureParallelCoordinates extends React.Component {
   constructor(props) {
+    console.log(props)
     super(props)
     var margin = {left: 10, right: 30, top: 20, bottom: 30}
     var width = props.size[0] - margin.left - margin.right
@@ -53,7 +54,18 @@ class FeatureParallelCoordinates extends React.Component {
 
   render(){
     console.log('render feature parallels')
-    console.log(this.props)
+    //console.log(this.props)
+
+    /*var displayData = this.props.featureValues.filter((feature, index) =>
+      this.props.dataIndex[index] == true
+    )
+    console.log(displayData)
+
+    var displayTarget = this.props.targetValues.filter((feature, index) =>
+      this.props.dataIndex[index] = true
+    )
+    console.log(displayTarget)
+    */
     var displayFeatures = this.props.features.filter((feature) =>
       feature.display == true
     )
@@ -87,7 +99,7 @@ class FeatureParallelCoordinates extends React.Component {
       <svg className={'feature-parallels-svg'} width={this.props.size[0]} height={this.props.size[1]}>
         <g className={'feature-parallels'} transform={`translate(${this.state.margin.left},${this.state.margin.top})`} >
           <g className={'data-paths'}>
-            {this.props.data.map((data) =>
+            {this.props.data.map((data, index) =>
               <path d={this.path(data.features, draw)} fill={"none"} stroke={this.props.colorFunction(data.target)}/>)
             }
           </g>

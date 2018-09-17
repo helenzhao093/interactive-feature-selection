@@ -6,6 +6,10 @@ from FeatureData import FeatureData
 from flask import Flask, render_template, flash, request, redirect, jsonify, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 
+DATA_FOLDER = 'static/cardiotocography3/'
+#DATA_FOLDER = 'static/cardiotocography10/'
+#DATA_FOLDER = 'static/spam/'
+
 UPLOAD_FOLDER = 'static/'
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
@@ -51,12 +55,16 @@ def uploaded_file():
 @app.route("/calculate")
 def get_histogram_data():
     # list of list
-    predicted = convert_csv_to_array('static/predicted.csv', True, csv.QUOTE_NONNUMERIC)
-    target = convert_csv_to_array('static/target.csv', True, csv.QUOTE_NONNUMERIC)
-    proba = convert_csv_to_array('static/proba.csv', False, csv.QUOTE_NONNUMERIC)
-    features = convert_csv_to_array('static/features.csv', False, csv.QUOTE_NONNUMERIC)
-    names = convert_csv_to_array('static/names.csv', False, csv.QUOTE_ALL)
+    predicted = convert_csv_to_array(DATA_FOLDER + 'prediction.csv', True, csv.QUOTE_NONNUMERIC)
+    target = convert_csv_to_array(DATA_FOLDER + 'target.csv', True, csv.QUOTE_NONNUMERIC)
+    proba = convert_csv_to_array(DATA_FOLDER + 'proba.csv', False, csv.QUOTE_NONNUMERIC)
+    features = convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
+    names = convert_csv_to_array(DATA_FOLDER + 'names.csv', False, csv.QUOTE_ALL)
     feature_names, class_names = create_names(names)
+
+    target = [d[0] for d in target]
+    predicted = [d[0] for d in predicted]
+
     global HISTOGRAM
     HISTOGRAM = Histogram(predicted, target, proba, class_names)
     global FEATURE_DATA
@@ -106,6 +114,14 @@ def update_class_selection():
         interface_data['featureData'] = FEATURE_DATA.feature_data
         interface_data['featureDistribution'] = FEATURE_DATA.feature_distribution
     return jsonify(interface_data)
+
+@app.route('/updateDiplay', methods=['POST'])
+def update_display():
+    if request.method == 'POST':
+        display = request.get_json(data)
+        print display
+        HISTOGRAM.set_display(display)
+    return jsonify(display)
 
 def convert_csv_to_array(csv_filename, convert_to_int, quoting):
     arr = []
