@@ -1,2 +1,19 @@
-geoDistance,senderHour,AverageIPNeighborDistance,fngr_wss,fngr_ttl,OS,pkts_sunk,rxmt_sourced,rxmt_sunk,rsts_sourced,rsts_sunk,fins_sourced,fins_sunk,idle,3whs,jvar,rttv,bytecount,throughput
-notspam,spam
+geoDistance: continuous.
+senderHour: continuous.
+AverageIPNeighborDistance: continuous.
+fngr_wss(K): continuous.
+fngr_ttl: continuous.
+OS: Windows,Solaris,Linux,UNKNOWN,FreeBSD,Others.
+pkts_sunk/pkts_sourced: continuous.
+rxmt_sourced: continuous.
+rxmt_sunk: continuous.
+rsts_sourced: continuous.
+rsts_sunk: continuous.
+fins_sourced: continuous.
+fins_sunk: continuous.
+idle: continuous.
+3whs: continuous.
+jvar: continuous.
+rttv: continuous.
+bytecount: continuous.
+throughput: continuous.

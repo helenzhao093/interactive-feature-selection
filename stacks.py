@@ -3,12 +3,13 @@ import requests
 import csv
 from histogram import Histogram
 from FeatureData import FeatureData
+from parse_features import *
 from flask import Flask, render_template, flash, request, redirect, jsonify, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 
-DATA_FOLDER = 'static/cardiotocography3/'
+#DATA_FOLDER = 'static/cardiotocography3/'
 #DATA_FOLDER = 'static/cardiotocography10/'
-#DATA_FOLDER = 'static/spam/'
+DATA_FOLDER = 'static/spam_1000/'
 
 UPLOAD_FOLDER = 'static/'
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
@@ -55,24 +56,25 @@ def uploaded_file():
 @app.route("/calculate")
 def get_histogram_data():
     # list of list
+    feature_names = parse_features(DATA_FOLDER + 'names.csv')
     predicted = convert_csv_to_array(DATA_FOLDER + 'prediction.csv', True, csv.QUOTE_NONNUMERIC)
     target = convert_csv_to_array(DATA_FOLDER + 'target.csv', True, csv.QUOTE_NONNUMERIC)
     proba = convert_csv_to_array(DATA_FOLDER + 'proba.csv', False, csv.QUOTE_NONNUMERIC)
     features = convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
-    names = convert_csv_to_array(DATA_FOLDER + 'names.csv', False, csv.QUOTE_ALL)
-    feature_names, class_names = create_names(names)
+    class_names = convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
 
     target = [d[0] for d in target]
     predicted = [d[0] for d in predicted]
+    class_names = class_names[0]
 
-    global HISTOGRAM
-    HISTOGRAM = Histogram(predicted, target, proba, class_names)
+    #global HISTOGRAM
+    #HISTOGRAM = Histogram(predicted, target, proba, class_names)
     global FEATURE_DATA
-    FEATURE_DATA = FeatureData(predicted, target, features, proba, HISTOGRAM.num_classes, feature_names, HISTOGRAM.Histogram_info['classNames'])
+    FEATURE_DATA = FeatureData(predicted, target, features, proba, feature_names, class_names)
     global INTERFACE_DATA
     INTERFACE_DATA = dict()
-    INTERFACE_DATA['histogramData'] = HISTOGRAM.Histogram_info
-    INTERFACE_DATA['summaryData'] = HISTOGRAM.summary_data
+    #INTERFACE_DATA['histogramData'] = HISTOGRAM.Histogram_info
+    #INTERFACE_DATA['summaryData'] = HISTOGRAM.summary_data
     INTERFACE_DATA['featureData'] = FEATURE_DATA.feature_data
     INTERFACE_DATA['featureDistribution'] = FEATURE_DATA.feature_distribution
     return jsonify(INTERFACE_DATA)

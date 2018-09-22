@@ -8,21 +8,19 @@ class FeatureData:
     CLASSIFICATIONS = [FP_KEY, FN_KEY, TP_KEY, TN_KEY]
     DEFAULT_NUM_BINS = 10
 
-    def __init__(self, predicted, target, features, proba, num_classes, feature_names, class_names):
+    def __init__(self, predicted, target, features, proba, feature_info, class_names):
         self.predicted = predicted
         self.target = target
         self.features = features
         self.proba = proba
-        self.class_names = class_names
-        self.num_classes = num_classes
+        self.class_names = class_names#create_class_names(class_names)
+        self.num_classes = len(class_names) # doesn't work if class_name is []
         self.num_bins = FeatureData.DEFAULT_NUM_BINS
         self.num_features = self.get_num_features()
         self.feature_data = dict()
 
-        feature_names = self.create_feature_names(feature_names)
-
-        self.init_feature_dict(feature_names)
-
+        #self.init_feature_dict(feature_names)
+        self.feature_data['features'] = feature_info
         self.create_default_class_display()
         self.set_default_feature_range()
         self.set_default_feature_display()
@@ -31,6 +29,12 @@ class FeatureData:
         #self.init_included_example_index_array()
         self.calculate_feature_distribution_graph_data()
 
+    def create_class_names(self, names_array):
+        if len(names_array) == self.num_classes:
+            self.feature_data['classNames'] = names_array
+        else:
+            self.feature_Data['classNames'] = ['class' + str(i) for i in range(self.num_classes)]
+
     def calculate_feature_distribution_graph_data(self):
         self.init_data()
         self.init_feature_distributions()
@@ -38,8 +42,8 @@ class FeatureData:
         self.populate_feature_distribution()
         self.calculate_previous_sum_feature_distribution()
 
-    # self.feature_data['classDisplay'][class_name][classification]['di']
     def create_default_class_display(self):
+        print self.class_names
         self.feature_data['classDisplay'] = dict()
         for class_name in self.class_names:
             self.feature_data['classDisplay'][class_name] = dict()
@@ -63,13 +67,12 @@ class FeatureData:
             feature_names = ['feature' + str(i) for i in range(self.num_features)]
         return feature_names
 
-    def init_feature_dict(self, names):
-        self.feature_data['features'] = []
-        for feature_name in names:
-            feature_dict = dict()
-            feature_dict['featureName'] = feature_name
-            self.feature_data['features'].append(feature_dict)
-        print self.feature_data['features']
+    #def init_feature_dict(self, feature_dict):
+    #    self.feature_data['features'] = []
+    #    for feature in feature_dict:
+    #        feature['featureName'] = feature_name
+    #        self.feature_data['features'].append(feature_dict)
+    #    print self.feature_data['features']
 
     def set_default_feature_range(self):
         #self.feature_data['featureRanges'] = []
@@ -130,7 +133,7 @@ class FeatureData:
         self.feature_distribution = []
         for feature_info in self.feature_data['features']:
             if feature_info['display']:
-                self.feature_distribution.append(self.init_feature(feature_info['featureName']))
+                self.feature_distribution.append(self.init_feature(feature_info['name']))
 
     def init_feature(self, feature_name):
         feature_dict = dict()
@@ -244,7 +247,7 @@ class FeatureData:
 
     def calculate_bin_num_for_feature_value(self, feature_value, feature_range_min, bin_range):
         if bin_range <= 0:
-            return -1
+            return 0
         bin_num = int(math.floor((feature_value - feature_range_min)/ bin_range))
         if bin_num == self.num_bins:
             bin_num -= 1
