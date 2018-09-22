@@ -133,13 +133,17 @@ class FeatureData:
         self.feature_distribution = []
         for feature_info in self.feature_data['features']:
             if feature_info['display']:
-                self.feature_distribution.append(self.init_feature(feature_info['name']))
+                self.feature_distribution.append(self.init_feature(feature_info))
 
-    def init_feature(self, feature_name):
+    def init_feature(self, feature_info):
         feature_dict = dict()
-        feature_dict['featureName'] = feature_name
+        feature_dict['featureName'] = feature_info['name']
         feature_dict['data'] = []
-        for bin_num in range(self.num_bins):
+        if feature_info['type'] == 'continuous':
+            num_bins = self.num_bins
+        else:
+            num_bins = len(feature_info['values'])
+        for bin_num in range(num_bins):
             feature_dict['data'].append(self.init_bin(bin_num))
         return feature_dict
 
@@ -181,44 +185,55 @@ class FeatureData:
         # calculate feature bin range outside of loop
         for feature_num, feature_info in enumerate(self.feature_data['features']):
             if feature_info['display']:
-                feature_bin_range = self.calculate_feature_bin_range(feature_info['range'])
-                for example in self.feature_data['data']:
-                    #feature_value = self.features[i][feature_num]
-                    predicted_class_name = example['predicted'] #self.class_names[self.predicted[i]]#
-                    target_class_name = example['target']#self.class_names[self.target[i]]#
-                    feature_value = example['features'][feature_num]
-                    #print predicted_class_name, target_class_name
-                    bin_num = self.calculate_bin_num_for_feature_value(feature_value, feature_info['range'][0], feature_bin_range)#int(math.floor((feature_value - feature_info['range'][0])/self.num_bins))
-                    if bin_num >= 0:
-                        if bin_num == self.num_bins:
-                            bin_num -= 1
-                        #print bin_num, feature_value, feature_num
-                        if predicted_class_name == target_class_name:
-                            self.feature_distribution[feature_num]['data'][bin_num][FeatureData.TP_KEY][target_class_name][target_class_name]['count'] += 1
+                if feature_info['type'] == 'continuous':
+                    feature_bin_range = self.calculate_feature_bin_range(feature_info['range'])
+                    for example in self.feature_data['data']:
+                        feature_value = example['features'][feature_num]
+                        bin_num = self.calculate_bin_num_for_feature_value(feature_value, feature_info['range'][0], feature_bin_range)#int(math.floor((feature_value - feature_info['range'][0])/self.num_bins))
+                        self.increment_feature_count(example, feature_num, bin_num)
+                else:
+                    for example in self.feature_data['data']:
+                        bin_num = int(example['features'][feature_num])
+                        self.increment_feature_count(example, feature_num, bin_num)
 
-                        if predicted_class_name != target_class_name:
-                            if self.feature_data['classDisplay'][predicted_class_name][FeatureData.FP_KEY]['display']:
-                                self.feature_distribution[feature_num]['data'][bin_num][FeatureData.FP_KEY][predicted_class_name][target_class_name]['count'] += 1
-                            if self.feature_data['classDisplay'][target_class_name][FeatureData.FN_KEY]['display']:
-                                self.feature_distribution[feature_num]['data'][bin_num][FeatureData.FN_KEY][target_class_name][predicted_class_name]['count'] += 1
+    def increment_feature_count(self, example, feature_num, bin_num ):
+        predicted_class_name = example['predicted'] #self.class_names[self.predicted[i]]#
+        target_class_name = example['target']#self.class_names[self.target[i]]#
+        if predicted_class_name == target_class_name:
+            self.feature_distribution[feature_num]['data'][bin_num][FeatureData.TP_KEY][target_class_name][target_class_name]['count'] += 1
+        if predicted_class_name != target_class_name:
+            if self.feature_data['classDisplay'][predicted_class_name][FeatureData.FP_KEY]['display']:
+                self.feature_distribution[feature_num]['data'][bin_num][FeatureData.FP_KEY][predicted_class_name][target_class_name]['count'] += 1
+            if self.feature_data['classDisplay'][target_class_name][FeatureData.FN_KEY]['display']:
+                self.feature_distribution[feature_num]['data'][bin_num][FeatureData.FN_KEY][target_class_name][predicted_class_name]['count'] += 1
 
     def calculate_previous_sum_feature_distribution(self):
-        for feature_num in self.feature_distribution:
-            tp_classes = self.get_display_classes(FeatureData.TP_KEY, feature_num)
-            fp_classes = self.get_display_classes(FeatureData.FP_KEY, feature_num)
-            fn_classes = self.get_display_classes(FeatureData.FN_KEY, feature_num)
+        for feature_num, feature_info in enumerate(self.feature_distribution):
+            tp_classes = self.get_display_classes(FeatureData.TP_KEY, feature_info)
+            fp_classes = self.get_display_classes(FeatureData.FP_KEY, feature_info)
+            fn_classes = self.get_display_classes(FeatureData.FN_KEY, feature_info)
             feature_max_bin = 0
-            for bin_num in range(self.num_bins):
+            num_bins = self.get_num_bins(feature_num)
+            for bin_num in range(num_bins):
                 for i, tp_class in enumerate(tp_classes):
-                    current_max = self.set_previous_sum_tp(feature_num['data'][bin_num], FeatureData.TP_KEY, i, tp_classes)
+                    current_max = self.set_previous_sum_tp(feature_info['data'][bin_num], FeatureData.TP_KEY, i, tp_classes)
 
                 for i, fp_class in enumerate(fp_classes):
-                    current_max = self.set_previous_sum(feature_num['data'][bin_num], FeatureData.FP_KEY, fp_classes[i], current_max)
+                    current_max = self.set_previous_sum(feature_info['data'][bin_num], FeatureData.FP_KEY, fp_classes[i], current_max)
                 for i, fn_class in enumerate(fn_classes):
-                    current_max = self.set_previous_sum(feature_num['data'][bin_num], FeatureData.FN_KEY, fn_classes[i], current_max)
+                    current_max = self.set_previous_sum(feature_info['data'][bin_num], FeatureData.FN_KEY, fn_classes[i], current_max)
                 if current_max > feature_max_bin:
                     feature_max_bin = current_max
-            feature_num['max'] = feature_max_bin
+            feature_info['max'] = feature_max_bin
+
+    def get_num_bins(self, feature_index):
+        if self.is_continuous(feature_index):
+            return self.num_bins
+        else:
+            return len(self.feature_data['features'][feature_index]['values'])
+
+    def is_continuous(self, feature_index):
+        return self.feature_data['features'][feature_index]['type'] == 'continuous'
 
     def get_display_classes(self, classification, feature_num):
         if classification in feature_num['data'][0]:

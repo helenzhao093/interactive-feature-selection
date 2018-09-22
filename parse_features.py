@@ -1,41 +1,3 @@
-class Feature(object):
-    class Type:
-        CLASS = 'CLASS'
-        ID = 'ID'
-        BINARY = 'BINARY'
-        NOMINAL = 'NOMINAL'
-        CONTINUOUS = 'CONTINUOUS'
-
-    def __init__(self, name, ftype, values=None):
-        self.info = dict()
-        self.info['name'] = name
-        self.info['type'] = ftype
-        if (self.type == Feature.Type.ID or
-            self.type == Feature.Type.NOMINAL):
-            if values is None:
-                raise Exception('No values for %s feature' % self.type)
-            else:
-                self.values = tuple(values)
-        else:
-            if values is None:
-                self.values = None
-            else:
-                raise Exception('Values given for % feature' % self.type)
-        self.tup = (self.name, self.type, self.values)
-
-    def to_float(self, value):
-        if value is None:
-            return None
-        if (self.type == Feature.Type.ID or
-            self.type == Feature.Type.NOMINAL):
-            return float(self.values.index(value))
-        elif (self.type == Feature.Type.BINARY or
-              self.type == Feature.Type.CLASS):
-            if value: return 1.0
-            else:     return 0.0
-        else:
-            return value
-
 def parse_features(feature_filename):
     features = []
     with open(feature_filename) as feature_file:
@@ -57,11 +19,11 @@ def parse_feature(line):
     values = parse_values(remainder)
     feature_data['name'] = name
     if len(values) == 1 and values[0].startswith('continuous'):
-        set_ftype_values('continous', [], feature_data)
+        set_ftype_values('continuous', [], feature_data)
     elif len(values) == 2 and '0' and '1' in values:
-        set_ftype_values('continous', [], feature_data)
+        set_ftype_values('continuous', [0,1], feature_data)
     else:
-        set_ftype_values('continous', [], feature_data)
+        set_ftype_values('nominal', values, feature_data)
     return feature_data
 
 def set_ftype_values(type, values, feature_data):

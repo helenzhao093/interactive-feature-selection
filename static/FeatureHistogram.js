@@ -81,13 +81,14 @@ class FeatureHistogram extends React.Component {
 
   render(){
     console.log('render feature histogram')
-    var xAxisDomain = this.props.data.map((bin, index) =>
-      (this.props.featureRange[1] - this.props.featureRange[0]) / this.props.numBins * index + this.props.featureRange[0]
-    )
+    const continuous = 'continuous'
+    var xAxisDomain = (this.props.featureType == continuous) ? this.props.data.map((bin, index) =>
+      (this.props.featureRange[1] - this.props.featureRange[0]) / this.props.numBins * (index + 1) + this.props.featureRange[0]) :
+      this.props.featureValues
 
-    var xScaleDomain = this.props.data.map((bin, index) =>
-      index
-    )
+    var xScaleDomain = (this.props.featureType == continuous) ?
+      this.props.data.map((bin, index) => index) :
+      this.props.featureValues.map((value, index) => index)
 
     var xScale = d3.scaleBand()
       .domain(xScaleDomain)
@@ -106,7 +107,7 @@ class FeatureHistogram extends React.Component {
       .domain([this.props.max, 0])
       .rangeRound([0, this.state.histogramHeight])
 
-    var xAxis = d3.axisBottom(xScaleAxis).tickFormat(d3.format(".3n"))
+    var xAxis = (this.props.featureType == continuous) ? d3.axisBottom(xScaleAxis).tickFormat(d3.format(".3n")) : d3.axisBottom(xScaleAxis)
     var yAxis = d3.axisLeft(yScaleAxis)
 
     var bins = this.props.data.map((bin, index) =>
@@ -126,8 +127,8 @@ class FeatureHistogram extends React.Component {
         <g transform={`translate(${this.props.margin.left},${this.props.margin.top})`}>
           {bins}
         </g>
-        <HistogramYAxis name={'x-axis-' + this.props.featureName} axis={xAxis} left={this.props.margin.left } top={this.props.margin.top + this.state.histogramHeight}/>
-        <HistogramYAxis name={'y-axis-' + this.props.featureName} axis={yAxis} left={this.props.margin.left } top={this.props.margin.top}/>
+        <HistogramYAxis name={'x-axis-feature' + this.props.index} axis={xAxis} left={this.props.margin.left } top={this.props.margin.top + this.state.histogramHeight}/>
+        <HistogramYAxis name={'y-axis-feature' + this.props.index} axis={yAxis} left={this.props.margin.left } top={this.props.margin.top}/>
         <text
           style={{fontSize: 12}}
           x={this.props.size[0]/2 - 5}
