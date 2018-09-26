@@ -46,10 +46,6 @@ class ZoomButton extends React.Component{
     var background = this.state.zoomOn ? "white" : "turquoise"
     console.log(background)
     this.setState({ zoomOn: !this.state.zoomOn, background: background})
-
-    //d3.selectAll(".brush").call(this.props.brush)
-    //d3.selectAll(".selection").attr("width", 0)
-    //console.log(this.state)
   }
 
   render(){
@@ -236,6 +232,8 @@ class Interface extends React.Component {
 
     //console.log(currentHistogramData)
 
+
+
     return (
       <div className={"interface"}>
          <CheckboxMultiSelect options={this.state.featureData.classDisplay} handleChange={(c,d) => this.handleClassSelection(c,d)} />
@@ -245,11 +243,14 @@ class Interface extends React.Component {
             data={feature.data}
             numBins={feature.data.length}
             size={[300,200]}
-            featureName={this.state.featureData.features[index].featureName}
+            featureType={this.state.featureData.features[index].type}
+            featureValues={this.state.featureData.features[index].values}
+            featureName={this.state.featureData.features[index].name}
             featureRange={this.state.featureData.features[index].range}
             colorFunction={this.state.colorFunction}
             margin={this.state.summaryHistogram.margin}
             max={feature.max}
+            index={index}
             />
         )}
         <FeatureParallelCoordinates

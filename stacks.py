@@ -4,13 +4,18 @@ import csv
 from histogram import Histogram
 from FeatureData import FeatureData
 from parse_features import *
+from mutual_information import *
+from CausalGraph import CausalGraph
+import numpy as np
+import json
 from flask import Flask, render_template, flash, request, redirect, jsonify, url_for, send_from_directory
 from werkzeug.utils import secure_filename
+from scipy.stats import rankdata
 
-#DATA_FOLDER = 'static/cardiotocography3/'
+DATA_FOLDER = 'static/cardiotocography3/'
 #DATA_FOLDER = 'static/cardiotocography10/'
-DATA_FOLDER = 'static/spam_1000/'
-
+#DATA_FOLDER = 'static/spam_1000/'
+#DATA_FOLDER = 'static/parkinson/'
 UPLOAD_FOLDER = 'static/'
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
@@ -21,6 +26,7 @@ APP_STATIC = os.path.join(APP_ROOT, 'static')
 HISTOGRAM = None
 FEATURE_DATA = None
 INTERFACE_DATA = None
+causalGraph = None
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -38,46 +44,68 @@ def upload_file():
         return redirect(url_for('uploaded_file'))
     return render_template('upload.html')
 
-@app.route("/data")
-def data():
-    return jsonify(get_data())
-
-# fetch data
-def get_data():
-    with open('static/uploaded_file.csv') as csvfile:
-        data = list(csv.reader(csvfile))
-        return data
-
 @app.route("/index")
 def uploaded_file():
     # call method that will calculate histogram data)
     return render_template('index.html')
 
+def calculate_feature_rank(features, target):
+    num_features = len(features[0])
+    MI = []
+    for i in range(num_features):
+        MI.append(calculate_MI(features, [i], target))
+    feature_rank = (num_features - rankdata(MI, method='ordinal')).astype(int)
+    print feature_rank
+    return feature_rank
+
+def sort_features_by_rank(rank, features, names):
+    num_features = len(features[0])
+    new_features = np.zeros((len(features), num_features))
+    features = np.asarray(features)
+    for i, rank in enumerate(rank):
+        new_features[:,rank] = features[:,i]
+        temp = names[rank]
+        names[rank] = names[i]
+        names[i] = temp
+    return new_features.tolist(), names
+
 @app.route("/calculate")
 def get_histogram_data():
     # list of list
-    feature_names = parse_features(DATA_FOLDER + 'names.csv')
-    predicted = convert_csv_to_array(DATA_FOLDER + 'prediction.csv', True, csv.QUOTE_NONNUMERIC)
-    target = convert_csv_to_array(DATA_FOLDER + 'target.csv', True, csv.QUOTE_NONNUMERIC)
-    proba = convert_csv_to_array(DATA_FOLDER + 'proba.csv', False, csv.QUOTE_NONNUMERIC)
-    features = convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
-    class_names = convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
+    #dot_str = init_causal_graph(DATA_FOLDER + 'datafile.csv')
+    #feature_names = parse_features(DATA_FOLDER + 'names.csv')
+    #print feature_names
+    #predicted = convert_csv_to_array(DATA_FOLDER + 'prediction.csv', True, csv.QUOTE_NONNUMERIC)
+    #target = convert_csv_to_array(DATA_FOLDER + 'target.csv', True, csv.QUOTE_NONNUMERIC)
+    #proba = convert_csv_to_array(DATA_FOLDER + 'proba.csv', False, csv.QUOTE_NONNUMERIC)
+    #features = convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
+    #class_names = convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
 
-    target = [d[0] for d in target]
-    predicted = [d[0] for d in predicted]
-    class_names = class_names[0]
-
+    #target = [d[0] for d in target]
+    #predicted = [d[0] for d in predicted]
+    #class_names = class_names[0]
+    #cal_MI(features, [0, 1], target)
+    #calculate_MI(features, [0, 1, 2], target)
+    #rank = calculate_feature_rank(features, target)
+    #features, feature_names = sort_features_by_rank(rank, features, feature_names)
     #global HISTOGRAM
     #HISTOGRAM = Histogram(predicted, target, proba, class_names)
-    global FEATURE_DATA
-    FEATURE_DATA = FeatureData(predicted, target, features, proba, feature_names, class_names)
-    global INTERFACE_DATA
+    #global FEATURE_DATA
+    #FEATURE_DATA = FeatureData(predicted, target, features, proba, feature_names, class_names)
+    global causalGraph
+    causalGraph = CausalGraph(DATA_FOLDER + 'datafile.csv')
     INTERFACE_DATA = dict()
+    INTERFACE_DATA['dotSrc'] = causalGraph.dot_src
+    #INTERFACE_DATA['graph'] = causalGraph.graph
+    INTERFACE_DATA['markovBlanketSelected'] = causalGraph.markov_blanket_selected
+
     #INTERFACE_DATA['histogramData'] = HISTOGRAM.Histogram_info
     #INTERFACE_DATA['summaryData'] = HISTOGRAM.summary_data
-    INTERFACE_DATA['featureData'] = FEATURE_DATA.feature_data
-    INTERFACE_DATA['featureDistribution'] = FEATURE_DATA.feature_distribution
+    #INTERFACE_DATA['featureData'] = FEATURE_DATA.feature_data
+    #INTERFACE_DATA['featureDistribution'] = FEATURE_DATA.feature_distribution
     return jsonify(INTERFACE_DATA)
+
+
 
 def create_names(names_array):
     if len(names_array) >= 2:
@@ -87,13 +115,29 @@ def create_names(names_array):
     else:
         return [], []
 
-def create_interface_data_to_send():
-    interface_data = dict()
+@app.route("/nodeSelected", methods=['POST'])
+def get_markov_blanket():
+    if request.method == 'POST':
+        node_json = json.loads(request.data)
+        causalGraph.color_graph_select_node(node_json['nodeStr'])
+        interface_data = dict()
+        interface_data['dotSrc'] = causalGraph.dot_src
+        interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
+    return jsonify(interface_data)
 
+@app.route("/toggleGraphSelection", methods=['POST'])
+def toggle_graph_selection():
+    if request.method == 'POST':
+        causalGraph.toggle_markov_blanket_selected()
+        interface_data = dict()
+        interface_data['dotSrc'] = causalGraph.dot_src
+        interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
+    return jsonify(interface_data)
 
 @app.route("/postHistogramZoom", methods=['POST'])
 def update_histogram_info_range():
     if request.method == 'POST':
+        print request.data
         new_range = request.get_json(data)
         HISTOGRAM.set_range(new_range['selection'])
     return jsonify(INTERFACE_DATA)

@@ -1,1 +1,21 @@
-age,sex,test_time,motor_UPDRS,total_UPDRS,Jitter(%),Jitter(Abs),Jitter:RAP,Jitter:PPQ5,Jitter:DDP,Shimmer,Shimmer(dB),Shimmer:APQ3,Shimmer:APQ5,Shimmer:APQ11,Shimmer:DDA,NHR,HNR,RPDE,DFA,PPE
+age: continuous.
+sex: continuous.
+test_time: continuous.
+motor_UPDRS: continuous.
+total_UPDRS: continuous.
+Jitter(%): continuous.
+Jitter(Abs): continuous.
+Jitter:RAP: continuous.
+Jitter:PPQ5: continuous.
+Jitter:DDP: continuous.
+Shimmer: continuous.
+Shimmer(dB): continuous.
+Shimmer:APQ3: continuous.
+Shimmer:APQ5: continuous.
+Shimmer:APQ11: continuous.
+Shimmer:DDA: continuous.
+NHR: continuous.
+HNR: continuous.
+RPDE: continuous.
+DFA: continuous.
+PPE: continuous.

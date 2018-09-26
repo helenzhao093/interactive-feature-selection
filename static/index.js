@@ -14,11 +14,18 @@ function getData(){
 
 getData()
   .then(function(data) {
+    console.log(data)
     ReactDOM.render(
-      <Interface data={data.histogramData}
-      featureData={data.featureData}
-      summaryData={data.summaryData}
-      featureDistribution={data.featureDistribution}/>,
+      <AppInterface
+        dotSrc={data.dotSrc}
+        markovBlanketSelected={data.markovBlanketSelected}/>,
       document.getElementById('root')
     );
   })
+
+/*
+data={data.histogramData}
+featureData={data.featureData}
+summaryData={data.summaryData}
+featureDistribution={data.featureDistribution}
+*/

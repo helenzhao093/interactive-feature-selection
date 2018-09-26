@@ -6,7 +6,7 @@ class Axis extends React.Component {
 
   componentDidMount() {
     var className = ".feature-axis-" + this.props.name
-    var axisG = d3.selectAll(className).call(d3.axisRight(this.props.axis).tickFormat(d3.format(".3n")))
+    var axisG = d3.selectAll(className).call(d3.axisRight(this.props.axis))//.tickFormat(d3.format(".3n")))
   }
 
   componentDidUpdate() {
@@ -16,7 +16,7 @@ class Axis extends React.Component {
     console.log('feature-axis')
     return (
       <g className={'feature-axis-' + this.props.name} transform={this.props.transform} style={{fontSize: 9}}>
-        <text x={0} y={-5} fill={"black"} >{this.props.name}</text>
+        <text x={0} y={-5} fill={"black"} >{this.props.textname}</text>
       </g>
     )
   }
@@ -66,7 +66,7 @@ class FeatureParallelCoordinates extends React.Component {
     )
     console.log(displayTarget)
     */
-    var displayFeatures = this.props.features.filter((feature) =>
+    const displayFeatures = this.props.features.filter((feature) =>
       feature.display == true
     )
     console.log(displayFeatures)
@@ -82,6 +82,19 @@ class FeatureParallelCoordinates extends React.Component {
         .domain(xScaleDomain)
         .range(xScaleRange)
 
+    var yScalesDisplay = []
+    for (var i = 0; i < displayFeatures.length; i++) {
+      if (displayFeatures[i].type == 'continuous') {
+        const scale = d3.scaleLinear().domain(displayFeatures[i].range).range([0, this.state.height])
+        yScalesDisplay.push(scale)
+      }
+      else {
+        const numSplits = displayFeatures[i].values.length - 1
+        const rangeDomain = displayFeatures[i].values.map((v, i) => i * this.state.height/numSplits)
+        yScalesDisplay.push(d3.scaleOrdinal().domain(displayFeatures[i].values).range(rangeDomain))
+      }
+    }
+    console.log(yScales)
     var yScales = displayFeatures.map((feature) =>
       d3.scaleLinear().domain(feature.range).range([0, this.state.height])
     )
@@ -104,7 +117,7 @@ class FeatureParallelCoordinates extends React.Component {
             }
           </g>
           {displayFeatures.map((feature, index) =>
-              <Axis name={feature.featureName} axis={yScales[index]} transform={`translate(${xScale(index)})`}/>
+              <Axis name={'axis' + index} textname={feature.name} axis={yScalesDisplay[index]} transform={`translate(${xScale(index)})`}/>
           )}
         </g>
       </svg>
