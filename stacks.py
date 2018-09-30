@@ -73,37 +73,41 @@ def sort_features_by_rank(rank, features, names):
 def get_histogram_data():
     # list of list
     #dot_str = init_causal_graph(DATA_FOLDER + 'datafile.csv')
-    #feature_names = parse_features(DATA_FOLDER + 'names.csv')
+    feature_names = parse_features(DATA_FOLDER + 'names.csv')
     #print feature_names
-    #predicted = convert_csv_to_array(DATA_FOLDER + 'prediction.csv', True, csv.QUOTE_NONNUMERIC)
-    #target = convert_csv_to_array(DATA_FOLDER + 'target.csv', True, csv.QUOTE_NONNUMERIC)
-    #proba = convert_csv_to_array(DATA_FOLDER + 'proba.csv', False, csv.QUOTE_NONNUMERIC)
-    #features = convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
-    #class_names = convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
+    predicted = convert_csv_to_array(DATA_FOLDER + 'prediction.csv', True, csv.QUOTE_NONNUMERIC)
+    target = convert_csv_to_array(DATA_FOLDER + 'target.csv', True, csv.QUOTE_NONNUMERIC)
+    proba = convert_csv_to_array(DATA_FOLDER + 'proba.csv', False, csv.QUOTE_NONNUMERIC)
+    features = convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
+    class_names = convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
 
-    #target = [d[0] for d in target]
-    #predicted = [d[0] for d in predicted]
-    #class_names = class_names[0]
+    target = [d[0] for d in target]
+    predicted = [d[0] for d in predicted]
+    class_names = class_names[0]
     #cal_MI(features, [0, 1], target)
     #calculate_MI(features, [0, 1, 2], target)
     #rank = calculate_feature_rank(features, target)
     #features, feature_names = sort_features_by_rank(rank, features, feature_names)
     #global HISTOGRAM
     #HISTOGRAM = Histogram(predicted, target, proba, class_names)
-    #global FEATURE_DATA
-    #FEATURE_DATA = FeatureData(predicted, target, features, proba, feature_names, class_names)
+    global FEATURE_DATA
+    FEATURE_DATA = FeatureData(predicted, target, features, proba, feature_names, class_names)
     global causalGraph
     causalGraph = CausalGraph(DATA_FOLDER + 'datafile.csv')
-    INTERFACE_DATA = dict()
-    INTERFACE_DATA['dotSrc'] = causalGraph.dot_src
+    interface_data = dict()
+    get_graph_information(interface_data)
+    interface_data['featureSchema'] = feature_names
+    interface_data['graph'] = causalGraph.graph
+    #INTERFACE_DATA['dotSrc'] = causalGraph.dot_src
     #INTERFACE_DATA['graph'] = causalGraph.graph
-    INTERFACE_DATA['markovBlanketSelected'] = causalGraph.markov_blanket_selected
+    #INTERFACE_DATA['markovBlanketSelected'] = causalGraph.markov_blanket_selected
 
     #INTERFACE_DATA['histogramData'] = HISTOGRAM.Histogram_info
     #INTERFACE_DATA['summaryData'] = HISTOGRAM.summary_data
-    #INTERFACE_DATA['featureData'] = FEATURE_DATA.feature_data
+    interface_data['featureData'] = FEATURE_DATA.feature_data
+    interface_data['classNames'] = FEATURE_DATA.class_names
     #INTERFACE_DATA['featureDistribution'] = FEATURE_DATA.feature_distribution
-    return jsonify(INTERFACE_DATA)
+    return jsonify(interface_data)
 
 
 
@@ -115,14 +119,33 @@ def create_names(names_array):
     else:
         return [], []
 
+def get_graph_information(data_dict):
+    data_dict['dotSrc'] = causalGraph.dot_src
+    data_dict['markovBlanketSelected'] = causalGraph.markov_blanket_selected
+    data_dict['isEdgeSelected'] = causalGraph.is_edge_selected()
+    data_dict['isNodeSelected'] = causalGraph.is_node_selected()
+
 @app.route("/nodeSelected", methods=['POST'])
 def get_markov_blanket():
     if request.method == 'POST':
         node_json = json.loads(request.data)
         causalGraph.color_graph_select_node(node_json['nodeStr'])
         interface_data = dict()
-        interface_data['dotSrc'] = causalGraph.dot_src
-        interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
+        get_graph_information(interface_data)
+        #interface_data['dotSrc'] = causalGraph.dot_src
+        #interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
+    return jsonify(interface_data)
+
+@app.route("/edgeSelected", methods=['POST'])
+def get_edge_selection():
+    if request.method == 'POST':
+        node_json = json.loads(request.data)
+        print node_json
+        causalGraph.color_edge(node_json['edgeStr'])
+        interface_data = dict()
+        get_graph_information(interface_data)
+        #interface_data['dotSrc'] = causalGraph.dot_src
+        #interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
     return jsonify(interface_data)
 
 @app.route("/toggleGraphSelection", methods=['POST'])
@@ -130,8 +153,19 @@ def toggle_graph_selection():
     if request.method == 'POST':
         causalGraph.toggle_markov_blanket_selected()
         interface_data = dict()
-        interface_data['dotSrc'] = causalGraph.dot_src
-        interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
+        get_graph_information(interface_data)
+        #interface_data['dotSrc'] = causalGraph.dot_src
+        #interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
+    return jsonify(interface_data)
+
+@app.route("/removeSelected", methods=['POST'])
+def remove_selection():
+    if request.method == 'POST':
+        causalGraph.remove_selection()
+        interface_data = dict()
+        get_graph_information(interface_data)
+        #interface_data['dotSrc'] = causalGraph.dot_src
+        #interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
     return jsonify(interface_data)
 
 @app.route("/postHistogramZoom", methods=['POST'])
@@ -153,12 +187,13 @@ def update_histogram_info_display():
 @app.route('/classSelected', methods=['POST'])
 def update_class_selection():
     if request.method == 'POST':
-        class_selected = request.get_json(data)
+        #class_selected = request.get_json(data)
+        class_selected = json.loads(request.data)
         FEATURE_DATA.update_class_selection(class_selected['className'], class_selected['currentDisplay'])
         interface_data = dict()
-        interface_data['histogramData'] = HISTOGRAM.Histogram_info
+        #interface_data['histogramData'] = HISTOGRAM.Histogram_info
         interface_data['featureData'] = FEATURE_DATA.feature_data
-        interface_data['featureDistribution'] = FEATURE_DATA.feature_distribution
+        #interface_data['featureDistribution'] = FEATURE_DATA.feature_distribution
     return jsonify(interface_data)
 
 @app.route('/updateDiplay', methods=['POST'])

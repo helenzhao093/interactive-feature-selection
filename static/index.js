@@ -18,7 +18,13 @@ getData()
     ReactDOM.render(
       <AppInterface
         dotSrc={data.dotSrc}
-        markovBlanketSelected={data.markovBlanketSelected}/>,
+        markovBlanketSelected={data.markovBlanketSelected}
+        graph={data.graph}
+        isEdgeSelected={data.isEdgeSelected}
+        isNodeSelected={data.isNodeSelected}
+        featureSchema={data.featureSchema}
+        featureData={data.featureData}
+        classNames={data.classNames}/>,
       document.getElementById('root')
     );
   })

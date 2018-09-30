@@ -25,9 +25,11 @@ class FeatureData:
         self.set_default_feature_range()
         self.set_default_feature_display()
 
-        self.init_data()
+        #self.init_data()
+
+        self.init_data_no_predictions()
         #self.init_included_example_index_array()
-        self.calculate_feature_distribution_graph_data()
+        #self.calculate_feature_distribution_graph_data()
 
     def create_class_names(self, names_array):
         if len(names_array) == self.num_classes:
@@ -115,6 +117,17 @@ class FeatureData:
             self.feature_data['includeData'][i] = False
             return False
                 #self.feature_data['data'].append(self.create_data_dict(predicted, target, feature_vector))
+
+    def init_data_no_predictions(self):
+        self.feature_data['inputData'] = []
+        for i, feature in enumerate(self.features):
+            class_name = self.class_names[self.target[i]]
+            if self.should_display(class_name, FeatureData.TP_KEY):
+                example = dict()
+                example['features'] = feature
+                example['target'] = class_name #self.target[i]
+                self.feature_data['inputData'].append(example)
+
 
     def init_data(self):
         self.feature_data['data'] = []
@@ -307,6 +320,8 @@ class FeatureData:
     def update_class_selection(self, update_class_name, current_display):
         new_display = not current_display
         self.feature_data['classDisplay'][update_class_name][FeatureData.TP_KEY]['display'] = new_display
+        print self.feature_data['classDisplay'][update_class_name][FeatureData.TP_KEY]['display']
+        self.init_data_no_predictions()
         #for name in self.class_names:
         #    for classification in FeatureData.CLASSIFICATIONS:
         #        if classification == FeatureData.TP_KEY and name == update_class_name:
@@ -314,4 +329,4 @@ class FeatureData:
         #        else:
         #            self.feature_data['classDisplay'][name][classification]['display'] = False
         #self.init_data()
-        self.calculate_feature_distribution_graph_data()
+        #self.calculate_feature_distribution_graph_data()
