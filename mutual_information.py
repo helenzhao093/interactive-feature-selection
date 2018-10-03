@@ -106,7 +106,7 @@ def calculate_MI(examples, feature_index, Y):
             MI -= calculate_MI_Xi_Xj(X, i, j, total_count, total_count)
             for y in Y_values:
                 X_condy = X[X[:,-1] == y, :]
-                print X_condy.shape
+                #print X_condy.shape
                 MI += calculate_MI_Xi_Xj(X_condy, i, j, total_count, X_condy.shape[0])
         S.append(i)
     print MI
@@ -138,7 +138,7 @@ def calculate_MI_Xi_Xj(X, i, j, total_count, cond_count):
             xi_xj_count = 1.0
     xj_count = Xj_value_count[xj_cur]
     MI += (xi_xj_count/total_count) * np.log2((xi_xj_count/cond_count)/(xi_count/cond_count)/(xj_count/cond_count))
-    #print MI
+    print MI
     return MI
 
 def calculate_xj_value_count(X, j):

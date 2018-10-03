@@ -22,6 +22,7 @@ class CausalGraph:
         self.edges_to_graph_dict()
         self.init_spouse_graph()
         self.find_paths_to_class_node()
+        self.get_markov_blanket_nodes()
         #self.color_markov_blanket('CLASS')
         #self.color_edges_nodes_to_class_node('AC')
 
@@ -58,6 +59,7 @@ class CausalGraph:
 
     def edges_to_graph_dict(self):
         self.graph = dict()
+        self.node_index_to_name_map = dict()
         #for node in self.nodes:
         #    self.graph[str(node)] = dict()
         node_index = 1
@@ -70,6 +72,7 @@ class CausalGraph:
                 self.graph[fromNode] = dict()
                 self.graph[fromNode]['edgeTo'] = dict()
                 self.graph[fromNode]['nodeIndex'] = node_index
+                self.node_index_to_name_map[node_index] = fromNode
                 self.graph[fromNode]['edgeFrom'] = []
                 self.graph[fromNode]['nodeFrom'] = []
                 self.graph[fromNode]['nodeTo'] = []
@@ -83,6 +86,7 @@ class CausalGraph:
                 self.graph[toNode] = dict()
                 self.graph[toNode]['edgeTo'] = dict()
                 self.graph[toNode]['nodeIndex'] = node_index
+                self.node_index_to_name_map[node_index] = toNode
                 self.graph[toNode]['edgeFrom'] = []
                 self.graph[toNode]['nodeFrom'] = []
                 self.graph[toNode]['nodeTo'] = []
@@ -96,6 +100,14 @@ class CausalGraph:
             self.graph[toNode]['edgeFrom'].append(dot_src_line_index)
             self.graph[toNode]['nodeFrom'].append(self.graph[fromNode]['nodeIndex'])
             self.graph[fromNode]['nodeTo'].append(self.graph[toNode]['nodeIndex'])
+
+    def get_markov_blanket_nodes(self):
+        self.class_markov_blanket = set()
+        all_node_indexes = [self.graph[self.class_node_str]['nodeFrom'], self.graph[self.class_node_str]['nodeTo'], self.graph[self.class_node_str]['spouseNode']]
+        for node_indexes in all_node_indexes:
+            for node_index in node_indexes:
+            #self.graph[self.class_node_str]['nodeFrom']:
+                self.class_markov_blanket.add(self.node_index_to_name_map[node_index])
 
     def init_spouse_graph(self):
         for index, edge in enumerate(self.edges):
@@ -125,12 +137,12 @@ class CausalGraph:
         if self.graph[node_str]['visited'] == False:
             for node_to in self.graph[node_str]['edgeTo'].keys():
                 if node_to == self.class_node_str:
-                    print node_str
+                    #print node_str
                     self.graph[node_str]['paths'].append([self.graph[node_str]['edgeTo'][node_to]])
-                    print self.graph[node_str]['paths']
+                    #print self.graph[node_str]['paths']
                 else:
                     self.find_paths_to_class(node_to)
-                    print self.graph[node_to]['paths']
+                    #print self.graph[node_to]['paths']
                     for path in self.graph[node_to]['paths']:
                         new_path = copy.copy(path)
                         new_path.insert(0, self.graph[node_str]['edgeTo'][node_to])
@@ -187,14 +199,14 @@ class CausalGraph:
             #updated_path = copy.copy(current_path)
             #updated_path.append(self.graph[start_node_str]['edgeTo'][node_str]) # index of new edge
             paths = self.find_paths_to_class_node_helper(node_str)
-            print paths, node_str, start_node_str
+            #print paths, node_str, start_node_str
             if paths == True:
                 self.graph[start_node_str]['paths'].add(self.graph[start_node_str]['edgeTo'][node_str])
                 self.graph[start_node_str]['pathNodes'].add(self.graph[node_str]['nodeIndex'])
                 #print self.graph[start_node_str]['paths']
                 return self.graph[start_node_str]['paths']
             if len(paths) > 0:
-                print paths
+                #print paths
                 #for path in paths:
                 #    new_path = copy.copy(path)
                 #new_path.insert(0, self.graph[start_node_str]['edgeTo'][node_str])
@@ -213,7 +225,7 @@ class CausalGraph:
         edges_from_parent = self.find_direct_parents(node)
         edges_to_children, child_str = self.find_direct_children(node)
         edges_spouse_to_child = self.find_spouse(child_str)
-        print(edges_from_parent, edges_to_children, edges_spouse_to_child)
+        #print(edges_from_parent, edges_to_children, edges_spouse_to_child)
         self.color_edges_nodes_in_path(edges_from_parent, self.color_to_class)
         self.color_edges_nodes_in_path(edges_to_children, self.color_from_class)
         self.color_edges_nodes_in_path(edges_spouse_to_child, self.color_spouse)
@@ -249,9 +261,9 @@ class CausalGraph:
         for line_index in path_array:
             if line_index not in modified_edges:
                 self.dot_src_lines[line_index] = self.add_color_attr_to_edge(self.dot_src_lines[line_index], color)
-                print self.dot_src_lines[line_index]
+                #print self.dot_src_lines[line_index]
                 modified_edges.append(line_index)
-                print self.get_from_to_nodes_from_edge(self.dot_src_lines[line_index].strip())
+                #print self.get_from_to_nodes_from_edge(self.dot_src_lines[line_index].strip())
                 for node_str in self.get_from_to_nodes_from_edge(self.dot_src_lines[line_index].strip()):
                     if node_str not in modified_edges and node_str != self.class_node_str and node_str != self.selected_node:
                         self.add_color_node_to_end_src_lines(node_str, color)
@@ -261,9 +273,9 @@ class CausalGraph:
         self.selected_edge = edge
         self.selcted_node = None
         index_arr = [self.convert_edge_to_line_in_dot_src_lines(edge)]
-        print index_arr
+        #print index_arr
         self.color_edges_nodes_in_path(index_arr, self.edge_selected_color)
-        print self.dot_src_lines[index_arr[0]]
+        #print self.dot_src_lines[index_arr[0]]
         self.dot_src = self.lines_to_dot_src(self.dot_src_lines)
 
     def remove_selection_colors(self):

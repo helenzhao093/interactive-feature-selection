@@ -90,13 +90,16 @@ def get_histogram_data():
     #features, feature_names = sort_features_by_rank(rank, features, feature_names)
     #global HISTOGRAM
     #HISTOGRAM = Histogram(predicted, target, proba, class_names)
-    global FEATURE_DATA
-    FEATURE_DATA = FeatureData(predicted, target, features, proba, feature_names, class_names)
+
     global causalGraph
     causalGraph = CausalGraph(DATA_FOLDER + 'datafile.csv')
+
+    global FEATURE_DATA
+    FEATURE_DATA = FeatureData(predicted, target, features, proba, feature_names, causalGraph.class_markov_blanket, class_names)
+
     interface_data = dict()
     get_graph_information(interface_data)
-    interface_data['featureSchema'] = feature_names
+
     interface_data['graph'] = causalGraph.graph
     #INTERFACE_DATA['dotSrc'] = causalGraph.dot_src
     #INTERFACE_DATA['graph'] = causalGraph.graph
@@ -105,7 +108,9 @@ def get_histogram_data():
     #INTERFACE_DATA['histogramData'] = HISTOGRAM.Histogram_info
     #INTERFACE_DATA['summaryData'] = HISTOGRAM.summary_data
     interface_data['featureData'] = FEATURE_DATA.feature_data
+    #interface_data['featureSchema'] = FEATURE_DATA.feature_d
     interface_data['classNames'] = FEATURE_DATA.class_names
+    interface_data['markovBlanket'] = list(FEATURE_DATA.class_markov_blanket)
     #INTERFACE_DATA['featureDistribution'] = FEATURE_DATA.feature_distribution
     return jsonify(interface_data)
 
@@ -124,6 +129,17 @@ def get_graph_information(data_dict):
     data_dict['markovBlanketSelected'] = causalGraph.markov_blanket_selected
     data_dict['isEdgeSelected'] = causalGraph.is_edge_selected()
     data_dict['isNodeSelected'] = causalGraph.is_node_selected()
+
+@app.route("/calculateMI", methods=["POST"])
+def send_new_calculated_MI():
+    if request.method == 'POST':
+        data = json.loads(request.data)
+        print (data['features'])
+        #feature_indexes = FEATURE_DATA.get_feature_indexes(data['features'])
+        FEATURE_DATA.calculate_mutual_information(data['features'])#calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
+        interface_data = dict()
+        interface_data['MIScore'] = FEATURE_DATA.MI
+        return jsonify(interface_data)
 
 @app.route("/nodeSelected", methods=['POST'])
 def get_markov_blanket():

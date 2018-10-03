@@ -22,9 +22,9 @@ getData()
         graph={data.graph}
         isEdgeSelected={data.isEdgeSelected}
         isNodeSelected={data.isNodeSelected}
-        featureSchema={data.featureSchema}
         featureData={data.featureData}
-        classNames={data.classNames}/>,
+        classNames={data.classNames}
+        markovBlanket={data.markovBlanket}/>,
       document.getElementById('root')
     );
   })

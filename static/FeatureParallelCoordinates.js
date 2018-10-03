@@ -9,7 +9,7 @@ class Axis extends React.Component {
     var axisG = d3.select(id).call(d3.axisRight(this.props.axis))//.tickFormat(d3.format(".3n")))
     if (this.props.name == 'BOUNDARY') {
       var g = d3.select(id)
-      g.select("path").attr("stroke", "yellow")
+      g.select("path").attr("stroke", "darkgrey").attr("stroke-width", 5)
       g.select(".tick").style("display", "none")
     }
   }
@@ -20,16 +20,16 @@ class Axis extends React.Component {
     var g = d3.select(id)
     if (this.props.name == 'BOUNDARY') {
 
-      g.select("path").attr("stroke", "yellow")
+      g.select("path").attr("stroke", "darkgrey").attr("stroke-width", 5)
       g.select(".tick").style("display", "none")
     } else {
-      g.select("path").attr("stroke", "black")
+      g.select("path").attr("stroke", "black").attr("stroke-width", 1)
     }
   }
 
   render(){
     console.log('feature-axis')
-    const textColor = this.props.name == "BOUNDARY" ? "yellow": "black"
+    const textColor = this.props.name == "BOUNDARY" ? "darkgrey": "black"
     return (
       <g className={'feature-axis'} id={this.props.name} transform={this.props.transform} style={{fontSize: 9}}>
         <text x={0} y={-5} fill={textColor} >{this.props.textname}</text>
@@ -46,9 +46,12 @@ class FeatureParallelCoordinates extends React.Component {
     var width = props.size[0] - margin.left - margin.right
     var height = props.size[1] - margin.top - margin.bottom
 
-    Object.keys(props.features).map((featurekey, index) =>
-      props.features[featurekey].index = index
-    )
+    //Object.keys(props.features).map((featurekey, index) =>
+    //  props.features[featurekey].index = index
+    //)
+
+    props.features.sort(function(a, b) { return a.index - b.index })
+    console.log(props.features)
 
     props.features.push(
       { index: props.features.length,
@@ -122,18 +125,31 @@ class FeatureParallelCoordinates extends React.Component {
         d3.select(this).attr('transform', function(d) { return 'translate(' + d3.event.x + ")" })
       })
       .on("end", function(d) {
+
+        d3.select(this).attr('transform', function(d) { return 'translate(' + that.state.xScale(this.id) + ")" })
         const attrId = this.id
         that.state.dragging[attrId] = d3.event.x
         var features = that.state.displayFeatures
         features.sort(function(a, b) { return that.position(a.name) - that.position(b.name)})
-        //console.log(that.state.displayFeatures)
+        //console.log(d3.event.x)
+        //console.log(that.position(this.id))
+        //console.log(that.position("BOUNDARY"))
+        //console.log(that.state.xScale("BOUNDARY"))
         //that.state.xScale.domain(that.state.displayFeatures)
         const xScaleDomain = features.map((feature, index) =>
           feature.name
         )
-        d3.select(this).attr('transform', function(d) { return 'translate(' + that.state.xScale(this.id) + ")" })
+        delete that.state.dragging[attrId]
         if (xScaleDomain != that.state.xScaleDomain) {
           var xScale = that.state.xScale.domain(xScaleDomain)
+          const allFeatureIndexes = features.map((feature) =>
+            feature.index
+          )
+          const stopIndex = allFeatureIndexes.indexOf(features.length - 1);
+          //console.log(stopIndex)
+          allFeatureIndexes.splice(stopIndex)
+
+          that.props.sendData("/calculateMI", { features: allFeatureIndexes })
           that.setState({
             xScale: xScale,
             xScaleDomain: xScaleDomain,
@@ -250,8 +266,6 @@ class FeatureParallelCoordinates extends React.Component {
     )
     console.log(displayTarget)
     */
-
-
 
     return (
       <svg className={'feature-parallels-svg'} width={this.props.size[0]} height={this.props.size[1]}>

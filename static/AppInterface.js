@@ -1,6 +1,6 @@
 class AppInterface extends React.Component {
   constructor(props) {
-    //console.log(props)
+    console.log(props)
     super(props)
     var colorRange = ["#00649b", "#bc4577", "#ff7e5a", "#b2bae4", "#c0392b", "#f1c40f", "#16a085", "#3498db", '#e88c5d', '#23a393' ]
     var color = d3.scaleOrdinal()
@@ -11,10 +11,10 @@ class AppInterface extends React.Component {
       markovBlanketSelected: this.props.markovBlanketSelected,
       isEdgeSelected: this.props.isEdgeSelected,
       isNodeSelected: this.props.isNodeSelected,
-      featureSchema: this.props.featureSchema,
       featureData:this.props.featureData,
       colorRange: colorRange,
       colorFunction: color,
+      MIScore: 0
     }
     this.sendData = this.sendData.bind(this)
     this.handleClassSelection = this.handleClassSelection.bind(this)
@@ -43,13 +43,23 @@ class AppInterface extends React.Component {
 
   updateData(data) {
     console.log(data)
-    this.setState({
-      featureData: data.featureData
+    const keys = Object.keys(data)
+    if (keys.includes("featureData")){
+      this.setState({
+        featureData: data.featureData,
+        //MIScore: data.MIScore
       //dotSrc: data.dotSrc,
       //markovBlanketSelected: data.markovBlanketSelected,
       //isEdgeSelected: data.isEdgeSelected,
       //isNodeSelected: data.isNodeSelected
-    })
+      })
+    }
+    if (keys.includes("MIScore")) {
+      this.setState({
+        MIScore: data.MIScore
+      })
+    }
+    //}
   }
 
   handleClassSelection(className, currentDisplay){
@@ -61,10 +71,11 @@ class AppInterface extends React.Component {
     console.log('app')
     return (
       <div>
+      <div className={"row"}>
         <ExpertKnowledge
-          featureSchema={this.state.featureSchema}
-          width={600}
-          height={600}
+          featureSchema={this.state.featureData.features}
+          width={500}
+          height={500}
           />
         <CausalGraph
           dotSrc={this.state.dotSrc}
@@ -73,12 +84,19 @@ class AppInterface extends React.Component {
           markovBlanketSelected={this.state.markovBlanketSelected}
           isEdgeSelected={this.state.isEdgeSelected}
           isNodeSelected={this.state.isNodeSelected}/>
+        </div>
+        <div className={"row"}>
+        <div className={"column"}>
         <CheckboxMultiSelect options={this.state.featureData.classDisplay} handleChange={(c,d) => this.handleClassSelection(c,d)} />
         <FeatureParallelCoordinates
           data={this.state.featureData.inputData}
           features={this.state.featureData.features}
-          size={[1000,400]}
-          colorFunction={this.state.colorFunction}/>
+          size={[900,500]}
+          sendData={this.sendData}
+          colorFunction={this.state.colorFunction}
+          markovBlanket={this.props.markovBlanket}/>
+        </div>
+        </div>
       </div>
     )
   }
