@@ -86,16 +86,19 @@ class AppInterface extends React.Component {
           isNodeSelected={this.state.isNodeSelected}/>
         </div>
         <div className={"row"}>
-        <div className={"column"}>
-        <CheckboxMultiSelect options={this.state.featureData.classDisplay} handleChange={(c,d) => this.handleClassSelection(c,d)} />
-        <FeatureParallelCoordinates
-          data={this.state.featureData.inputData}
-          features={this.state.featureData.features}
-          size={[900,500]}
-          sendData={this.sendData}
-          colorFunction={this.state.colorFunction}
-          markovBlanket={this.props.markovBlanket}/>
-        </div>
+          <div className={"column"}>
+            <CheckboxMultiSelect options={this.state.featureData.classDisplay} handleChange={(c,d) => this.handleClassSelection(c,d)} />
+            <FeatureParallelCoordinates
+              data={this.state.featureData.inputData}
+              features={this.state.featureData.features}
+              size={[900,500]}
+              sendData={this.sendData}
+              colorFunction={this.state.colorFunction}
+              markovBlanket={this.props.markovBlanket}/>
+          </div>
+          <div className={"column"}>
+            <ProgressGraph size={[500,300]} consistencyEK={[0.91, 0.74, 0.23]} consistencyMB={[0.84, 0.77, 0.99]} MI={[0.77, 0.88, 0.11]}/>
+          </div>
         </div>
       </div>
     )

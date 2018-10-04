@@ -17,8 +17,8 @@ class FeatureData:
         self.num_examples = len(self.features)
         self.proba = proba
         self.class_markov_blanket = markov_blanket_index
-        self.class_names = class_names#create_class_names(class_names)
-        self.num_classes = len(class_names) # doesn't work if class_name is []
+        self.class_names = class_names
+        self.num_classes = len(class_names)
         self.num_bins = FeatureData.DEFAULT_NUM_BINS
         self.num_features = self.get_num_features()
         self.feature_data = dict()
@@ -31,40 +31,27 @@ class FeatureData:
         self.set_default_feature_display()
         #self.current_feature_set = {}
         self.MI = 0
-        #self.init_data()
 
-        #
         self.map_feature_name_to_information()
         self.order_by_class_MB()
         self.init_data_no_predictions()
         self.init_mutual_information_dataset()
-        #self.calculate_mutual_information([0, 1, 2])
-        #self.init_included_example_index_array()
-        #self.calculate_feature_distribution_graph_data()
 
-    def init_mutual_information_dataset(self):
-        self.X = np.around(normalize(self.features), 10)
-        self.calculate_proba_y()
-        #self.yvalues = set(self.target)
-        #self.Y = self.target
-
+    # add index to feature_data['features']
+    # create map of feature name to column index in self.features
     def map_feature_name_to_information(self):
-        self.feature_name_to_information_map = dict()
+        self.feature_name_to_index_map = dict()
         for i in range(len(self.feature_data['features'])):
-            #print(self.features['features'][i])
             self.feature_data['features'][i]['index'] = i
-            self.feature_name_to_information_map[self.feature_data['features'][i]['name']] = i
+            self.feature_name_to_index_map[self.feature_data['features'][i]['name']] = i
 
+    # order columns of self.features by MB
+    # self.feature_data['feature'] index is updated
     def order_by_class_MB(self):
-        #num_features = len(self.features)
-        #new_features = np.zeros((self.num_examples, self.num_features))
-        print (self.features[0])
-        print(self.class_markov_blanket)
-
         # get column index from names in markov_blanket
         column_indexes = []
         for name in self.class_markov_blanket:
-            column_indexes.append(self.feature_name_to_information_map[name])
+            column_indexes.append(self.feature_name_to_index_map[name])
 
         features = np.asarray(self.features)
         sorted_features = np.zeros((self.num_examples, self.num_features))
@@ -81,29 +68,14 @@ class FeatureData:
                 sorted_features[:,j] = features[:,k]
                 self.feature_data['features'][k]['index'] = j
                 j += 1
-            #print i, column_index
-            #temp = features[:,i]
-            #features[:,i] = features[:,column_index]
-            #features[:,column_index] = temp
-
-            #ith_feature_name = self.feature_data['features'][i]['name']
-            #column_index_name = self.feature_data['features'][column_index]['name']
-            #print ith_feature_name, column_index_name
-            #self.feature_name_to_information_map[ith_feature_name]['index']
-            #self.feature_data['features'][i]['index'] = column_index #[ith_feature_name]['index'] = column_index
-            #self.feature_data['features'][column_index]['index'] = i
-            #print features[0]
-            #temp = dict()
-            #temp_feature = feature_info[i]
-            #feature_info[i] = feature_info[column_indexes]
-            #feature_info[column_indexes] = temp_feature
-            #print feature_info[i]
-            #print feature_info[feature_index]
-        #print self.feature_data['features']
-        #self.feature_data['features'] = feature_info
-        #print self.feature_data['features'][0]
         self.features = sorted_features.tolist()
-        print (self.features[0])
+        #print (self.features[0])
+
+    # self.X : normalized features
+    def init_mutual_information_dataset(self):
+        self.X = np.around(normalize(self.features), 10)
+        self.calculate_proba_y()
+
 
     def get_feature_indexes(self, feature_names):
         feature_indexes = []
@@ -151,13 +123,6 @@ class FeatureData:
         else:
             feature_names = ['feature' + str(i) for i in range(self.num_features)]
         return feature_names
-
-    #def init_feature_dict(self, feature_dict):
-    #    self.feature_data['features'] = []
-    #    for feature in feature_dict:
-    #        feature['featureName'] = feature_name
-    #        self.feature_data['features'].append(feature_dict)
-    #    print self.feature_data['features']
 
     def set_default_feature_range(self):
         #self.feature_data['featureRanges'] = []
@@ -225,6 +190,8 @@ class FeatureData:
                 self.add_data(i, predicted, FeatureData.FP_KEY, predicted, target, feature)
 
 
+
+    #### FEATURE DISTRIBUTION METHODS
     def init_feature_distributions(self):
         self.feature_distribution = []
         for feature_info in self.feature_data['features']:
@@ -416,19 +383,10 @@ class FeatureData:
     ####
 
 
-
     ##### Mutual Information
     def calculate_mutual_information(self, feature_indexes):
-        # self mutual_information_chain = [{feature_index: 9, value: 0.78 },   1, 2, 3, 4, 5]
-        #start_index = self.get_first_removed_feature_index(feature_indexes)
-        #new_indexes = feature_indexes[start_index:]
-        #old_indexes = feature_indexes[:start_index]
-
-        #X = self.sort_selected_features(old_indexes, self.X)
-        #X = self.sort_selected_features(new_indexes, X)
         if len(feature_indexes) == 0:
             return 0
-
         X = self.get_columns(feature_indexes)
         X = self.sort_selected_features(X)
         print X[0,:]
@@ -444,16 +402,9 @@ class FeatureData:
             self.class_proba[yvalue] = (Y == yvalue).sum() / float(self.num_examples)
         print self.class_proba
 
-    def init_X_Y_count(self):
-        X_Y_count = dict()
-        for yvalue in self.class_proba:
-            X_Y_count[yvalue] = 0
-        return X_Y_count
-
     def calculate_joint_probabily(self, X):
         MI = 0
         example = X[0,:]
-        #current_y =
         X_count = 1 #p(x1..xk)
         X_Y_count = dict() #self.init_X_Y_count()
         X_Y_count[X[0,:][-1]] = 1 #{ yvalue: count } #p(x1,..,xk,y)
@@ -472,7 +423,6 @@ class FeatureData:
                 X_Y_count[example[-1]] = 1
         return MI
 
-
     #p(x1..xk,y) / p(x1..xk) * p(y)
     def add_MI(self, X_count, X_Y_count):
         MI = 0
@@ -480,10 +430,8 @@ class FeatureData:
         for yvalue in X_Y_count.keys(): # key is y value
             p_y = self.class_proba[yvalue]
             p_X_y = float(X_Y_count[yvalue])/self.num_examples
-            #print (X_count, X_Y_count[yvalue], p_X_y)
             MI += p_X_y * np.log2((p_X_y/p_X)/p_y)
         return MI
-
 
     def get_columns(self, feature_indexes):
         X = self.X[:,feature_indexes[0]]
@@ -491,15 +439,5 @@ class FeatureData:
             X = np.column_stack((X, self.X[:,feature_indexes[i]]))
         return np.column_stack((X, self.target))
 
-    def get_first_removed_feature_index(self, feature_indexes):
-        for i, feature in enumerate(self.mutual_information_chain):
-            if feature['feature_index'] != feature_indexes[i]:
-                return i
-        return 0
-
     def sort_selected_features(self, X):
-        #sort_features = []
-        #for index in feature_indexes:
-        #    sort_features.append(inputX[:,index])
-        #new_X = inputX[np.lexsort(sort_features)]
         return X[np.lexsort(np.transpose(X)[::-1])]

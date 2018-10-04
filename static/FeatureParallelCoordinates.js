@@ -53,7 +53,7 @@ class FeatureParallelCoordinates extends React.Component {
     props.features.sort(function(a, b) { return a.index - b.index })
     console.log(props.features)
 
-    props.features.push(
+    props.features.splice(props.markovBlanket.length, 0,
       { index: props.features.length,
         display: true,
         name: "BOUNDARY",
@@ -61,6 +61,7 @@ class FeatureParallelCoordinates extends React.Component {
         range: [0,0]
       }
     )
+    console.log(props)
 
     const displayFeatures = props.features
     const xScaleRange = displayFeatures.map((feature, index) =>

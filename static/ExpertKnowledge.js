@@ -126,7 +126,7 @@ class ExpertKnowledge extends React.Component {
         this.state.moves.splice(this.state.step - 1)
         this.state.step = this.state.step - 1
       } else {
-        //const features = lastStep.features;
+        //  const features = lastStep.features;
         /*features.map((feature, index) => {
           const selector = '[id=\"' + index + '"]'
           //console.log(feature)
