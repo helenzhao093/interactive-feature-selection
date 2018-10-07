@@ -185,7 +185,7 @@ class ExpertKnowledge extends React.Component {
     console.log("render EK")
     this.setPointPositions()
     return (
-      <div className={"column"} width={500} height={500}>
+      <div className={"column-left"} width={500} height={500}>
       <div width={"100%"} style={{"margin-left": 5}}>
         <button onClick={this.addCircle}>{"Add Layer"}</button>
         <button onClick={this.undo}>{"Undo"}</button>
@@ -200,8 +200,8 @@ class ExpertKnowledge extends React.Component {
         {
           this.state.features.map((feature, index) =>
             <g className={"feature-node"} id={index} transform={`translate(${feature.x},${feature.y})`}>
-              <circle id={index} r={this.state.featureRadius} fill={"#b9d9ff"}/>
-              <text id={index} textAnchor={"middle"}>{feature.name}</text>
+              <ellipse id={index} rx={this.state.featureRadius} ry={this.state.featureRadius} fill={"#b9d9ff"}/>
+              <text id={index} y={4} textAnchor={"middle"}>{feature.name}</text>
             </g>)
         }
       </g>

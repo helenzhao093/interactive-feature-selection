@@ -1,3 +1,31 @@
+class Legend extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+
+  componentDidMount() {
+
+  }
+
+  componentDidUpdate() {
+
+  }
+
+  render() {
+    console.log(this.props)
+    return (
+      <div className={"legend"}>
+      {this.props.keys.map((key, index) =>
+        <div>
+          <div className={"series-marker"}  style={{background: this.props.colors[index]}}></div>
+          <p>{key}</p>
+        </div>
+      )}
+      </div>
+    )
+  }
+}
+
 class LineAxis extends React.Component {
  constructor(props) {
    console.log(props)
@@ -10,21 +38,22 @@ class LineAxis extends React.Component {
  }
 
  componentDidUpdate() {
-   console.log('update axis')
+   //console.log('update axis')
    var className = '.' + this.props.name
    d3.selectAll(className).call(this.props.axis)
  }
 
  render() {
-   console.log('render axis')
+   //console.log('render axis')
    return(
-     <g className={this.props.name} transform={`translate(0,${this.props.top})`}/>
+     <g className={this.props.name} transform={`translate(0,${this.props.top})`} style={{fontSize: 11, fontFamily: "san-serif"}}/>
    )
  }
 }
 
 class ProgressGraph extends React.Component {
   constructor(props) {
+    console.log(props)
     super(props)
     // array of consistency MB scores
     // array of consistency EK scores
@@ -38,31 +67,38 @@ class ProgressGraph extends React.Component {
       height: height,
       min: 1,
       max: 0,
-      selectedIndex: 0
+      selectedIndex: 0,
     }
     this.initializeMinMax = this.initializeMinMax.bind(this)
     this.getData = this.getData.bind(this)
-    this.onMouseMove = this.onMouseMove.bind(this)
     this.onMouseEnter = this.onMouseEnter.bind(this)
     this.onMouseLeave = this.onMouseLeave.bind(this)
   }
 
   componentDidMount() {
     var that = this
-    d3.select("#progress-graph")
+    var id = '#progress-graph-' + this.props.name
+    d3.select(id)
       .on("mousemove", function(d) {
         var xPosition = d3.mouse(this)[0] - that.state.margin.left
-        var numDataPoints = that.props.consistencyEK.length
+        var keys = Object.keys(that.props.consistencyScores)
+        //console.log(keys)
+        var numDataPoints = (that.props.currentScores) ? that.props.consistencyScores[keys[0]].length + 1 : that.props.consistencyScores[keys[0]].length
+        //console.log(numDataPoints)
         var range = (that.props.size[0] - that.state.margin.left - that.state.margin.right) / (numDataPoints - 1)
-        console.log(xPosition)
-        console.log(range)
+        //console.log(xPosition)
+        //console.log(range)
         var mouseIndex = ((Math.ceil(xPosition/range) - xPosition/range) < 0.5) ? Math.ceil(xPosition/range) : Math.floor(xPosition/range)
-        console.log(mouseIndex)
-        if (mouseIndex != that.props.mouseIndex) {
+        //console.log(mouseIndex)
+        if (mouseIndex != that.props.selectedIndex) {
           that.setState({
             selectedIndex: mouseIndex
           })
         }
+      })
+      .on("mousedown", function(d) {
+        console.log(that.state.selectedIndex)
+        that.props.goToStep(that.state.selectedIndex)
       })
   }
 
@@ -78,8 +114,6 @@ class ProgressGraph extends React.Component {
     if (max > this.state.max) {
       this.state.max = max
     }
-    //var yScale = d3.scaleLinear().domain([min, max]).range([0, this.state.height])
-    //return yScale
   }
 
   getData(data) {
@@ -87,58 +121,87 @@ class ProgressGraph extends React.Component {
   }
 
   onMouseEnter() {
-    d3.select(".focus").attr("display", "block")
-  }
-
-  onMouseMove() {
-    console.log(d3.mouse(d3.select(".focus")))
+    //d3.select(".focus").attr("display", "block")
   }
 
   onMouseLeave() {
-    d3.select(".focus").attr("display", "none")
+    //d3.select(".focus").attr("display", "none")
   }
 
+
   render(){
-    var xScaleDomain = this.props.consistencyEK.map((score, index) => index)
-    var xScaleRange = this.props.consistencyEK.map((score, index) =>
-      this.state.width/(this.props.consistencyEK.length - 1) * index
-    )
-    console.log(xScaleDomain)
-    console.log(xScaleRange)
+    console.log("progress graph")
+    var scores = {}
+    //console.log(scores)
+    var keys = Object.keys(this.props.consistencyScores)
+  //  console.log(keys)
+    keys.forEach((key) => {
+      //console.log(this.props.consistencyScores[key])
+      //console.log(this.props.consistencyScores[key].slice())
+      scores[key] = this.props.consistencyScores[key].slice() //.push(this.props.currentScores[key])
+
+    })
+    //console.log(keys)
+    //console.log(scores)
+    if (this.props.currentScores) {
+      if (this.props.currentScores["MI"] >= 0) {
+        keys.map((key) => {
+          scores[key].push(this.props.currentScores[key])
+        })
+      }
+    }
+    //console.log(this.props.consistencyScores)
+    //console.log(scores)
+    //var MB = this.props.consistencyMB.splice()
+    //MB.push(this.props.currentMB)
+    //var EK = this.props.consistencyEK
+    var xScaleDomain = (scores[keys[0]].length > 1) ?
+        scores[keys[0]].map((score, index) => index) :
+        [0, 1]
+    var xScaleRange = (scores[keys[0]].length > 1) ?
+      scores[keys[0]].map((score, index) => this.state.width/(scores[keys[0]].length - 1) * index) :
+      [0, this.state.width]
+    //console.log(xScaleDomain)
+    //console.log(xScaleRange)
     var xScale = d3.scaleOrdinal().domain(xScaleDomain).range(xScaleRange)
 
-    this.initializeMinMax(this.props.consistencyEK)
-    this.initializeMinMax(this.props.consistencyMB)
-    this.initializeMinMax(this.props.MI)
+    keys.map((key) =>
+      this.initializeMinMax(scores[key])
+    )
 
     var yScale = d3.scaleLinear().domain([this.state.max, this.state.min]).range([0, this.state.height])
     var draw = d3.line().x(function(d) {return xScale(d[0])}).y(function(d) { return yScale(d[1])})
-    var EKdata = this.getData(this.props.consistencyEK)
-    var MBdata = this.getData(this.props.consistencyMB)
-    var MIdata = this.getData(this.props.MI)
-    console.log(EKdata)
 
+    var lineDataPoints = keys.map((key) =>
+      this.getData(scores[key])
+    )
+    //var EKdata = this.getData(this.props.consistencyEK)
+    //var MBdata = this.getData(this.props.consistencyMB)
+    //var MIdata = this.getData(this.props.MI)
+    //console.log(EKdata)
     var xAxis = d3.axisBottom(xScale)
     var yAxis = d3.axisLeft(yScale)
     //console.log(xAxis)
-    var datapoints = [this.props.consistencyEK, this.props.consistencyMB, this.props.MI]
+    //var datapoints = [this.props.consistencyEK, this.props.consistencyMB, this.props.MI]
     var colors = ["red", "green", "blue"]
+    //console.log(lineDataPoints)
     return (
-      <svg id={"progress-graph"} width={this.props.size[0]} height={this.props.size[1]}
+      <svg id={"progress-graph-" + this.props.name} width={this.props.size[0]} height={this.props.size[1]}
         onMouseEnter={this.onMouseEnter}
         onMouseLeave={this.onMouseLeave}>
         <g className={"score-paths"} transform={`translate(${this.state.margin.left},${this.state.margin.top})`}>
-          <LineAxis name={"progress-x-axis"} axis={xAxis} top={this.state.height}/>
-          <LineAxis name={"progress-y-axis"} axis={yAxis} top={0}/>
-          <path d={draw(EKdata)} stroke={"red"} stroke-width={3} fill={"none"}/>
-          <path d={draw(MBdata)} stroke={"green"} stroke-width={3} fill={"none"}/>
-          <path d={draw(MIdata)} stroke={"blue"} stroke-width={3} fill={"none"}/>
-          <g className={"focus"} display={"none"}>
-            {datapoints.map((points, index) =>
-              <g transform={`translate(${xScale(this.state.selectedIndex)},${yScale(points[this.state.selectedIndex])})`}>
-                <circle r={5} fill={colors[index]}/>
-                <rect x={8} y={-5} width={22} height={12} fill={"grey"}/>
-                <text x={9}>{points[this.state.selectedIndex]}</text>
+          <LineAxis name={"progress-x-axis-" + this.props.name} axis={xAxis} top={this.state.height}/>
+          <LineAxis name={"progress-y-axis-" + this.props.name} axis={yAxis} top={0}/>
+          {
+            lineDataPoints.map((points, index) =>
+              <path className={"graphline"} d={draw(points)} stroke={this.props.colors[index]} stroke-width={3} fill={"none"} />
+            )
+          }
+          <g className={"focus"} style={{fontSize: 11, fontFamily: "san-serif"}}>
+            {keys.map((key, index) =>
+              <g transform={`translate(${xScale(this.state.selectedIndex)},${yScale(scores[key][this.state.selectedIndex])})`}>
+                <circle r={5} fill={this.props.colors[index]}/>
+                <text x={9}>{scores[key][this.state.selectedIndex]}</text>
               </g>)
             }
           </g>
@@ -147,3 +210,9 @@ class ProgressGraph extends React.Component {
     )
   }
 }
+
+/*
+<path className={"graphline"} d={draw(EKdata)} stroke={"red"} stroke-width={3} fill={"none"}/>
+<path className={"graphline"} d={draw(MBdata)} stroke={"green"} stroke-width={3} fill={"none"}/>
+<path className={"graphline"} d={draw(MIdata)} stroke={"blue"} stroke-width={3} fill={"none"}/>
+*/

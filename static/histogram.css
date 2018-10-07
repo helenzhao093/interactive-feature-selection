@@ -1,3 +1,189 @@
+body {
+  background: lightsteelblue;
+}
+
+.graphline {
+  stroke-width: 3px;
+}
+
+path.link.hidden {
+  stroke-width: 0;
+}
+
+.container {
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 22px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 15px;
+    width: 15px;
+    background-color: #eee;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+/* Show the checkmark when checked */
+.container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* Style the checkmark/indicator */
+.container .checkmark:after {
+    left: 9px;
+    top: 5px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.series-marker {
+    height: 1em;
+    width: 1em;
+    border-radius: 35%;
+    background-color: crimson;
+    display: inline-block;
+    margin-right: 4px;
+    margin-bottom: -0.16rem;
+}
+
+.legend  {
+    min-width: 200px;
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    font-size: 16px;
+}
+
+.legend p {
+    display:inline;
+    font-size: 0.8em;
+    font-family: sans-serif;
+    font-weight: 600;
+    margin-right: 5px
+}
+
+.column {
+    float: left;
+    padding: 5px;
+    border-color: grey;
+    border-radius: 5px;
+    border-width: 5px;
+    background: #fbfbfb
+}
+
+.column-left {
+    float: left;
+    padding: 5px;
+    border-color: grey;
+    border-radius: 5px;
+    border-width: 5px;
+    background: #fbfbfb;
+    margin-right: 5px
+}
+
+/* Clear floats after the columns */
+.row {
+    margin-bottom: 10px
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+
+.selected-edgeto path{
+  stroke: #fffbd0;
+}
+
+.selected-edgeto polygon{
+  fill: #fffbd0;
+  stroke: #fffbd0
+}
+
+.selected-edgefrom path{
+  stroke: #ff9900;
+}
+
+.selected-edgefrom polygon{
+  fill: #ff9900;
+  stroke: #ff9900
+}
+
+.selected-node ellipse{
+  fill: yellow;
+}
+
+.selected-nodefrom ellipse{
+  fill: #ff9900;
+}
+
+.selected-nodeto ellipse{
+  fill: #fffbd0;
+}
+
+.selected-spousenode ellipse{
+  fill: green;
+}
+
+.selected-spouseedge path{
+  stroke: green;
+}
+.selected-spouseedge polygon{
+  fill: green;
+  stroke: green;
+}
+
+.selected-pathnode ellipse{
+  fill: orange;
+}
+
+.selected-pathto path{
+  stroke: orange;
+}
+.selected-pathto polygon{
+  fill: orange;
+  stroke: orange;
+}
+
+.removed {
+  display: none;
+}
+
+.active circle{
+  stroke: #000;
+  stroke-width: 2px;
+}
+
 .histogram-tooltip {
     position: relative;
     text-align: center;

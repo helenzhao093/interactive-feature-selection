@@ -31,7 +31,7 @@ class Axis extends React.Component {
     console.log('feature-axis')
     const textColor = this.props.name == "BOUNDARY" ? "darkgrey": "black"
     return (
-      <g className={'feature-axis'} id={this.props.name} transform={this.props.transform} style={{fontSize: 9}}>
+      <g className={'feature-axis'} id={this.props.name} transform={this.props.transform} style={{fontSize: 11, fontFamily: "san-serif"}}>
         <text x={0} y={-5} fill={textColor} >{this.props.textname}</text>
       </g>
     )
@@ -42,7 +42,7 @@ class FeatureParallelCoordinates extends React.Component {
   constructor(props) {
     //console.log(props)
     super(props)
-    var margin = {left: 10, right: 30, top: 20, bottom: 30}
+    var margin = {left: 10, right: 30, top: 20, bottom:10}
     var width = props.size[0] - margin.left - margin.right
     var height = props.size[1] - margin.top - margin.bottom
 
@@ -50,10 +50,10 @@ class FeatureParallelCoordinates extends React.Component {
     //  props.features[featurekey].index = index
     //)
 
-    props.features.sort(function(a, b) { return a.index - b.index })
-    console.log(props.features)
+    //props.features.sort(function(a, b) { return a.index - b.index })
+    //console.log(props.features)
 
-    props.features.splice(props.markovBlanket.length, 0,
+    /*props.features.splice(props.markovBlanket.length, 0,
       { index: props.features.length,
         display: true,
         name: "BOUNDARY",
@@ -61,13 +61,14 @@ class FeatureParallelCoordinates extends React.Component {
         range: [0,0]
       }
     )
-    console.log(props)
+    //console.log(props) */
 
-    const displayFeatures = props.features
-    const xScaleRange = displayFeatures.map((feature, index) =>
-      width/(displayFeatures.length - 1) * index
+    //const displayFeatures = props.features
+    //console.log(this.props.features)
+    const xScaleRange = this.props.features.map((feature, index) =>
+      width/(this.props.features.length - 1) * index
     )
-    const xScaleDomain = displayFeatures.map((feature, index) =>
+    const xScaleDomain = this.props.features.map((feature, index) =>
       feature.name
     )
     const xScale = d3.scaleOrdinal()
@@ -75,18 +76,18 @@ class FeatureParallelCoordinates extends React.Component {
         .range(xScaleRange)
 
     var yScalesDisplay = {}
-    for (var i = 0; i < displayFeatures.length; i++) {
-      if (displayFeatures[i].type == 'continuous') {
-        const scale = d3.scaleLinear().domain(displayFeatures[i].range).range([0, height])
-        yScalesDisplay[displayFeatures[i].name] = scale
+    for (var i = 0; i < this.props.features.length; i++) {
+      if (this.props.features[i].type == 'continuous') {
+        const scale = d3.scaleLinear().domain(this.props.features[i].range).range([0, height])
+        yScalesDisplay[this.props.features[i].name] = scale
       }
       else {
-        const numSplits = displayFeatures[i].values.length - 1
-        const rangeDomain = displayFeatures[i].values.map((v, i) => i * height/numSplits)
-        yScalesDisplay[displayFeatures[i].name] = d3.scaleOrdinal().domain(displayFeatures[i].values).range(rangeDomain)
+        const numSplits = this.props.features[i].values.length - 1
+        const rangeDomain = this.props.features[i].values.map((v, i) => i * height/numSplits)
+        yScalesDisplay[this.props.features[i].name] = d3.scaleOrdinal().domain(this.props.features[i].values).range(rangeDomain)
       }
     }
-    var yScales = displayFeatures.map((feature) =>
+    var yScales = this.props.features.map((feature) =>
       d3.scaleLinear().domain(feature.range).range([0, height])
     )
 
@@ -102,7 +103,7 @@ class FeatureParallelCoordinates extends React.Component {
       margin: margin,
       width: width,
       height: height,
-      displayFeatures: displayFeatures,
+      displayFeatures: this.props.features,
       xScale: xScale,
       xScaleDomain: xScaleDomain,
       yScales: yScales,
@@ -113,11 +114,12 @@ class FeatureParallelCoordinates extends React.Component {
 
     this.path = this.path.bind(this)
     this.position = this.position.bind(this)
+    console.log(this.state)
   }
 
   componentDidMount() {
     var that = this
-    console.log(d3.selectAll('.feature-axis'))
+    //console.log(d3.selectAll('.feature-axis'))
     d3.selectAll(".feature-axis").call(d3.drag()
       .on("start", function(d) {
         //that.state.dragging[attrId] = that.state.xScale(attrId)
@@ -130,27 +132,37 @@ class FeatureParallelCoordinates extends React.Component {
         d3.select(this).attr('transform', function(d) { return 'translate(' + that.state.xScale(this.id) + ")" })
         const attrId = this.id
         that.state.dragging[attrId] = d3.event.x
-        var features = that.state.displayFeatures
-        features.sort(function(a, b) { return that.position(a.name) - that.position(b.name)})
-        //console.log(d3.event.x)
-        //console.log(that.position(this.id))
-        //console.log(that.position("BOUNDARY"))
-        //console.log(that.state.xScale("BOUNDARY"))
-        //that.state.xScale.domain(that.state.displayFeatures)
-        const xScaleDomain = features.map((feature, index) =>
+        var oldFeatureNames = that.state.displayFeatures.map((feature) =>
           feature.name
         )
+        var features = that.state.displayFeatures
+
+        features.sort(function(a, b) { return that.position(a.name) - that.position(b.name)})
+
+        var allFeatureIndexes = features.map((feature) =>
+          feature.index
+        )
+        var allFeatureNames = features.map((feature) =>
+          feature.name
+        )
+        //console.log(oldFeatureNames)
+        //console.log(allFeatureNames)
         delete that.state.dragging[attrId]
-        if (xScaleDomain != that.state.xScaleDomain) {
-          var xScale = that.state.xScale.domain(xScaleDomain)
-          const allFeatureIndexes = features.map((feature) =>
-            feature.index
+
+        if (JSON.stringify(oldFeatureNames) != JSON.stringify(allFeatureNames)) {
+
+          var xScaleDomain = features.map((feature, index) =>
+            feature.name
           )
+          var xScale = that.state.xScale.domain(xScaleDomain)
+          //console.log(xScaleDomain)
           const stopIndex = allFeatureIndexes.indexOf(features.length - 1);
           //console.log(stopIndex)
           allFeatureIndexes.splice(stopIndex)
-
-          that.props.sendData("/calculateMI", { features: allFeatureIndexes })
+          allFeatureNames.splice(stopIndex)
+          //console.log(features)
+          //console.log(xScaleDomain)
+          that.props.sendData("/calculateScores", { features: allFeatureIndexes, names: allFeatureNames, featureOrder: features })
           that.setState({
             xScale: xScale,
             xScaleDomain: xScaleDomain,
@@ -273,7 +285,8 @@ class FeatureParallelCoordinates extends React.Component {
         <g className={'feature-parallels'} transform={`translate(${this.state.margin.left},${this.state.margin.top})`} >
         <g className={'data-paths'}>
           {this.props.data.map((data, index) =>
-            <path d={this.path(data.features, this.state.draw)} fill={"none"} stroke={this.props.colorFunction(data.target)}/>)
+            <path d={this.path(data.features, this.state.draw)} fill={"none"}
+            stroke={this.props.colorFunction(data.target)} stroke-width={3}/>)
           }
         </g>
         {this.state.displayFeatures.map((feature, index) =>

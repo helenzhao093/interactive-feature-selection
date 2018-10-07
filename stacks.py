@@ -6,6 +6,7 @@ from FeatureData import FeatureData
 from parse_features import *
 from mutual_information import *
 from CausalGraph import CausalGraph
+from Classifier import Classifier
 import numpy as np
 import json
 from flask import Flask, render_template, flash, request, redirect, jsonify, url_for, send_from_directory
@@ -27,6 +28,7 @@ HISTOGRAM = None
 FEATURE_DATA = None
 INTERFACE_DATA = None
 causalGraph = None
+classifier = None
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -97,6 +99,9 @@ def get_histogram_data():
     global FEATURE_DATA
     FEATURE_DATA = FeatureData(predicted, target, features, proba, feature_names, causalGraph.class_markov_blanket, class_names)
 
+    global classifier
+    classifier = Classifier(DATA_FOLDER + 'datafile.csv')
+
     interface_data = dict()
     get_graph_information(interface_data)
 
@@ -108,13 +113,13 @@ def get_histogram_data():
     #INTERFACE_DATA['histogramData'] = HISTOGRAM.Histogram_info
     #INTERFACE_DATA['summaryData'] = HISTOGRAM.summary_data
     interface_data['featureData'] = FEATURE_DATA.feature_data
+    interface_data['featureSchema'] = FEATURE_DATA.feature_data['features']
     #interface_data['featureSchema'] = FEATURE_DATA.feature_d
     interface_data['classNames'] = FEATURE_DATA.class_names
     interface_data['markovBlanket'] = list(FEATURE_DATA.class_markov_blanket)
-    #INTERFACE_DATA['featureDistribution'] = FEATURE_DATA.feature_distribution
+    interface_data['MI'] = FEATURE_DATA.MI
+    interface_data['consistencyMB'] = causalGraph.decay_score #FEATURE_DATA.feature_distribution
     return jsonify(interface_data)
-
-
 
 def create_names(names_array):
     if len(names_array) >= 2:
@@ -130,16 +135,32 @@ def get_graph_information(data_dict):
     data_dict['isEdgeSelected'] = causalGraph.is_edge_selected()
     data_dict['isNodeSelected'] = causalGraph.is_node_selected()
 
-@app.route("/calculateMI", methods=["POST"])
+@app.route("/calculateScores", methods=["POST"])
 def send_new_calculated_MI():
     if request.method == 'POST':
         data = json.loads(request.data)
         print (data['features'])
+        data['names']
         #feature_indexes = FEATURE_DATA.get_feature_indexes(data['features'])
         FEATURE_DATA.calculate_mutual_information(data['features'])#calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
+        causalGraph.calculate_MB_consistency_score2(data['names'])
         interface_data = dict()
-        interface_data['MIScore'] = FEATURE_DATA.MI
+        interface_data['MI'] = FEATURE_DATA.MI
+        interface_data['consistencyMB'] = causalGraph.decay_score
+        #interface_data['featureData'] = FEATURE_DATA.feature_data
         return jsonify(interface_data)
+
+@app.route("/classify", methods=['POST'])
+def classify():
+    if request.method == 'POST':
+        features = json.loads(request.data)
+        classifier.classify(features['features'])
+        data = dict()
+        data['accuracy'] = classifier.accuracy
+        data['precision'] = classifier.precision
+        data['recall'] = classifier.recall
+    print data
+    return jsonify(data)
 
 @app.route("/nodeSelected", methods=['POST'])
 def get_markov_blanket():

@@ -23,6 +23,7 @@ class CausalGraph:
         self.init_spouse_graph()
         self.find_paths_to_class_node()
         self.get_markov_blanket_nodes()
+        self.calculate_MB_consistency_score2(list(self.class_markov_blanket))
         #self.color_markov_blanket('CLASS')
         #self.color_edges_nodes_to_class_node('AC')
 
@@ -101,13 +102,104 @@ class CausalGraph:
             self.graph[toNode]['nodeFrom'].append(self.graph[fromNode]['nodeIndex'])
             self.graph[fromNode]['nodeTo'].append(self.graph[toNode]['nodeIndex'])
 
+    def calculate_MB_consistency_score(self, feature_names):
+        # have index and names of nodes in the MB, names of selected set
+        # list of uncovered nodes
+        MB_nodes = dict()
+        for node_index in self.markov_blanket_node_indexes:
+            MB_nodes[node_index] = False
+        parent_nodes = self.graph[self.class_node_str]['nodeFrom']
+        node_indexes = self.graph[self.class_node_str]['spouseNode'] + self.graph[self.class_node_str]['nodeTo']
+        found_node_indexes = set() # set of found node indices
+        parent_node_indexes = set()
+        for node_name in feature_names:
+            # parent node covered
+            if len(parent_nodes_indexes) < len(parent_nodes): #if not all parent nodes covered:
+                common_nodes = list(set(parent_nodes) & set(self.graph[node_name]['pathNodes']))
+                for common_node in common_nodes:
+                    MB_nodes[common_node] = True
+                    parent_node_indexes.add(common_node)#add common node to set of found parent nodes
+            # spouse and child node covered
+            if len(found_node_indexes) < len(node_indexes):#not all nodes covered:
+                self.has_path_to_spouse(node_name, node_indexes, found_node_indexes)
+            if len(found_node_indexes) == len(node_indexes) and len(parent_nodes_indexes) == len(parent_nodes):
+                break
+        score = self.calculate_consistency_from_coverage(MB_nodes)
+
+    #def calculate_consistency_from_coverage(self, MB_nodes):
+    #    value_per_node = 1.0/len(self.markov_blanket_node_indexes)
+    #    score = 0.0
+    #    for node_index in MB_nodes.keys():
+    #        if MB_nodes[node_index] == True:
+    #        score += node_value
+    #    return score
+
+    def has_path_to_node_indexes(self, feature_name, node_indexes, found_indexes):
+        for node_index in self.graph[feature_name].nodeTo:
+            if node_index in node_indexes:
+                found_indexes.add(node_index)
+            else:
+                name = self.node_index_to_name_map[node_index]
+                self.has_path_to_spouse(name, node_indexes, found_indexes)
+
+    def calculate_MB_consistency_score2(self, feature_names):
+        decay_factor = 0.9
+        MB_nodes = dict()
+        for node_index in self.markov_blanket_node_indexes:
+            MB_nodes[node_index] = -1
+        node_indexes = self.markov_blanket_node_indexes
+        found_indexes = set()
+        for name in feature_names:
+            self.calculate_steps_to_node_indexes(name, node_indexes, found_indexes, 1, MB_nodes)
+            if len(found_indexes) == len(node_indexes):
+                break
+        print MB_nodes
+        node_value = 1.0/(len(node_indexes))
+        self.score = len(found_indexes) * node_value
+        #print score
+        self.decay_score = self.calculate_score_from_coverage(MB_nodes, decay_factor)
+        #print decay_score
+
+    def calculate_score_from_coverage(self, MB_nodes, decay_factor):
+        score = 0.0
+        node_value = 1.0/(len(self.markov_blanket_node_indexes))
+        for node_index in MB_nodes.keys():
+            if MB_nodes[node_index] > 0:
+                score += decay_factor * MB_nodes[node_index] * node_value
+            elif MB_nodes[node_index] == 0:
+                score += node_value
+            else:
+                score += 0.0
+        return score
+
+        # need to get # of step to the node
+    def calculate_steps_to_node_indexes(self, feature_name, node_indexes, found_indexes, step, MB_nodes):
+        node_index = self.graph[feature_name]['nodeIndex']
+        if node_index in node_indexes:
+            MB_nodes[node_index] = 0
+            found_indexes.add(node_index)
+            return
+        for node_index in self.graph[feature_name]['nodeTo']:
+            if node_index in node_indexes:
+                #print self.node_index_to_name_map[node_index]
+                #print step
+                found_indexes.add(node_index)
+                if MB_nodes[node_index] == -1 or MB_nodes[node_index] > step:
+                    MB_nodes[node_index] = step
+            else:
+                new_step = step + 1
+                name = self.node_index_to_name_map[node_index]
+                self.calculate_steps_to_node_indexes(name, node_indexes, found_indexes, new_step, MB_nodes)
+
     def get_markov_blanket_nodes(self):
         self.class_markov_blanket = set()
+        self.markov_blanket_node_indexes = set()
         all_node_indexes = [self.graph[self.class_node_str]['nodeFrom'], self.graph[self.class_node_str]['nodeTo'], self.graph[self.class_node_str]['spouseNode']]
         for node_indexes in all_node_indexes:
             for node_index in node_indexes:
             #self.graph[self.class_node_str]['nodeFrom']:
                 self.class_markov_blanket.add(self.node_index_to_name_map[node_index])
+                self.markov_blanket_node_indexes.add(node_index)
 
     def init_spouse_graph(self):
         for index, edge in enumerate(self.edges):
@@ -183,6 +275,8 @@ class CausalGraph:
         #current_path = []
         #all_paths = []
         for start_node in self.graph.keys():
+            self.graph[start_node]['pathNodeToTarget'] = dict()
+        for start_node in self.graph.keys():
             self.find_paths_to_class_node_helper(start_node)
         for start_node in self.graph.keys():
             self.graph[start_node]['paths'] = list(self.graph[start_node]['paths'])
@@ -198,12 +292,12 @@ class CausalGraph:
         for node_str in self.graph[start_node_str]['edgeTo'].keys():
             #updated_path = copy.copy(current_path)
             #updated_path.append(self.graph[start_node_str]['edgeTo'][node_str]) # index of new edge
+            #new_step = step + 1
             paths = self.find_paths_to_class_node_helper(node_str)
             #print paths, node_str, start_node_str
             if paths == True:
                 self.graph[start_node_str]['paths'].add(self.graph[start_node_str]['edgeTo'][node_str])
                 self.graph[start_node_str]['pathNodes'].add(self.graph[node_str]['nodeIndex'])
-                #print self.graph[start_node_str]['paths']
                 return self.graph[start_node_str]['paths']
             if len(paths) > 0:
                 #print paths

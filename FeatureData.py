@@ -30,12 +30,18 @@ class FeatureData:
         self.set_default_feature_range()
         self.set_default_feature_display()
         #self.current_feature_set = {}
-        self.MI = 0
-
+        #self.MI = self.calculate_mutual_information(self.class_markov_blanket)
         self.map_feature_name_to_information()
         self.order_by_class_MB()
         self.init_data_no_predictions()
         self.init_mutual_information_dataset()
+        self.init_MI()
+
+    def init_MI(self):
+        indexes = []
+        for i in range(len(self.class_markov_blanket)):
+            indexes.append(i)
+        self.calculate_mutual_information(indexes)
 
     # add index to feature_data['features']
     # create map of feature name to column index in self.features
@@ -61,7 +67,7 @@ class FeatureData:
             self.feature_data['features'][column_index]['index'] = i
 
         j = len(column_indexes)
-        print column_indexes
+        #print column_indexes
         for k in range(self.num_features):
             if k not in column_indexes:
                 print j, k
@@ -382,6 +388,11 @@ class FeatureData:
         #self.calculate_feature_distribution_graph_data()
     ####
 
+    def calculate_scores(self, feature_indexes):
+        print feature_indexes
+    ####
+
+    #### Consistency MB
 
     ##### Mutual Information
     def calculate_mutual_information(self, feature_indexes):

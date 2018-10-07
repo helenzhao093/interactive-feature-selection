@@ -23,8 +23,13 @@ getData()
         isEdgeSelected={data.isEdgeSelected}
         isNodeSelected={data.isNodeSelected}
         featureData={data.featureData}
+        featureSchema={data.featureSchema}
         classNames={data.classNames}
-        markovBlanket={data.markovBlanket}/>,
+        markovBlanket={data.markovBlanket}
+        MI={data.MI}
+        consistencyMB={data.consistencyMB}
+        //consistencyEK={data.consistencyEK}
+        />,
       document.getElementById('root')
     );
   })

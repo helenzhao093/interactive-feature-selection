@@ -43,8 +43,20 @@ class CausalGraph extends React.Component {
 
     var nodes = d3.selectAll('.node')
     var that = this
-    nodes.
-      on("click", that.nodeClicked)
+    nodes
+      .on("click", that.nodeClicked)
+      .on("mousedown", function(d) {
+        console.log(d3.event)
+        var x = d3.event.clientX
+        var y = d3.event.clientY
+        //console.log(x)
+        //console.log(y)
+        console.log(d)
+        console.log(d3.select('.link'))
+        var dragline = d3.select(".link")
+        dragline.classed("hidden", false)
+          //.attr("d", `M${x},${y}L${x},${y}`)
+      })
         //that.props.sendData("/nodeSelected", {"nodeStr" : title}))
 
     var edges = d3.selectAll('.edge')
@@ -54,7 +66,24 @@ class CausalGraph extends React.Component {
         console.log(title)
         that.props.sendData("/edgeSelected", {"edgeStr" : title})
       })*/
-    d3.select('#graph').select('svg').attr("width", 700).attr("height", 500)
+    var svg = d3.select('#graph').select('svg')
+    svg.attr("width", 700).attr("height", 500)
+    svg.append('path')
+      .attr('class', 'link dragline hidden')
+      .attr('d', 'M0,0L0,0');
+
+    nodes
+      .selectAll("ellipse")
+      .attr("rx", 24)
+      .attr("ry", 24)
+      .attr("stroke", "")
+      .attr("fill", "#b9d9ff")
+
+    nodes
+      .selectAll("text")
+      .attr("font-size", 24)
+
+      d3.select('#graph').select('svg').select("#graph0").select("polygon").attr("fill", "#fbfbfb")
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -144,6 +173,7 @@ class CausalGraph extends React.Component {
   }
 
   nodeClicked(element) {
+      if (d3.event.defaultPrevented) return;
       this.state.selectedEdge = ""
       this.removeEdgeClass()
       this.removeNodeClass()
