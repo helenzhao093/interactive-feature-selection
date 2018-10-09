@@ -71,7 +71,7 @@ def sort_features_by_rank(rank, features, names):
         names[i] = temp
     return new_features.tolist(), names
 
-@app.route("/calculate")
+@app.route("/markovGrapj")
 def get_histogram_data():
     # list of list
     #dot_str = init_causal_graph(DATA_FOLDER + 'datafile.csv')
@@ -141,8 +141,8 @@ def send_new_calculated_MI():
         data = json.loads(request.data)
         print (data['features'])
         data['names']
-        #feature_indexes = FEATURE_DATA.get_feature_indexes(data['features'])
         FEATURE_DATA.calculate_mutual_information(data['features'])#calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
+        #FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['features'])
         causalGraph.calculate_MB_consistency_score2(data['names'])
         interface_data = dict()
         interface_data['MI'] = FEATURE_DATA.MI
@@ -154,12 +154,22 @@ def send_new_calculated_MI():
 def classify():
     if request.method == 'POST':
         features = json.loads(request.data)
+
+        FEATURE_DATA.calculate_rank_loss(features['featureRank'], features['features'])
+        FEATURE_DATA.calculate_rank_loss_listwise(features['featureRank'], features['features'])
+
         classifier.classify(features['features'])
         data = dict()
         data['accuracy'] = classifier.accuracy
         data['precision'] = classifier.precision
         data['recall'] = classifier.recall
-    print data
+
+        target = FEATURE_DATA.target
+        class_names = FEATURE_DATA.class_names
+        global HISTOGRAM
+        HISTOGRAM = Histogram(classifier.predicted, target, classifier.proba, class_names)
+
+        data['histogramData'] = HISTOGRAM.Histogram_info
     return jsonify(data)
 
 @app.route("/nodeSelected", methods=['POST'])
@@ -216,9 +226,11 @@ def update_histogram_info_range():
 @app.route("/postHistogramDisplay", methods=['POST'])
 def update_histogram_info_display():
     if request.method == 'POST':
-        new_display = request.get_json(data)
+        new_display = json.loads(request.data)
         HISTOGRAM.update_display(new_display['classification'], new_display['display'])
-    return jsonify(INTERFACE_DATA)
+        data = dict()
+        data['histogramData'] = HISTOGRAM.Histogram_info
+    return jsonify(data)
 
 
 @app.route('/classSelected', methods=['POST'])

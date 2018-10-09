@@ -3,15 +3,16 @@ class ExpertKnowledge extends React.Component {
     super(props)
     var radius = 16
     var circleRadii = [Math.min(this.props.width, this.props.height)/2 - 2*radius]
-    this.props.featureSchema.map(schema =>
+
+    Object.keys(props.featureSchema).map(key =>
       {
-        schema.circleIndex = 0
-        var pt_angle = Math.random() * 2 * Math.PI;
-        var randomRadius = Math.random() * (circleRadii[0] - radius)
-        var pt_radius_sq = randomRadius * randomRadius
-        schema.radius = randomRadius;
-        schema.x = Math.sqrt(pt_radius_sq) * Math.cos(pt_angle);
-        schema.y = Math.sqrt(pt_radius_sq) * Math.sin(pt_angle);
+          props.featureSchema[key].circleIndex = 0
+          var pt_angle = Math.random() * 2 * Math.PI;
+          var randomRadius = Math.random() * (circleRadii[0] - radius)
+          var pt_radius_sq = randomRadius * randomRadius
+          props.featureSchema[key].radius = randomRadius;
+          props.featureSchema[key].x = Math.sqrt(pt_radius_sq) * Math.cos(pt_angle);
+          props.featureSchema[key].y = Math.sqrt(pt_radius_sq) * Math.sin(pt_angle);
       }
     )
     console.log(d3.scaleOrdinal().range(['#e9f2fb', '#cfe1f2', '#a6cde4', '#7bb7d9', '#4694c7']).domain([0,1,2,3,4]))
@@ -67,19 +68,22 @@ class ExpertKnowledge extends React.Component {
             that.state.features[this.id].circleIndex = -1;
             that.state.moves.push({type: "feature", id: this.id, position: {x: x, y: y }, radius: currentRadius, circleIndex: currentIndex})
             that.state.step = that.state.step + 1
+            that.props.updateFeatureRank(this.id, that.state.circleRadii.length) // outside of circles
           }
-          if (radius <= that.state.circleRadii[that.state.circleRadii.length - 1] - that.state.featureRadius && that.state.features[this.id].circleIndex != that.state.circleRadii.length - 1) {
+          if (radius <= that.state.circleRadii[that.state.circleRadii.length - 1] - that.state.featureRadius && that.state.features[this.id].circleIndex != that.state.circleRadii.length - 1) { //smallest circle
             that.state.features[this.id].circleIndex = that.state.circleRadii.length - 1
             that.state.moves.push({type: "feature", id: this.id, position: {x: x, y: y }, radius: currentRadius, circleIndex: currentIndex})
             that.state.step = that.state.step + 1
+            that.props.updateFeatureRank(this.id, 0)
           } else {
             for (var i = that.state.circleRadii.length - 2; i >= 0; i--) {
-              console.log(radius)
-              console.log(that.state.circleRadii[i])
+              //console.log(radius)
+              //console.log(that.state.circleRadii[i])
               if (radius <= that.state.circleRadii[i] - that.state.featureRadius && radius >= that.state.circleRadii[i+1] && that.state.features[this.id].circleIndex != i) {
                 that.state.features[this.id].circleIndex = i;
                 that.state.moves.push({type: "feature", id: this.id, position: {x: x, y: y }, radius: currentRadius, circleIndex: currentIndex })
                 that.state.step = that.state.step + 1
+                that.props.updateFeatureRank(this.id, that.state.circleRadii.length - i - 1)
                 break;
               }
             }
@@ -159,6 +163,9 @@ class ExpertKnowledge extends React.Component {
     console.log(newCircleRadii)
     this.state.moves.push({type: "circle", circleRadii: this.state.circleRadii, features: this.state.features})
     this.state.step = this.state.step + 1
+    Object.keys(this.state.features).map((key) => {
+      this.props.updateFeatureRank(key, this.state.circleRadii.length - this.state.features[key].circleIndex)
+    })
     this.setState({
       circleRadii: newCircleRadii,
     })
@@ -166,17 +173,17 @@ class ExpertKnowledge extends React.Component {
 
   setPointPositions(){
     console.log(this.state.features)
-    this.state.features.map(schema =>
+    Object.keys(this.state.features).map(key =>
       {
-        if (schema.circleIndex != -1 && (schema.radius >= this.state.circleRadii[schema.circleIndex] - this.state.featureRadius || schema.radius <= this.state.circleRadii[schema.circleIndex + 1])) {
-          var pt_angle = Math.random() * 2 * Math.PI;
-          var randomRadius = this.state.circleRadii.length > 1 ?
-                              Math.random() * (this.state.circleRadii[schema.circleIndex] - this.state.circleRadii[schema.circleIndex + 1] - 2*this.state.featureRadius) + (this.state.circleRadii[schema.circleIndex + 1] + this.state.featureRadius)
+        if (this.state.features[key].circleIndex != -1 && (this.state.features[key].radius >= this.state.circleRadii[this.state.features[key].circleIndex] - this.state.featureRadius || this.state.features[key].radius <= this.state.circleRadii[this.state.features[key].circleIndex + 1])) {
+            var pt_angle = Math.random() * 2 * Math.PI;
+            var randomRadius = this.state.circleRadii.length > 1 ?
+                              Math.random() * (this.state.circleRadii[this.state.features[key].circleIndex] - this.state.circleRadii[this.state.features[key].circleIndex + 1] - 2*this.state.featureRadius) + (this.state.circleRadii[this.state.features[key].circleIndex + 1] + this.state.featureRadius)
                               : Math.random() * (this.state.circleRadii[0] - this.state.featureRadius)
-          var pt_radius_sq = randomRadius * randomRadius
-          schema.radius = randomRadius;
-          schema.x = Math.sqrt(pt_radius_sq) * Math.cos(pt_angle);
-          schema.y = Math.sqrt(pt_radius_sq) * Math.sin(pt_angle);
+            var pt_radius_sq = randomRadius * randomRadius
+            this.state.features[key].radius = randomRadius;
+            this.state.features[key].x = Math.sqrt(pt_radius_sq) * Math.cos(pt_angle);
+            this.state.features[key].y = Math.sqrt(pt_radius_sq) * Math.sin(pt_angle);
       }
     })
   }
@@ -191,17 +198,17 @@ class ExpertKnowledge extends React.Component {
         <button onClick={this.undo}>{"Undo"}</button>
       </div>
       <svg width={this.state.width} height={this.state.height}>
-      <g transform={`translate(${this.state.width/2},${this.state.height/2})`} >
+      <g id={"expert-knowledge"} transform={`translate(${this.state.width/2},${this.state.height/2})`} >
         {
           this.state.circleRadii.map((radius, index) =>
             <circle r={radius} fill={this.state.colorFunction(index)} stroke={"black"} stroke-width={2}/>
           )
         }
         {
-          this.state.features.map((feature, index) =>
-            <g className={"feature-node"} id={index} transform={`translate(${feature.x},${feature.y})`}>
-              <ellipse id={index} rx={this.state.featureRadius} ry={this.state.featureRadius} fill={"#b9d9ff"}/>
-              <text id={index} y={4} textAnchor={"middle"}>{feature.name}</text>
+          Object.keys(this.state.features).map((key, index) =>
+            <g className={"feature-node"} id={key} transform={`translate(${this.state.features[key].x},${this.state.features[key].y})`}>
+              <ellipse id={key} rx={this.state.featureRadius} ry={this.state.featureRadius} fill={"#b9d9ff"}/>
+              <text id={key} y={4} textAnchor={"middle"}>{this.state.features[key].name}</text>
             </g>)
         }
       </g>

@@ -94,7 +94,7 @@ class HistogramBinHorizontal extends React.Component {
             className={`FN${bar.className}`}
             width={this.props.xScaleCount(bar.count) - this.props.fnStrokeWidth}
             height={this.props.yScale.bandwidth() - this.props.fnStrokeWidth}
-            x={this.props.xScale(-bar.previousSum - bar.count) - this.props.fnStrokeWidth}
+            x={this.props.xScale(0) - this.props.xScaleCount(bar.previousSum + bar.count) }
             y={this.props.yScale(bar.bin) + this.props.fnStrokeWidth/2}
             fill={"white"} stroke={this.props.color(bar.className)} stroke-width={this.props.fnStrokeWidth}
             onMouseEnter={() => this.props.onMouseEnter(bar.count,
@@ -186,7 +186,7 @@ class Histogram extends React.Component {
       />)
 
     return (
-      <div className={"histogram-div"}>
+      <div className={"histogram-div"} >
         <HistogramToolTip data={this.state.tooltip} />
         <svg className={"histogram"} width={this.props.size[0]} height={this.props.size[1]}>
           <g transform={`translate(${this.props.margin.left},${this.props.margin.top})`}>

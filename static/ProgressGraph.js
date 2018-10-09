@@ -67,7 +67,6 @@ class ProgressGraph extends React.Component {
       height: height,
       min: 1,
       max: 0,
-      selectedIndex: 0,
     }
     this.initializeMinMax = this.initializeMinMax.bind(this)
     this.getData = this.getData.bind(this)
@@ -83,22 +82,35 @@ class ProgressGraph extends React.Component {
         var xPosition = d3.mouse(this)[0] - that.state.margin.left
         var keys = Object.keys(that.props.consistencyScores)
         //console.log(keys)
-        var numDataPoints = (that.props.currentScores) ? that.props.consistencyScores[keys[0]].length + 1 : that.props.consistencyScores[keys[0]].length
+        var numDataPoints;
+        if (that.props.currentScores) {
+          if (that.props.currentScores[keys[0]] >= 0) {
+            numDataPoints = that.props.consistencyScores[keys[0]].length + 1
+          } else {
+            numDataPoints = that.props.consistencyScores[keys[0]].length
+          }
+        } else{
+          numDataPoints = that.props.consistencyScores[keys[0]].length
+        }
+
+        //}? that.props.consistencyScores[keys[0]].length + 1 : that.props.consistencyScores[keys[0]].length
+        //console.log(that.props.currentScores)
         //console.log(numDataPoints)
-        var range = (that.props.size[0] - that.state.margin.left - that.state.margin.right) / (numDataPoints - 1)
+        var range = (that.props.size[0] - that.state.margin.left - that.state.margin.right) / (that.props.xAxisLength - 1)
         //console.log(xPosition)
         //console.log(range)
         var mouseIndex = ((Math.ceil(xPosition/range) - xPosition/range) < 0.5) ? Math.ceil(xPosition/range) : Math.floor(xPosition/range)
-        //console.log(mouseIndex)
+
         if (mouseIndex != that.props.selectedIndex) {
-          that.setState({
+          that.props.updateIndex(mouseIndex)
+          /*that.setState({
             selectedIndex: mouseIndex
-          })
+          })*/
         }
       })
       .on("mousedown", function(d) {
-        console.log(that.state.selectedIndex)
-        that.props.goToStep(that.state.selectedIndex)
+        console.log(that.props.selectedIndex)
+        that.props.goToStep(that.props.selectedIndex)
       })
   }
 
@@ -155,12 +167,20 @@ class ProgressGraph extends React.Component {
     //var MB = this.props.consistencyMB.splice()
     //MB.push(this.props.currentMB)
     //var EK = this.props.consistencyEK
-    var xScaleDomain = (scores[keys[0]].length > 1) ?
-        scores[keys[0]].map((score, index) => index) :
-        [0, 1]
-    var xScaleRange = (scores[keys[0]].length > 1) ?
-      scores[keys[0]].map((score, index) => this.state.width/(scores[keys[0]].length - 1) * index) :
-      [0, this.state.width]
+    var xScaleDomain = []
+    var xScaleRange = []
+    for (var i = 0; i < this.props.xAxisLength; i++) {
+      xScaleDomain.push(i)
+      xScaleRange.push( this.state.width/(this.props.xAxisLength - 1) * i )
+    }
+    console.log(this.props.xAxisLength)
+    console.log(xScaleDomain)
+    //var xScaleDomain = (scores[keys[0]].length > 1) ?
+    //    scores[keys[0]].map((score, index) => index) :
+    //    [0, 1]
+    //var xScaleRange = (scores[keys[0]].length > 1) ?
+    //  scores[keys[0]].map((score, index) => this.state.width/(scores[keys[0]].length - 1) * index) :
+    //  [0, this.state.width]
     //console.log(xScaleDomain)
     //console.log(xScaleRange)
     var xScale = d3.scaleOrdinal().domain(xScaleDomain).range(xScaleRange)
@@ -199,9 +219,9 @@ class ProgressGraph extends React.Component {
           }
           <g className={"focus"} style={{fontSize: 11, fontFamily: "san-serif"}}>
             {keys.map((key, index) =>
-              <g transform={`translate(${xScale(this.state.selectedIndex)},${yScale(scores[key][this.state.selectedIndex])})`}>
+              <g transform={`translate(${xScale(this.props.selectedIndex)},${yScale(scores[key][this.props.selectedIndex])})`}>
                 <circle r={5} fill={this.props.colors[index]}/>
-                <text x={9}>{scores[key][this.state.selectedIndex]}</text>
+                <text x={9}>{scores[key][this.props.selectedIndex]}</text>
               </g>)
             }
           </g>

@@ -36,7 +36,7 @@ class Histogram:
         self.Histogram_info['range'] = [1.0, 0.0]
 
         self.create_histogram_data()
-        self.create_summary_data()
+        #self.create_summary_data()
 
     def set_default_class_display(self):
         for classification in Histogram.CLASSIFICATIONS:

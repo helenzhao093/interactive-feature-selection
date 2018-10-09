@@ -10,13 +10,13 @@ class FeatureData:
     CLASSIFICATIONS = [FP_KEY, FN_KEY, TP_KEY, TN_KEY]
     DEFAULT_NUM_BINS = 10
 
-    def __init__(self, predicted, target, features, proba, feature_info, markov_blanket_index, class_names):
+    def __init__(self, predicted, target, features, proba, feature_info, markov_blanket, class_names):
         self.predicted = predicted
         self.target = target
         self.features = features
         self.num_examples = len(self.features)
         self.proba = proba
-        self.class_markov_blanket = markov_blanket_index
+        self.class_markov_blanket = markov_blanket
         self.class_names = class_names
         self.num_classes = len(class_names)
         self.num_bins = FeatureData.DEFAULT_NUM_BINS
@@ -452,3 +452,63 @@ class FeatureData:
 
     def sort_selected_features(self, X):
         return X[np.lexsort(np.transpose(X)[::-1])]
+
+    #### RANKING
+    def calculate_rank_loss(self, feature_name_to_rank_map, selected_features_names):
+        # create map of feature rank to feature name
+        print 'feature name to rank'
+        print feature_name_to_rank_map
+        loss = 0.0
+        feature_rank_to_feature_name = dict()
+        for feature_name in feature_name_to_rank_map.keys():
+            rank = feature_name_to_rank_map[feature_name]
+            if rank not in feature_rank_to_feature_name:
+                feature_rank_to_feature_name[rank] = []
+            feature_rank_to_feature_name[rank].append(feature_name)
+        print 'feature rank to feature name'
+        print feature_rank_to_feature_name
+        rank_keys = feature_rank_to_feature_name.keys()
+        for key in rank_keys:
+            for feature_s in feature_rank_to_feature_name[key]:
+                feature_s_value = self.feature_selection_function(selected_features_names, feature_s)
+                for rank in range(key + 1, len(rank_keys)):
+                    for feature_j in feature_rank_to_feature_name[rank]:
+                        feature_j_value = self.feature_selection_function(selected_features_names, feature_j)
+                        loss += self.logistic_function(feature_s_value - feature_j_value)
+        print ('pairwise loss: ' + str(loss))
+        return loss
+
+    def calculate_rank_loss_listwise(self, feature_name_to_rank_map, selected_features_names):
+        loss = 0.0
+        feature_rank_to_feature_name = dict()
+        for feature_name in feature_name_to_rank_map.keys():
+            rank = feature_name_to_rank_map[feature_name]
+            if rank not in feature_rank_to_feature_name:
+                feature_rank_to_feature_name[rank] = []
+            feature_rank_to_feature_name[rank].append(feature_name)
+
+        rank_keys = feature_rank_to_feature_name.keys()
+        for key in rank_keys:
+            for feature_s in feature_rank_to_feature_name[key]:
+                feature_s_value = - 1 * self.feature_selection_function(selected_features_names, feature_s)
+                current_loss = 0.0
+                for rank in range(key + 1, len(rank_keys)):
+                    for feature_j in feature_rank_to_feature_name[rank]:
+                        feature_j_value = self.feature_selection_function(selected_features_names, feature_j)
+                        current_loss += math.exp(feature_j_value)
+                feature_s_value += current_loss
+            loss += feature_s_value
+        print ('list wise loss: ' + str(loss))
+        return loss
+        # for rank in all features
+            # for j in all features whose importance is less than feature s
+                # feature selection (s) - feature selection (j)
+                # logistic function of value
+    def logistic_function(self, value):
+        # log(1+e^-x)
+        return math.log(1 + math.exp(-value), 2)
+
+    def feature_selection_function(self, selected_features_names, feature):
+        if feature in selected_features_names:
+            return 1
+        return 0

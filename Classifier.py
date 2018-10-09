@@ -31,6 +31,9 @@ class Classifier:
             y_pred = self.clf.predict(X_test)
             precision.append(precision_score(y_test, y_pred, average='weighted'))
             recall.append(recall_score(y_test, y_pred, average='weighted'))
+        self.predicted = self.clf.predict(X)
+        self.proba = self.clf.predict_proba(X)
+        #print self.predictions
         self.set_average_scores(accurary, precision, recall)
 
     def set_average_scores(self, accuracy, precision, recall):

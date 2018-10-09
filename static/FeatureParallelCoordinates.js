@@ -40,7 +40,7 @@ class Axis extends React.Component {
 
 class FeatureParallelCoordinates extends React.Component {
   constructor(props) {
-    //console.log(props)
+    console.log(props)
     super(props)
     var margin = {left: 10, right: 30, top: 20, bottom:10}
     var width = props.size[0] - margin.left - margin.right
@@ -65,15 +65,7 @@ class FeatureParallelCoordinates extends React.Component {
 
     //const displayFeatures = props.features
     //console.log(this.props.features)
-    const xScaleRange = this.props.features.map((feature, index) =>
-      width/(this.props.features.length - 1) * index
-    )
-    const xScaleDomain = this.props.features.map((feature, index) =>
-      feature.name
-    )
-    const xScale = d3.scaleOrdinal()
-        .domain(xScaleDomain)
-        .range(xScaleRange)
+
 
     var yScalesDisplay = {}
     for (var i = 0; i < this.props.features.length; i++) {
@@ -91,30 +83,17 @@ class FeatureParallelCoordinates extends React.Component {
       d3.scaleLinear().domain(feature.range).range([0, height])
     )
 
-    var draw = d3.line()
-      .x(function(d) {
-        return xScale(d[0])
-      })
-      .y(function(d) {
-        return yScalesDisplay[d[0]](d[1])
-      })
+
 
     this.state = {
       margin: margin,
       width: width,
       height: height,
-      displayFeatures: this.props.features,
-      xScale: xScale,
-      xScaleDomain: xScaleDomain,
       yScales: yScales,
-      yScalesDisplay: yScalesDisplay,
-      draw: draw,
-      dragging: {}
+      yScalesDisplay: yScalesDisplay
     }
 
     this.path = this.path.bind(this)
-    this.position = this.position.bind(this)
-    console.log(this.state)
   }
 
   componentDidMount() {
@@ -128,47 +107,7 @@ class FeatureParallelCoordinates extends React.Component {
         d3.select(this).attr('transform', function(d) { return 'translate(' + d3.event.x + ")" })
       })
       .on("end", function(d) {
-
-        d3.select(this).attr('transform', function(d) { return 'translate(' + that.state.xScale(this.id) + ")" })
-        const attrId = this.id
-        that.state.dragging[attrId] = d3.event.x
-        var oldFeatureNames = that.state.displayFeatures.map((feature) =>
-          feature.name
-        )
-        var features = that.state.displayFeatures
-
-        features.sort(function(a, b) { return that.position(a.name) - that.position(b.name)})
-
-        var allFeatureIndexes = features.map((feature) =>
-          feature.index
-        )
-        var allFeatureNames = features.map((feature) =>
-          feature.name
-        )
-        //console.log(oldFeatureNames)
-        //console.log(allFeatureNames)
-        delete that.state.dragging[attrId]
-
-        if (JSON.stringify(oldFeatureNames) != JSON.stringify(allFeatureNames)) {
-
-          var xScaleDomain = features.map((feature, index) =>
-            feature.name
-          )
-          var xScale = that.state.xScale.domain(xScaleDomain)
-          //console.log(xScaleDomain)
-          const stopIndex = allFeatureIndexes.indexOf(features.length - 1);
-          //console.log(stopIndex)
-          allFeatureIndexes.splice(stopIndex)
-          allFeatureNames.splice(stopIndex)
-          //console.log(features)
-          //console.log(xScaleDomain)
-          that.props.sendData("/calculateScores", { features: allFeatureIndexes, names: allFeatureNames, featureOrder: features })
-          that.setState({
-            xScale: xScale,
-            xScaleDomain: xScaleDomain,
-            displayFeatures: features
-          })
-        }
+        that.props.featureAxisOnEnd(this)
       })
     )
     //{this.props.data.map((data, index) =>
@@ -235,39 +174,43 @@ class FeatureParallelCoordinates extends React.Component {
     selection.exit().remove()*/
   }
 
-  position(d) {
-    var value = this.state.dragging[d]
-    var a = value == null ? this.state.xScale(d) : value;
-    //console.log(a)
-    return value == null ? this.state.xScale(d) : value;
-  }
 
-  path(data, drawFunction) {
+
+  path(data) {
     //console.log(drawFunction)
     //var drawData = data.map((point, index) =>
     //  [this.state.featureNames[index], point]
     //)
     //console.log(this.state.displayFeatures)
+    var xScale = this.props.xScale
+    var yScalesDisplay = this.state.yScalesDisplay
+    var draw = d3.line()
+      .x(function(d) {
+        return xScale(d[0])
+      })
+      .y(function(d) {
+        return yScalesDisplay[d[0]](d[1])
+      })
+
     var drawData = []
 
-    for (var i = 0; i < this.state.displayFeatures.length; i++) {
-      if (this.state.displayFeatures[i].name == "BOUNDARY") {
+    for (var i = 0; i < this.props.features.length; i++) {
+      if (this.props.features[i].name == "BOUNDARY") {
         break;
       } else {
-        drawData.push([this.state.displayFeatures[i].name, data[this.state.displayFeatures[i].index]])
+        drawData.push([this.props.features[i].name, data[this.props.features[i].index]])
       }
     }
     /*i in this.state.displayFeatures.map((feature) =>
       [feature.name, data[feature.index]]
     )*/
-    //console.log(drawData)
     //console.log(this.state.xScale(0), this.state.yScales[0](data[0]))
-    return drawFunction(drawData)
+    return draw(drawData)
   }
 
   render(){
     console.log('render feature parallels')
-    console.log(this.state.displayFeatures)
+    //console.log(this.state.displayFeatures)
     //console.log(this.state.xScale('e'))
     /*var displayData = this.props.featureValues.filter((feature, index) =>
       this.props.dataIndex[index] == true
@@ -280,17 +223,22 @@ class FeatureParallelCoordinates extends React.Component {
     console.log(displayTarget)
     */
 
+    //var xScaleDomain = this.props.features.map((feature, index) =>
+    //  feature.name
+    //)
+    //var xScale = this.state.xScale.domain(xScaleDomain)
+
     return (
       <svg className={'feature-parallels-svg'} width={this.props.size[0]} height={this.props.size[1]}>
         <g className={'feature-parallels'} transform={`translate(${this.state.margin.left},${this.state.margin.top})`} >
         <g className={'data-paths'}>
           {this.props.data.map((data, index) =>
-            <path d={this.path(data.features, this.state.draw)} fill={"none"}
+            <path d={this.path(data.features)} fill={"none"}
             stroke={this.props.colorFunction(data.target)} stroke-width={3}/>)
           }
         </g>
-        {this.state.displayFeatures.map((feature, index) =>
-            <Axis name={feature.name} textname={feature.name} axis={this.state.yScalesDisplay[feature.name]} transform={`translate(${this.state.xScale(feature.name)})`}/>
+        {this.props.features.map((feature, index) =>
+            <Axis name={feature.name} textname={feature.name} axis={this.state.yScalesDisplay[feature.name]} transform={`translate(${this.props.xScale(feature.name)})`}/>
         )}
         </g>
       </svg>
