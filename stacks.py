@@ -71,7 +71,7 @@ def sort_features_by_rank(rank, features, names):
         names[i] = temp
     return new_features.tolist(), names
 
-@app.route("/markovGrapj")
+@app.route("/causalGraph")
 def get_histogram_data():
     # list of list
     #dot_str = init_causal_graph(DATA_FOLDER + 'datafile.csv')
@@ -82,7 +82,6 @@ def get_histogram_data():
     proba = convert_csv_to_array(DATA_FOLDER + 'proba.csv', False, csv.QUOTE_NONNUMERIC)
     features = convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
     class_names = convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
-
     target = [d[0] for d in target]
     predicted = [d[0] for d in predicted]
     class_names = class_names[0]
@@ -108,18 +107,43 @@ def get_histogram_data():
     interface_data['graph'] = causalGraph.graph
     #INTERFACE_DATA['dotSrc'] = causalGraph.dot_src
     #INTERFACE_DATA['graph'] = causalGraph.graph
-    #INTERFACE_DATA['markovBlanketSelected'] = causalGraph.markov_blanket_selected
+    interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
 
     #INTERFACE_DATA['histogramData'] = HISTOGRAM.Histogram_info
     #INTERFACE_DATA['summaryData'] = HISTOGRAM.summary_data
     interface_data['featureData'] = FEATURE_DATA.feature_data
-    interface_data['featureSchema'] = FEATURE_DATA.feature_data['features']
-    #interface_data['featureSchema'] = FEATURE_DATA.feature_d
+    #interface_data['featureSchema'] = FEATURE_DATA.feature_data['features']
+    ##interface_data['featureSchema'] = FEATURE_DATA.feature_d
     interface_data['classNames'] = FEATURE_DATA.class_names
-    interface_data['markovBlanket'] = list(FEATURE_DATA.class_markov_blanket)
-    interface_data['MI'] = FEATURE_DATA.MI
-    interface_data['consistencyMB'] = causalGraph.decay_score #FEATURE_DATA.feature_distribution
+    #interface_data['markovBlanket'] = list(FEATURE_DATA.class_markov_blanket)
+    #interface_data['MI'] = FEATURE_DATA.MI
+    #interface_data['consistencyMB'] = causalGraph.decay_score #FEATURE_DATA.feature_distribution
     return jsonify(interface_data)
+
+@app.route("/redrawGraph", methods=["POST"])
+def remove_nodes_from_causal_graph():
+    if request.method == 'POST':
+        data = json.loads(request.data)
+        causalGraph.recalculate_causal_graph(data['features'], data['removedEdges'])
+        interface_data = dict()
+        get_graph_information(interface_data)
+        interface_data['graph'] = causalGraph.graph
+        return jsonify(interface_data)
+
+@app.route('/addRemovedNode', methods=["POST"])
+def add_removed_node():
+    if request.method == 'POST':
+        data = json.loads(request.data)
+        causalGraph.remove_node_from_removed_nodes(data['node'])
+        interface_data = dict()
+        return jsonify(interface_data)
+
+@app.route('/clearGraph', methods=["POST"])
+def clear_removed_node():
+    if request.method == 'POST':
+        causalGraph.clear_removed_node()
+        interface_data = dict()
+        return jsonify(interface_data)
 
 def create_names(names_array):
     if len(names_array) >= 2:
@@ -141,12 +165,16 @@ def send_new_calculated_MI():
         data = json.loads(request.data)
         print (data['features'])
         data['names']
+        rank_loss = FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['names'])
+        rank_loss_listwise = FEATURE_DATA.calculate_rank_loss_listwise(data['featureRank'], data['names'])
+
         FEATURE_DATA.calculate_mutual_information(data['features'])#calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
         #FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['features'])
         causalGraph.calculate_MB_consistency_score2(data['names'])
         interface_data = dict()
         interface_data['MI'] = FEATURE_DATA.MI
         interface_data['consistencyMB'] = causalGraph.decay_score
+        interface_data['rankLoss'] = rank_loss_listwise
         #interface_data['featureData'] = FEATURE_DATA.feature_data
         return jsonify(interface_data)
 
@@ -154,9 +182,6 @@ def send_new_calculated_MI():
 def classify():
     if request.method == 'POST':
         features = json.loads(request.data)
-
-        FEATURE_DATA.calculate_rank_loss(features['featureRank'], features['features'])
-        FEATURE_DATA.calculate_rank_loss_listwise(features['featureRank'], features['features'])
 
         classifier.classify(features['features'])
         data = dict()

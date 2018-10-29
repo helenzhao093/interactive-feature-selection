@@ -1,34 +1,37 @@
 class Tabs extends React.Component {
 
-    constructor(props, context) {
-        super(props, context);
-        this.state = {
+    constructor(props) {
+        super(props);
+        console.log(props)
+        /*this.state = {
             activeTabIndex: 0
         };
-        this.handleTabClick = this.handleTabClick.bind(this);
+        this.handleTabClick = this.handleTabClick.bind(this); */
     }
 
-    handleTabClick(tabIndex) {
+    /*handleTabClick(tabIndex) {
         this.setState({
             activeTabIndex: tabIndex === this.state.activeTabIndex ? this.props.defaultActiveTabIndex : tabIndex
         });
-    }
+    }*/
 
     // Encapsulate <Tabs/> component API as props for <Tab/> children
     renderChildrenWithTabsApiAsProps() {
         return React.Children.map(this.props.children, (child, index) => {
             return React.cloneElement(child, {
-                onClick : this.handleTabClick,
+                onClick : this.props.handleTabClick,
                 tabIndex: index,
-                isActive: index === this.state.activeTabIndex
+                isActive: index === this.props.activeTabIndex
             });
         });
     }
 
     // Render current active tab content
     renderActiveTabContent() {
-        const {children} = this.props;
-        const {activeTabIndex} = this.state;
+        const children = this.props.children
+        console.log(children)
+        const activeTabIndex = this.props.activeTabIndex;
+        console.log( children[activeTabIndex])
         if(children[activeTabIndex]) {
             return children[activeTabIndex].props.children;
         }

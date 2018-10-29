@@ -1,26 +1,36 @@
 class ExpertKnowledge extends React.Component {
   constructor(props) {
     super(props)
-    var radius = 16
-    var circleRadii = [Math.min(this.props.width, this.props.height)/2 - 2*radius]
+    console.log(props.features)
+    var radius = 16;
+    const numberCircle = 2;
+    const largeCircleRadius = Math.min(this.props.width, this.props.height)/2 - 2*radius;
 
-    Object.keys(props.featureSchema).map(key =>
+    var circleRadii = []
+    for (var i = numberCircle; i > 0; i--) {
+      circleRadii.push(largeCircleRadius/numberCircle * i)
+    }
+
+    Object.keys(props.features).map(key =>
       {
-          props.featureSchema[key].circleIndex = 0
           var pt_angle = Math.random() * 2 * Math.PI;
-          var randomRadius = Math.random() * (circleRadii[0] - radius)
-          var pt_radius_sq = randomRadius * randomRadius
-          props.featureSchema[key].radius = randomRadius;
-          props.featureSchema[key].x = Math.sqrt(pt_radius_sq) * Math.cos(pt_angle);
-          props.featureSchema[key].y = Math.sqrt(pt_radius_sq) * Math.sin(pt_angle);
+          var randomRadius;
+          if (props.features[key].circleIndex == 0) {
+            randomRadius = Math.random() * (circleRadii[props.features[key].circleIndex] - circleRadii[props.features[key].circleIndex + 1] - 2 * radius) + (circleRadii[props.features[key].circleIndex + 1] + radius);
+          } else {
+            randomRadius = Math.random() * (circleRadii[props.features[key].circleIndex] - radius);
+          }
+          var pt_radius_sq = randomRadius * randomRadius;
+          props.features[key].radius = randomRadius;
+          props.features[key].x = Math.sqrt(pt_radius_sq) * Math.cos(pt_angle);
+          props.features[key].y = Math.sqrt(pt_radius_sq) * Math.sin(pt_angle);
       }
     )
-    console.log(d3.scaleOrdinal().range(['#e9f2fb', '#cfe1f2', '#a6cde4', '#7bb7d9', '#4694c7']).domain([0,1,2,3,4]))
-    //console.log(d3.schemeBlues[9]);
+
     var colorFunction = d3.scaleOrdinal().range(['#e9f2fb', '#cfe1f2', '#a6cde4', '#7bb7d9', '#4694c7', '#2574b5', '#1059a1', '#083979']).domain([0,1,2,3,4,5,6,7])
 
     this.state = {
-      features: this.props.featureSchema,
+      features: this.props.features,
       featureRadius: radius,
       circleRadii: circleRadii,
       width: this.props.width,
@@ -28,13 +38,11 @@ class ExpertKnowledge extends React.Component {
       colorFunction: colorFunction,
       moves: [],
       step: 0
-      //featureRankChanged: false
-    }
-    this.addCircle = this.addCircle.bind(this)
-    this.calculateNewCircleRadius = this.calculateNewCircleRadius.bind(this)
-    this.setPointPositions = this.setPointPositions.bind(this)
-    this.undo = this.undo.bind(this)
-    console.log(this.state)
+    };
+    this.addCircle = this.addCircle.bind(this);
+    this.calculateNewCircleRadius = this.calculateNewCircleRadius.bind(this);
+    this.setPointPositions = this.setPointPositions.bind(this);
+    this.undo = this.undo.bind(this);
   }
 
   componentDidMount() {
@@ -165,17 +173,21 @@ class ExpertKnowledge extends React.Component {
     this.state.step = this.state.step + 1
     Object.keys(this.state.features).map((key) => {
       this.props.updateFeatureRank(key, this.state.circleRadii.length - this.state.features[key].circleIndex)
-    })
+    });
+    this.props.updateNumRanks(newCircleRadii.length);
     this.setState({
       circleRadii: newCircleRadii,
     })
   }
 
   setPointPositions(){
-    console.log(this.state.features)
+    //console.log(this.state.features)
     Object.keys(this.state.features).map(key =>
       {
-        if (this.state.features[key].circleIndex != -1 && (this.state.features[key].radius >= this.state.circleRadii[this.state.features[key].circleIndex] - this.state.featureRadius || this.state.features[key].radius <= this.state.circleRadii[this.state.features[key].circleIndex + 1])) {
+        if (this.state.features[key].circleIndex != -1 &&
+          (this.state.features[key].radius >= this.state.circleRadii[this.state.features[key].circleIndex] - this.state.featureRadius
+            || this.state.features[key].radius <= this.state.circleRadii[this.state.features[key].circleIndex + 1])) {
+
             var pt_angle = Math.random() * 2 * Math.PI;
             var randomRadius = this.state.circleRadii.length > 1 ?
                               Math.random() * (this.state.circleRadii[this.state.features[key].circleIndex] - this.state.circleRadii[this.state.features[key].circleIndex + 1] - 2*this.state.featureRadius) + (this.state.circleRadii[this.state.features[key].circleIndex + 1] + this.state.featureRadius)

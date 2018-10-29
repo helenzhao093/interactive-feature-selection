@@ -195,8 +195,6 @@ class FeatureData:
                 self.add_data(i, target, FeatureData.FN_KEY, predicted, target, feature)
                 self.add_data(i, predicted, FeatureData.FP_KEY, predicted, target, feature)
 
-
-
     #### FEATURE DISTRIBUTION METHODS
     def init_feature_distributions(self):
         self.feature_distribution = []
@@ -215,7 +213,6 @@ class FeatureData:
         for bin_num in range(num_bins):
             feature_dict['data'].append(self.init_bin(bin_num))
         return feature_dict
-
 
     def init_bin(self, bin_num):
         bin_dict = dict()
@@ -479,6 +476,7 @@ class FeatureData:
         return loss
 
     def calculate_rank_loss_listwise(self, feature_name_to_rank_map, selected_features_names):
+        print selected_features_names
         loss = 0.0
         feature_rank_to_feature_name = dict()
         for feature_name in feature_name_to_rank_map.keys():
@@ -496,6 +494,7 @@ class FeatureData:
                     for feature_j in feature_rank_to_feature_name[rank]:
                         feature_j_value = self.feature_selection_function(selected_features_names, feature_j)
                         current_loss += math.exp(feature_j_value)
+                        #print feature_j, feature_j_value, current_loss
                 feature_s_value += current_loss
             loss += feature_s_value
         print ('list wise loss: ' + str(loss))
@@ -510,5 +509,5 @@ class FeatureData:
 
     def feature_selection_function(self, selected_features_names, feature):
         if feature in selected_features_names:
-            return 1
-        return 0
+            return 1.0
+        return 0.0

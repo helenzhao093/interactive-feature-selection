@@ -18,7 +18,9 @@ class CausalGraph:
         self.class_node_color = "\"0.000 1.000 0.750\"" #0.650 0.200 1.000
         self.selected_node_color = "yellow"
         self.edge_selected_color = "\"0.650 0.200 1.000\""
-        self.init_causal_graph_dot_src(datapath)
+        self.removed_nodes = []
+        self.init_dataframe(datapath)
+        self.init_causal_graph_dot_src(self.df)
         self.edges_to_graph_dict()
         self.init_spouse_graph()
         self.find_paths_to_class_node()
@@ -27,8 +29,68 @@ class CausalGraph:
         #self.color_markov_blanket('CLASS')
         #self.color_edges_nodes_to_class_node('AC')
 
-    def init_causal_graph_dot_src(self, datapath):
+    def init_dataframe(self, datapath):
         df = pd.read_csv(datapath)
+        self.df = df
+
+    def recalculate_causal_graph(self, feature_name_array, removed_edges):
+        for feature_name in feature_name_array:
+            self.removed_nodes.append(feature_name)
+        df = self.df.drop(self.removed_nodes, axis=1)
+        self.init_causal_graph_dot_src(df)
+        self.edges_to_graph_dict()
+        self.init_spouse_graph()
+        self.find_paths_to_class_node()
+        self.get_markov_blanket_nodes()
+        self.add_removed_node_to_dotlines(self.removed_nodes)
+        self.remove_edges_from_dot_lines_and_graph(removed_edges)
+        self.dot_src = self.lines_to_dot_src(self.dot_src_lines)
+        self.add_node_to_graph_dict(feature_name_array)
+
+    def remove_node_from_removed_nodes(self, node):
+        for i, removed_node in enumerate(self.removed_nodes):
+            if node == removed_node:
+                del self.removed_nodes[i]
+
+    def clear_removed_node(self):
+        self.removed_nodes = []
+
+    def remove_edges_from_dot_lines_and_graph(self, removed_edges):
+        for edge in removed_edges:
+            node_from_str = edge[0]
+            node_to_str = edge[1]
+            if node_to_str in self.graph[node_from_str]['edgeTo'].keys():
+                index = self.graph[node_from_str]['edgeTo'][node_to_str]
+                self.dot_src_lines[index] = ""
+                self.graph[node_from_str]['edgeTo'].pop(node_to_str, None)
+                node_from_index = self.graph[node_from_str]['nodeIndex']
+                node_to_index = self.graph[node_to_index]['nodeIndex']
+
+                for i, value in enumerate(self.graph[node_from_str]['nodeTo']):
+                    if value == node_to_index:
+                        del self.graph[node_from_str]['nodeTo'][i]
+                for j, value in enumerate(self.graph[node_to_str]['nodeFrom']):
+                    if value == node_from_index:
+                        del self.graph[node_to_str]['nodeFrom'][i]
+                        del self.graph[node_to_str]['edgeFrom'][i]
+            #else:
+            #    index = self.graph[node1]['edgeTo'][node2]
+
+
+
+    def add_node_to_graph_dict(self, feature_name_array):
+        for feature_name in feature_name_array:
+            self.create_node_dict(feature_name, self.node_index)
+            self.node_index += 1
+            self.graph[feature_name]['paths'] = []
+            self.graph[feature_name]['pathNodes'] = []
+
+    def add_removed_node_to_dotlines(self, feature_name_array):
+        for feature_name in feature_name_array:
+            self.dot_src_lines.insert(len(self.dot_src_lines) - 1, feature_name)
+        print self
+
+    def init_causal_graph_dot_src(self, df):
         p = pc()
         p.start_vm()
         tetrad = s.tetradrunner()
@@ -39,7 +101,7 @@ class CausalGraph:
         dot_src = self.trim_init_src_string(dot_src)
         self.dot_src_lines = self.dot_src_to_lines(dot_src)
         self.insert_node_attr_dot_src()
-        self.insert_class_node_color()
+        #self.insert_class_node_color()
         self.dot_src = self.lines_to_dot_src(self.dot_src_lines)
         self.init_dot_src = self.dot_src
         self.uncolored_dot_src = self.init_dot_src
@@ -58,45 +120,37 @@ class CausalGraph:
     def lines_to_dot_src(self, lines):
         return "\n".join(lines)
 
+    def create_node_dict(self, node_name, node_index):
+        self.graph[node_name] = dict()
+        self.graph[node_name]['edgeTo'] = dict()
+        self.graph[node_name]['nodeIndex'] = node_index
+        self.node_index_to_name_map[node_index] = node_name
+        self.graph[node_name]['edgeFrom'] = []
+        self.graph[node_name]['nodeFrom'] = []
+        self.graph[node_name]['nodeTo'] = []
+        self.graph[node_name]['spouseEdge'] = []
+        self.graph[node_name]['spouseNode'] = []
+        self.graph[node_name]['paths'] = set()
+        self.graph[node_name]['pathNodes'] = set()
+        self.graph[node_name]['visited'] = False
+
     def edges_to_graph_dict(self):
         self.graph = dict()
         self.node_index_to_name_map = dict()
         #for node in self.nodes:
         #    self.graph[str(node)] = dict()
-        node_index = 1
+        self.node_index = 1
         for index, edge in enumerate(self.edges):
             dot_src_line_index = index + self.edge_to_dot_src_line_offset
             edgeInfo = edge.split(" ")
             fromNode = str(edgeInfo[0])
             toNode = str(edgeInfo[2])
             if fromNode not in self.graph.keys():
-                self.graph[fromNode] = dict()
-                self.graph[fromNode]['edgeTo'] = dict()
-                self.graph[fromNode]['nodeIndex'] = node_index
-                self.node_index_to_name_map[node_index] = fromNode
-                self.graph[fromNode]['edgeFrom'] = []
-                self.graph[fromNode]['nodeFrom'] = []
-                self.graph[fromNode]['nodeTo'] = []
-                self.graph[fromNode]['spouseEdge'] = []
-                self.graph[fromNode]['spouseNode'] = []
-                self.graph[fromNode]['paths'] = set()
-                self.graph[fromNode]['pathNodes'] = set()
-                self.graph[fromNode]['visited'] = False
-                node_index += 1
+                self.create_node_dict(fromNode, self.node_index)
+                self.node_index += 1
             if toNode not in self.graph.keys():
-                self.graph[toNode] = dict()
-                self.graph[toNode]['edgeTo'] = dict()
-                self.graph[toNode]['nodeIndex'] = node_index
-                self.node_index_to_name_map[node_index] = toNode
-                self.graph[toNode]['edgeFrom'] = []
-                self.graph[toNode]['nodeFrom'] = []
-                self.graph[toNode]['nodeTo'] = []
-                self.graph[toNode]['spouseEdge'] = []
-                self.graph[toNode]['spouseNode'] = []
-                self.graph[toNode]['paths'] = set()
-                self.graph[toNode]['pathNodes'] = set()
-                self.graph[toNode]['visited'] = False
-                node_index += 1
+                self.create_node_dict(toNode, self.node_index)
+                self.node_index += 1
             self.graph[fromNode]['edgeTo'][toNode] = dot_src_line_index
             self.graph[toNode]['edgeFrom'].append(dot_src_line_index)
             self.graph[toNode]['nodeFrom'].append(self.graph[fromNode]['nodeIndex'])
@@ -174,6 +228,7 @@ class CausalGraph:
 
         # need to get # of step to the node
     def calculate_steps_to_node_indexes(self, feature_name, node_indexes, found_indexes, step, MB_nodes):
+        print feature_name
         node_index = self.graph[feature_name]['nodeIndex']
         if node_index in node_indexes:
             MB_nodes[node_index] = 0
