@@ -2,7 +2,7 @@
 
 function getData(){
   return new Promise(function(resolve, reject) {
-    d3.json('/causalGraph', function(error, data) {
+    d3.json('/getFeatures', function(error, data) {
       if (error) {
         reject(error);
       } else {
@@ -17,12 +17,7 @@ getData()
     //console.log(data)
     ReactDOM.render(
         <AppInterface
-            dotSrc={data.dotSrc}
-            markovBlanketSelected={data.markovBlanketSelected}
-            graph={data.graph}
             features={data.featureData}
-            isEdgeSelected={data.isEdgeSelected}
-            isNodeSelected={data.isNodeSelected}
             classNames={data.classNames}
         />,
       document.getElementById('root')
@@ -32,6 +27,17 @@ getData()
 
 
 /*
+<AppInterface
+            dotSrc={data.dotSrc}
+            markovBlanketSelected={data.markovBlanketSelected}
+            graph={data.graph}
+            features={data.featureData}
+            isEdgeSelected={data.isEdgeSelected}
+            isNodeSelected={data.isNodeSelected}
+            classNames={data.classNames}
+        />,
+
+
 data={data.histogramData}
 featureData={data.featureData}
 summaryData={data.summaryData}

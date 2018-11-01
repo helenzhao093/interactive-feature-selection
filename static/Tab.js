@@ -1,19 +1,10 @@
 class Tabs extends React.Component {
 
-    constructor(props) {
-        super(props);
-        console.log(props)
-        /*this.state = {
-            activeTabIndex: 0
-        };
-        this.handleTabClick = this.handleTabClick.bind(this); */
+    constructor(props, context) {
+        super(props, context);
     }
 
-    /*handleTabClick(tabIndex) {
-        this.setState({
-            activeTabIndex: tabIndex === this.state.activeTabIndex ? this.props.defaultActiveTabIndex : tabIndex
-        });
-    }*/
+
 
     // Encapsulate <Tabs/> component API as props for <Tab/> children
     renderChildrenWithTabsApiAsProps() {
@@ -28,10 +19,8 @@ class Tabs extends React.Component {
 
     // Render current active tab content
     renderActiveTabContent() {
-        const children = this.props.children
-        console.log(children)
+        const children = this.props.children;
         const activeTabIndex = this.props.activeTabIndex;
-        console.log( children[activeTabIndex])
         if(children[activeTabIndex]) {
             return children[activeTabIndex].props.children;
         }
@@ -40,7 +29,7 @@ class Tabs extends React.Component {
     render() {
         return (
             <div className="tabs">
-                <ul className="tabs-nav nav navbar-nav navbar-left">
+                <ul>
                     {this.renderChildrenWithTabsApiAsProps()}
                 </ul>
                 <div className="tabs-active-content">
@@ -65,6 +54,8 @@ class Tab extends React.Component {
         super(props, context);
         this.handleTabClick = this.handleTabClick.bind(this);
     }
+
+
 
     handleTabClick(event) {
         event.preventDefault();

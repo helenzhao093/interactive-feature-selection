@@ -13,6 +13,7 @@ from flask import Flask, render_template, flash, request, redirect, jsonify, url
 from werkzeug.utils import secure_filename
 from scipy.stats import rankdata
 
+#DATA_FOLDER = 'static/iris/'
 DATA_FOLDER = 'static/cardiotocography3/'
 #DATA_FOLDER = 'static/cardiotocography10/'
 #DATA_FOLDER = 'static/spam_1000/'
@@ -71,7 +72,8 @@ def sort_features_by_rank(rank, features, names):
         names[i] = temp
     return new_features.tolist(), names
 
-@app.route("/causalGraph")
+# first call to get all features!
+@app.route("/getFeatures")
 def get_histogram_data():
     # list of list
     #dot_str = init_causal_graph(DATA_FOLDER + 'datafile.csv')
@@ -92,22 +94,22 @@ def get_histogram_data():
     #global HISTOGRAM
     #HISTOGRAM = Histogram(predicted, target, proba, class_names)
 
-    global causalGraph
-    causalGraph = CausalGraph(DATA_FOLDER + 'datafile.csv')
+    #global causalGraph
+    #causalGraph = CausalGraph(DATA_FOLDER + 'datafile.csv')
 
     global FEATURE_DATA
-    FEATURE_DATA = FeatureData(predicted, target, features, proba, feature_names, causalGraph.class_markov_blanket, class_names)
+    FEATURE_DATA = FeatureData(predicted, target, features, proba, feature_names, class_names)
 
     global classifier
     classifier = Classifier(DATA_FOLDER + 'datafile.csv')
 
     interface_data = dict()
-    get_graph_information(interface_data)
+    #get_graph_information(interface_data)
 
-    interface_data['graph'] = causalGraph.graph
+    #interface_data['graph'] = causalGraph.graph
     #INTERFACE_DATA['dotSrc'] = causalGraph.dot_src
     #INTERFACE_DATA['graph'] = causalGraph.graph
-    interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
+    #interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
 
     #INTERFACE_DATA['histogramData'] = HISTOGRAM.Histogram_info
     #INTERFACE_DATA['summaryData'] = HISTOGRAM.summary_data
@@ -119,6 +121,28 @@ def get_histogram_data():
     #interface_data['MI'] = FEATURE_DATA.MI
     #interface_data['consistencyMB'] = causalGraph.decay_score #FEATURE_DATA.feature_distribution
     return jsonify(interface_data)
+
+@app.route("/initializeGraph", methods=['POST'])
+def initialize_graph():
+    if request.method == 'POST':
+        data = json.loads(request.data)
+        print data
+        global causalGraph
+        causalGraph = CausalGraph(DATA_FOLDER + 'datafile.csv', data['requiredEdges'], data['forbiddenEdges'])
+        interface_data = dict()
+        get_graph_information(interface_data)
+        interface_data['graph'] = causalGraph.graph
+        return jsonify(interface_data)
+
+@app.route("/addEdge", methods=['POST'])
+def add_edge_to_causal_graph():
+    if request.method == 'POST':
+        data = json.loads(request.data)
+        causalGraph.add_edge(data['nodeFrom'], data['nodeTo'])
+        interface_data = dict()
+        get_graph_information(interface_data)
+        interface_data['graph'] = causalGraph.graph
+        return jsonify(interface_data)
 
 @app.route("/redrawGraph", methods=["POST"])
 def remove_nodes_from_causal_graph():
@@ -173,7 +197,7 @@ def send_new_calculated_MI():
         causalGraph.calculate_MB_consistency_score2(data['names'])
         interface_data = dict()
         interface_data['MI'] = FEATURE_DATA.MI
-        interface_data['consistencyMB'] = causalGraph.decay_score
+        interface_data['consistencyMB'] = causalGraph.score
         interface_data['rankLoss'] = rank_loss_listwise
         #interface_data['featureData'] = FEATURE_DATA.feature_data
         return jsonify(interface_data)

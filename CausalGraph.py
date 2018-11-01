@@ -1,12 +1,13 @@
 import pydot
 import numpy as np
 from pycausal.pycausal import pycausal as pc
+from pycausal import prior as pr
 from pycausal import search as s
 import pandas as pd
 import copy
 
 class CausalGraph:
-    def __init__(self, datapath):
+    def __init__(self, datapath, forbidden_edges, required_edges):
         self.class_node_str = 'CLASS'
         self.edge_to_dot_src_line_offset = 2
         self.markov_blanket_selected = True
@@ -20,7 +21,7 @@ class CausalGraph:
         self.edge_selected_color = "\"0.650 0.200 1.000\""
         self.removed_nodes = []
         self.init_dataframe(datapath)
-        self.init_causal_graph_dot_src(self.df)
+        self.init_causal_graph_dot_src(forbidden_edges, required_edges)
         self.edges_to_graph_dict()
         self.init_spouse_graph()
         self.find_paths_to_class_node()
@@ -76,7 +77,16 @@ class CausalGraph:
             #else:
             #    index = self.graph[node1]['edgeTo'][node2]
 
-
+    def add_edge(self, node_from, node_to):
+        print node_from, node_to
+        new_edge = node_from + ' -> ' + node_to
+        self.edge_index += 1
+        self.dot_src_lines.insert(len(self.dot_src_lines) - 1, new_edge)
+        self.graph[node_from]['nodeTo'].append(self.graph[node_to]['nodeIndex'])
+        self.graph[node_to]['nodeFrom'].append(self.graph[node_from]['nodeIndex'])
+        self.graph[node_from]['edgeTo'][node_to] = self.edge_index
+        self.graph[node_to]['edgeFrom'].append(self.edge_index)
+        self.dot_src = self.lines_to_dot_src(self.dot_src_lines)
 
     def add_node_to_graph_dict(self, feature_name_array):
         for feature_name in feature_name_array:
@@ -90,11 +100,12 @@ class CausalGraph:
             self.dot_src_lines.insert(len(self.dot_src_lines) - 1, feature_name)
         print self
 
-    def init_causal_graph_dot_src(self, df):
+    def init_causal_graph_dot_src(self, forbidden_edges, required_edges):
         p = pc()
         p.start_vm()
         tetrad = s.tetradrunner()
-        tetrad.run(algoId = 'fges', dfs = df, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
+        prior = pr.knowledge(forbiddirect = forbidden_edges, requiredirect = required_edges)
+        tetrad.run(algoId = 'fges', dfs = self.df, priorKnowledge = prior, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
         dot_src = p.tetradGraphToDot(tetrad.getTetradGraph())
         self.edges = tetrad.getEdges()
         self.nodes = tetrad.getNodes()
@@ -140,8 +151,9 @@ class CausalGraph:
         #for node in self.nodes:
         #    self.graph[str(node)] = dict()
         self.node_index = 1
+        self.edge_index = 0
         for index, edge in enumerate(self.edges):
-            dot_src_line_index = index + self.edge_to_dot_src_line_offset
+            self.edge_index = index + self.edge_to_dot_src_line_offset
             edgeInfo = edge.split(" ")
             fromNode = str(edgeInfo[0])
             toNode = str(edgeInfo[2])
@@ -151,8 +163,8 @@ class CausalGraph:
             if toNode not in self.graph.keys():
                 self.create_node_dict(toNode, self.node_index)
                 self.node_index += 1
-            self.graph[fromNode]['edgeTo'][toNode] = dot_src_line_index
-            self.graph[toNode]['edgeFrom'].append(dot_src_line_index)
+            self.graph[fromNode]['edgeTo'][toNode] = self.edge_index
+            self.graph[toNode]['edgeFrom'].append(self.edge_index)
             self.graph[toNode]['nodeFrom'].append(self.graph[fromNode]['nodeIndex'])
             self.graph[fromNode]['nodeTo'].append(self.graph[toNode]['nodeIndex'])
 
@@ -197,7 +209,7 @@ class CausalGraph:
                 self.has_path_to_spouse(name, node_indexes, found_indexes)
 
     def calculate_MB_consistency_score2(self, feature_names):
-        decay_factor = 0.9
+        decay_factor = 1
         MB_nodes = dict()
         for node_index in self.markov_blanket_node_indexes:
             MB_nodes[node_index] = -1
@@ -211,7 +223,7 @@ class CausalGraph:
         node_value = 1.0/(len(node_indexes))
         self.score = len(found_indexes) * node_value
         #print score
-        self.decay_score = self.calculate_score_from_coverage(MB_nodes, decay_factor)
+        #self.decay_score = self.calculate_score_from_coverage(MB_nodes, decay_factor)
         #print decay_score
 
     def calculate_score_from_coverage(self, MB_nodes, decay_factor):
@@ -228,7 +240,6 @@ class CausalGraph:
 
         # need to get # of step to the node
     def calculate_steps_to_node_indexes(self, feature_name, node_indexes, found_indexes, step, MB_nodes):
-        print feature_name
         node_index = self.graph[feature_name]['nodeIndex']
         if node_index in node_indexes:
             MB_nodes[node_index] = 0

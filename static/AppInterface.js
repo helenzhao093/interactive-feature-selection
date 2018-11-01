@@ -1,7 +1,7 @@
 class AppInterface extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props)
+    console.log(props);
     var colorRange = ["#00649b", "#bc4577", "#ff7e5a", "#b2bae4", "#c0392b", "#f1c40f", "#16a085", "#3498db", '#e88c5d', '#23a393' ];
     var color = d3.scaleOrdinal()
         .range(colorRange)
@@ -16,20 +16,41 @@ class AppInterface extends React.Component {
     var xScale = d3.scaleOrdinal()
         .domain(xScaleDomain)
         .range(xScaleRange);
+
+    /* FEATURE IMPORTANCE */
+    var circleRadii = [250];
+    var radius = 16;
+    var rankedFeatures = {};
+    this.props.features.features.map(feature => {
+        feature.rank = 1;
+        feature.circleIndex = 0;
+        var pt_angle = Math.random() * 2 * Math.PI;
+        var randomRadius = Math.random() * (circleRadii[feature.circleIndex] - radius);
+        var pt_radius_sq = randomRadius * randomRadius;
+        feature.radius = randomRadius;
+        feature.x = Math.sqrt(pt_radius_sq) * Math.cos(pt_angle);
+        feature.y = Math.sqrt(pt_radius_sq) * Math.sin(pt_angle);
+        rankedFeatures[feature.index] = feature;
+    });
+    console.log(rankedFeatures)
     this.state = {
         activeTabIndex: 0,
+        featureSelectionMargin : {left: 50, right: 30, top: 20, bottom:10},
         causalGraph: {
-            showComponent: true,
-            markovBlanketSelected: this.props.markovBlanketSelected,
-            isEdgeSelected: this.props.isEdgeSelected,
-            isNodeSelected: this.props.isNodeSelected,
-            graphHistory: [{ graph: this.props.graph, dotSrc: this.props.dotSrc }],
-        },
-        graphIndex: 0,
-        featureImportance: {
             showComponent: false,
-            features: {}, // initialized to null object
+            markovBlanketSelected: false,//this.props.markovBlanketSelected,
+            isEdgeSelected: false,//this.props.isEdgeSelected,
+            isNodeSelected: false,//this.props.isNodeSelected,
+            graphHistory: []//[{ graph: this.props.graph, dotSrc: this.props.dotSrc }],
         },
+        graphIndex: -1,
+        featureImportanceSize: [500, 500],
+        featureImportance: {
+            circleRadii: [250],
+            features: rankedFeatures, // initialized to null object
+        },
+        featureImportanceMoves: [],
+        featureImportanceStep: 0,
         featureSelection: {
             showComponent: false,
             xScaleDomain: null,
@@ -53,7 +74,8 @@ class AppInterface extends React.Component {
         },
         consistencyGraphLegend: {
             keys: ["MB consistency", "Mutual Information"],
-            colors: ["red", "green"]
+            colors: ["red", "green"],
+            max: 1
         },
         metricsGraphLegend: {
             keys: ["accuracy", "precision"],
@@ -76,7 +98,7 @@ class AppInterface extends React.Component {
         selectedFeatureNames: [],
         featureRank: {},
         rankData: [],
-        numRanks: 2,
+        numRanks: 1, // number of circles in feature Importance
         featureHistory: [],
         step: 0,
         dragging: {},
@@ -84,20 +106,26 @@ class AppInterface extends React.Component {
         featureCoordinatesSize: featureCoordinatesSize,
         markovBlanketFeatureNames: [],
         xAxisLength: 2,
-        selectedIndex: 0
+        selectedIndex: 0,
+        showInfo: false
     };
     //console.log(this.state)
+
+    /* FEATURE IMPORTANCE METHODS */
+      this.calculateNewCircleRadius = this.calculateNewCircleRadius.bind(this);
+      this.addCircle = this.addCircle.bind(this);
+
     this.sendData = this.sendData.bind(this);
     this.removeLastGraph = this.removeLastGraph.bind(this);
     this.clearGraph = this.clearGraph.bind(this);
-    this.sendGraphToFeatureImportance = this.sendGraphToFeatureImportance.bind(this);
+    this.sendGraphToSelection = this.sendGraphToSelection.bind(this);
     this.getNodeIndexToFeatureMap = this.getNodeIndexToFeatureMap.bind(this);
     this.getMarkovBlanketFeatureNames = this.getMarkovBlanketFeatureNames.bind(this);
     this.updateFeatureRank = this.updateFeatureRank.bind(this);
     this.updateData = this.updateData.bind(this);
     this.position = this.position.bind(this);
     this.featureAxisOnEnd = this.featureAxisOnEnd.bind(this);
-    this.sendImportanceToSelection = this.sendImportanceToSelection.bind(this);
+    this.sendImportanceToGraph = this.sendImportanceToGraph.bind(this);
     this.classify = this.classify.bind(this);
     this.updateIndex = this.updateIndex.bind(this);
     this.goToStep = this.goToStep.bind(this);
@@ -106,6 +134,11 @@ class AppInterface extends React.Component {
     this.initializeRankData = this.initializeRankData.bind(this);
     this.updateNumRanks = this.updateNumRanks.bind(this);
     this.handleTabClick = this.handleTabClick.bind(this);
+    this.showInfoTrue = this.showInfoTrue.bind(this);
+    this.showInfoFalse = this.showInfoFalse.bind(this);
+    this.initializeForbiddenEdges = this.initializeForbiddenEdges.bind(this);
+    this.initializeRequiredEdges = this.initializeRequiredEdges.bind(this);
+    this.initializeFeatureNameToRankMap = this.initializeFeatureNameToRankMap.bind(this);
       /*props.featureData.features.sort(function(a, b) { return a.index - b.index });
       props.featureData.features.splice(props.markovBlanket.length, 0,
         { index: props.featureData.features.length,
@@ -181,6 +214,45 @@ class AppInterface extends React.Component {
   componentDidUpdate() {
   }
 
+  /* FEATURE IMPORTANCE  */
+    calculateNewCircleRadius(){
+        const numberCircle = this.state.featureImportance.circleRadii.length + 1;
+        const largeCircleRadius = this.state.featureImportance.circleRadii[0];
+        var newCircleRadii = [];
+        for (var i = numberCircle; i > 0; i--) {
+            newCircleRadii.push(largeCircleRadius/numberCircle * i)
+        }
+        return newCircleRadii
+    }
+
+    addCircle() {
+        const newCircleRadii = this.calculateNewCircleRadius(); //currentCircleRadii.concat(newRadius)
+        this.state.featureImportanceMoves.push({type: "circle", circleRadii: this.state.featureImportance.circleRadii, features: this.state.featureImportance.features});
+        this.state.featureImportanceStep = this.state.featureImportanceStep + 1;
+        Object.keys(this.state.featureImportance.features).map((key) => {
+            this.updateFeatureRank(key, this.state.featureImportance.circleRadii.length - this.state.featureImportance.features[key].circleIndex)
+        });
+        this.setState({
+            featureImportance: {
+                circleRadii: newCircleRadii,
+                features: this.state.featureImportance.features
+            }
+        });
+    }
+
+
+  showInfoTrue() {
+      this.setState({
+          showInfo: true
+      })
+  }
+
+  showInfoFalse() {
+      this.setState({
+          showInfo: false
+      })
+  }
+
   handleTabClick(tabIndex) {
       this.setState({
           activeTabIndex: tabIndex === this.state.activeTabIndex ? this.props.defaultActiveTabIndex : tabIndex
@@ -235,6 +307,7 @@ class AppInterface extends React.Component {
       });
   }
 
+  // causalGraph node index to feature name map
   getNodeIndexToFeatureMap(graph){
     var indexToFeatureMap = {};
     Object.keys(graph).map((featureName) =>
@@ -270,22 +343,55 @@ class AppInterface extends React.Component {
       return rankedFeatures;
   }
 
-  sendGraphToFeatureImportance() {
+  // 2 -> 3
+  sendGraphToSelection() {
     const currentIndex = this.state.graphIndex;
     const currentGraph = this.state.causalGraph.graphHistory[currentIndex].graph;
+    console.log(this.state.graphIndex)
     var indexToFeatureMap = this.getNodeIndexToFeatureMap(currentGraph);
     var markovBlanketFeatureNames = this.getMarkovBlanketFeatureNames(indexToFeatureMap, currentGraph.CLASS);
     this.state.markovBlanketFeatureNames = markovBlanketFeatureNames;
-    const rankedFeatures = this.getInitialFeatureRank(markovBlanketFeatureNames);
 
-    this.setState({
-      featureImportance: {
-        showComponent: true,
-        features: rankedFeatures,
-        markovBlanket: markovBlanketFeatureNames
-      },
-        activeTabIndex : 1
-    })
+    this.initializeRankData();
+
+    var featuresWithBoundary = [];
+    Object.keys(this.state.featureImportance.features).map((featureKey) => {
+        if (this.state.markovBlanketFeatureNames.has(this.state.featureImportance.features[featureKey].name)) {
+          featuresWithBoundary.unshift(this.state.featureImportance.features[featureKey]);
+        } else {
+          featuresWithBoundary.push(this.state.featureImportance.features[featureKey]);
+        }
+    });
+    featuresWithBoundary.splice(this.state.markovBlanketFeatureNames.size, 0,
+        { index: featuresWithBoundary.length,
+          display: true,
+          name: "BOUNDARY",
+          type: "continuous",
+          range: [0,0]
+        });
+      console.log(featuresWithBoundary)
+      var featureSelectionWidth = this.state.featureCoordinatesSize[0] - this.state.featureSelectionMargin.left - this.state.featureSelectionMargin.right;
+      var xScaleRange = featuresWithBoundary.map((feature, index) =>
+        featureSelectionWidth/(featuresWithBoundary.length - 1) * index
+      );
+      var xScaleDomain = featuresWithBoundary.map((feature, index) =>
+        feature.name
+      );
+      var xScale = d3.scaleOrdinal()
+          .domain(xScaleDomain)
+          .range(xScaleRange);
+
+      var allFeatureNames = this.getInitialConsistencyScores(featuresWithBoundary);
+
+      this.setState({
+        featureSelection: {
+          xScaleDomain: xScaleDomain,
+          xScale: xScale,
+          features: featuresWithBoundary
+        },
+        selectedFeatureNames: allFeatureNames,
+          activeTabIndex: 2
+      });
   }
 
   updateData(data) {
@@ -557,45 +663,91 @@ class AppInterface extends React.Component {
       this.state.numRanks = numRanks;
   }
 
-  initializeRankData() { //mapping of name to rank
-      var featureRankMap = {};
+  initializeRankData() { //initialize map of feature name to rank
+      /*var featureRankMap = {};
       Object.keys(this.state.featureImportance.features).map(key =>
           featureRankMap[this.state.featureImportance.features[key].name] = this.state.featureImportance.features[key].circleIndex + 1
-      );
-      var featureNames = Object.keys(featureRankMap);
-      var rankData = {};
+      ); */
+      var featureNameToRankMap = this.state.featureRank;
+      var featureNames = Object.keys(featureNameToRankMap);
+      var rankData = [];
       for (var i = 0; i <= this.state.numRanks; i++) {
-          rankData[i] = {};
+          /*rankData[i] = {};
           rankData[i].MB = [];
-          rankData[i].NotMB = [];
+          rankData[i].NotMB = []; */
+          rankData.push({ rank: i, MB:[], NotMB: []})
       }
 
+      // sort featureNames by MB or Not MB and by rank
       featureNames.map((name) => {
-          console.log(featureRankMap[name]);
           if (this.state.markovBlanketFeatureNames.has(name)) {
-              rankData[featureRankMap[name]].MB.push(name);
+              rankData[featureNameToRankMap[name]].MB.push(name);
           } else {
-              rankData[featureRankMap[name]].NotMB.push(name);
+              rankData[featureNameToRankMap[name]].NotMB.push(name);
           }
       });
+
+      /* convert key to object
       var rankDataArray = [];
       Object.keys(rankData).map((key) => {
           rankData[key].rank = key
           rankDataArray.push(rankData[key])
-      });
-      this.state.rankData = rankDataArray;
+      }); */
+
+      this.state.rankData = rankData;
+      return rankData;
   }
 
-  sendImportanceToSelection() {
-      var featureRank = {};
+  initializeFeatureNameToRankMap() {
+      var featureNameToRankMap = {};
       Object.keys(this.state.featureImportance.features).map(key =>
-          featureRank[this.state.featureImportance.features[key].name] = this.state.featureImportance.features[key].rank
+          featureNameToRankMap[this.state.featureImportance.features[key].name] = this.state.featureImportance.features[key].rank
       );
-      this.state.featureRank = featureRank;
+      this.state.featureRank = featureNameToRankMap;
+      return featureNameToRankMap;
+  }
 
-      this.initializeRankData();
+  initializeForbiddenEdges() {
+      var forbiddenEdges = [];
+      Object.keys(this.state.featureImportance.features).map(key => {
+        if (this.state.featureImportance.features[key].circleIndex == -1) {
+            forbiddenEdges.push([this.state.featureImportance.features[key].name, "CLASS"])
+        }
+      })
+      return forbiddenEdges;
+  }
 
-    var featuresWithBoundary = [];
+  initializeRequiredEdges() {
+      var requiredEdges = [];
+      if (this.state.numRanks > 1) {
+          Object.keys(this.state.featureImportance.features).map(key => {
+              if (this.state.featureImportance.features[key].circleIndex == this.state.numRanks - 1) {
+                  requiredEdges.push([this.state.featureImportance.features[key].name, "CLASS"])
+              }
+          });
+      }
+      return requiredEdges;
+    }
+
+  // 1 -> 2
+  sendImportanceToGraph() {
+      //console.log("hi")
+      var featureNameToRankMap = this.initializeFeatureNameToRankMap();
+     // var rankData = this.initializeRankData(featureNameToRankMap);
+
+      // initialize forbidden and required edges
+      var forbiddenEdges = this.initializeForbiddenEdges();
+      var requiredEdges = this.initializeRequiredEdges();
+
+      // send prior to graph and initialize graph
+      this.sendData("/initializeGraph", {forbiddenEdges: forbiddenEdges, requiredEdges: requiredEdges});
+
+      // set tab index to graph index
+      this.setState({
+          activeTabIndex: 1
+      });
+
+    /*var featuresWithBoundary = [];
     Object.keys(this.state.featureImportance.features).map((featureKey) => {
       if (this.state.markovBlanketFeatureNames.has(this.state.featureImportance.features[featureKey].name)) {
         featuresWithBoundary.unshift(this.state.featureImportance.features[featureKey]);
@@ -612,9 +764,10 @@ class AppInterface extends React.Component {
         range: [0,0]
       }
     );
-    console.log(featuresWithBoundary)
+    //console.log(featuresWithBoundary)
+    var featureSelectionWidth = this.state.featureCoordinatesSize[0] - this.state.featureSelectionMargin.left - this.state.featureSelectionMargin.right;
     var xScaleRange = featuresWithBoundary.map((feature, index) =>
-      this.state.featureCoordinatesSize[0]/(featuresWithBoundary.length - 1) * index
+      featureSelectionWidth/(featuresWithBoundary.length - 1) * index
     );
     var xScaleDomain = featuresWithBoundary.map((feature, index) =>
       feature.name
@@ -633,7 +786,7 @@ class AppInterface extends React.Component {
       },
       selectedFeatureNames: allFeatureNames,
         activeTabIndex: 2
-    });
+    }); */
   }
 
   render() {
@@ -680,15 +833,35 @@ class AppInterface extends React.Component {
           histograms = <div></div>
           settings = <div></div>
       } */
-
+    var metricsGraphMax = Math.max(this.state.consistencyGraphLegend.max, this.state.currentScores.MI);
+    this.state.consistencyGraphLegend.max = metricsGraphMax;
+    var featureInfo = [{name: "hi", description: "hello"}];
     var rankLossMax = this.state.rankLossCurrent.score;
     rankLossMax = Math.max(rankLossMax, Math.max.apply(null, this.state.rankLoss.score)) + 1;
-    //var rankLossMin = this.state.rankLossCurrent.score;
-     // rankLossMin = Math.min(rankLossMin, Math.min.apply(null, this.state.rankLoss.score));
-      const currentGraphHistory = this.state.causalGraph.graphHistory[this.state.graphIndex];
+      var currentGraphHistory;
+    if (this.state.graphIndex >= 0) {
+        currentGraphHistory = this.state.causalGraph.graphHistory[this.state.graphIndex];
+    } else {
+        currentGraphHistory = {graph: {}, dotSrc: ""}
+    }
       return (
+        <div className={'root-div'}>
+            <SideBar featureInfo={featureInfo} show={this.state.showInfo} close={() => this.showInfoFalse()}/>
+            <button className={"sidebar-toggle"} onClick={this.showInfoTrue}>{"☰"}</button>
           <Tabs activeTabIndex={this.state.activeTabIndex} handleTabClick={(t) => this.handleTabClick(t)}>
-              <Tab linkClassName={"CausalGraph"}>
+              <Tab linkClassName={"Feature Importance"}>
+                <ExpertKnowledge
+                    circleRadii={this.state.featureImportance.circleRadii}
+                    addCircle={this.addCircle}
+                    features={this.state.featureImportance.features}
+                    updateFeatureRank={(r, f) => this.updateFeatureRank(r, f)}
+                    updateNumRanks={(r) => this.updateNumRanks(r)}
+                    width={500}
+                    height={500}
+                    nextStep={this.sendImportanceToGraph}
+                />
+              </Tab>
+              <Tab linkClassName={"Causal Graph"}>
                   <CausalGraph
                       dotSrc={currentGraphHistory.dotSrc}
                       sendData={this.sendData}
@@ -699,18 +872,7 @@ class AppInterface extends React.Component {
                       undoNodeRemoval={(n) => this.removeLastGraph(n)}
                       clearGraph={this.clearGraph}
                   />
-                  <button onClick={this.sendGraphToFeatureImportance}>{"Next"}</button>
-              </Tab>
-              <Tab linkClassName={"Feature Importance"}>
-                <ExpertKnowledge
-                    display={this.state.featureImportance.display}
-                    features={this.state.featureImportance.features}
-                    updateFeatureRank={(r, f) => this.updateFeatureRank(r, f)}
-                    updateNumRanks={(r) => this.updateNumRanks(r)}
-                    width={500}
-                    height={500}
-                />
-                <button onClick={this.sendImportanceToSelection}>{"Next"}</button>
+                  <button onClick={this.sendGraphToSelection}>{"Next"}</button>
               </Tab>
               <Tab linkClassName={"Feature Selection"}>
                   <div>
@@ -718,7 +880,6 @@ class AppInterface extends React.Component {
                           <CheckboxMultiSelect options={this.state.featureData.classDisplay}
                                                handleChange={(c, d) => this.handleClassSelection(c, d)}/>
                           <button onClick={this.classify}>{"Classify"}</button>
-
                       </div>
                       <FeatureParallelCoordinates
                           data={this.state.featureData.inputData}
@@ -731,10 +892,26 @@ class AppInterface extends React.Component {
                           sendData={this.sendData}
                           colorFunction={this.state.colorFunction}
                       />
+                  </div>
+              </Tab>
+          </Tabs>
+        </div>
+      )
+  }
+}
+
+/*
+
+
+
+
+                  <button onClick={this.sendGraphToSelection}>{"Next"}</button>
+              </Tab>
+
                       <div className={"grid-container"}>
                       <div className={"grid-item"}>
                           <ProgressGraph size={[500, 300]}
-                                         max={1}
+                                         max={this.state.consistencyGraphLegend.max}
                                          min={0}
                                          name={"consistency"}
                                          consistencyScores={this.state.consistencyScores}
@@ -783,12 +960,8 @@ class AppInterface extends React.Component {
                       </div>
                   </div>
               </Tab>
-          </Tabs>
-      )
-  }
-}
 
-/*
+
 <ProgressGraph size={[500, 300]}
                                      name={"metrics"}
                                      consistencyScores={this.state.metrics}

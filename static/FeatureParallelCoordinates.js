@@ -42,9 +42,9 @@ class FeatureParallelCoordinates extends React.Component {
   constructor(props) {
     console.log(props)
     super(props)
-    var margin = {left: 10, right: 30, top: 20, bottom:10}
-    var width = props.size[0] - margin.left - margin.right
-    var height = props.size[1] - margin.top - margin.bottom
+    var margin = {left: 50, right: 30, top: 20, bottom:10};
+    var width = props.size[0] - margin.left - margin.right;
+    var height = props.size[1] - margin.top - margin.bottom;
 
     //Object.keys(props.features).map((featurekey, index) =>
     //  props.features[featurekey].index = index
@@ -67,21 +67,21 @@ class FeatureParallelCoordinates extends React.Component {
     //console.log(this.props.features)
 
 
-    var yScalesDisplay = {}
+    var yScalesDisplay = {};
     for (var i = 0; i < this.props.features.length; i++) {
       if (this.props.features[i].type == 'continuous') {
-        const scale = d3.scaleLinear().domain(this.props.features[i].range).range([0, height])
+        const scale = d3.scaleLinear().domain(this.props.features[i].range).range([0, height]);
         yScalesDisplay[this.props.features[i].name] = scale
       }
       else {
-        const numSplits = this.props.features[i].values.length - 1
-        const rangeDomain = this.props.features[i].values.map((v, i) => i * height/numSplits)
+        const numSplits = this.props.features[i].values.length - 1;
+        const rangeDomain = this.props.features[i].values.map((v, i) => i * height/numSplits);
         yScalesDisplay[this.props.features[i].name] = d3.scaleOrdinal().domain(this.props.features[i].values).range(rangeDomain)
       }
     }
     var yScales = this.props.features.map((feature) =>
       d3.scaleLinear().domain(feature.range).range([0, height])
-    )
+    );
 
 
 

@@ -10,13 +10,13 @@ class FeatureData:
     CLASSIFICATIONS = [FP_KEY, FN_KEY, TP_KEY, TN_KEY]
     DEFAULT_NUM_BINS = 10
 
-    def __init__(self, predicted, target, features, proba, feature_info, markov_blanket, class_names):
+    def __init__(self, predicted, target, features, proba, feature_info, class_names):
         self.predicted = predicted
         self.target = target
         self.features = features
         self.num_examples = len(self.features)
         self.proba = proba
-        self.class_markov_blanket = markov_blanket
+        #self.class_markov_blanket = markov_blanket
         self.class_names = class_names
         self.num_classes = len(class_names)
         self.num_bins = FeatureData.DEFAULT_NUM_BINS
@@ -25,17 +25,17 @@ class FeatureData:
 
         #self.init_feature_dict(feature_names)
         self.feature_data['features'] = feature_info
-
         self.create_default_class_display()
         self.set_default_feature_range()
         self.set_default_feature_display()
         #self.current_feature_set = {}
         #self.MI = self.calculate_mutual_information(self.class_markov_blanket)
+
         self.map_feature_name_to_information()
-        self.order_by_class_MB()
+        #self.order_by_class_MB()
         self.init_data_no_predictions()
         self.init_mutual_information_dataset()
-        self.init_MI()
+        #self.init_MI()
 
     def init_MI(self):
         indexes = []
@@ -397,8 +397,8 @@ class FeatureData:
             return 0
         X = self.get_columns(feature_indexes)
         X = self.sort_selected_features(X)
-        print X[0,:]
-        print X[1,:]
+        #print X[0,:]
+        #print X[1,:]
         self.MI = self.calculate_joint_probabily(X)
         print self.MI
         # map { yvalue: p(y)}
