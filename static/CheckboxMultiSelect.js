@@ -3,15 +3,16 @@ class CheckboxOption extends React.Component {
     console.log('checkbox')
     const { value, isChecked, children } = this.props
     return (
-      <div width={100} style={{float: "left"}}>
+      <div className={"checkbox"} width={100}>
         <input
+            id={value}
           type={"checkbox"}
           className={"react-select-option__checkbox"}
           defaultValue={null}
           checked={isChecked}
           onChange={this.props.onChange}
         />
-          {children}
+          <label for={value}>{children}</label>
       </div>
     )
   }

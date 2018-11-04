@@ -42,30 +42,11 @@ class FeatureParallelCoordinates extends React.Component {
   constructor(props) {
     console.log(props)
     super(props)
-    var margin = {left: 50, right: 30, top: 20, bottom:10};
+    var margin = {left: 10, right: 30, top: 20, bottom:10};
     var width = props.size[0] - margin.left - margin.right;
     var height = props.size[1] - margin.top - margin.bottom;
 
-    //Object.keys(props.features).map((featurekey, index) =>
-    //  props.features[featurekey].index = index
-    //)
-
-    //props.features.sort(function(a, b) { return a.index - b.index })
-    //console.log(props.features)
-
-    /*props.features.splice(props.markovBlanket.length, 0,
-      { index: props.features.length,
-        display: true,
-        name: "BOUNDARY",
-        type: "continuous",
-        range: [0,0]
-      }
-    )
-    //console.log(props) */
-
-    //const displayFeatures = props.features
-    //console.log(this.props.features)
-
+    var axisWidth = 30;
 
     var yScalesDisplay = {};
     for (var i = 0; i < this.props.features.length; i++) {
@@ -83,21 +64,20 @@ class FeatureParallelCoordinates extends React.Component {
       d3.scaleLinear().domain(feature.range).range([0, height])
     );
 
-
-
     this.state = {
       margin: margin,
       width: width,
       height: height,
       yScales: yScales,
-      yScalesDisplay: yScalesDisplay
-    }
+      yScalesDisplay: yScalesDisplay,
+      axisWidth: axisWidth
+    };
 
     this.path = this.path.bind(this)
   }
 
   componentDidMount() {
-    var that = this
+    var that = this;
     //console.log(d3.selectAll('.feature-axis'))
     d3.selectAll(".feature-axis").call(d3.drag()
       .on("start", function(d) {
@@ -227,21 +207,22 @@ class FeatureParallelCoordinates extends React.Component {
     //  feature.name
     //)
     //var xScale = this.state.xScale.domain(xScaleDomain)
-
+    //var width = this.props.features.length * 75 + this.state.margin.left + this.state.margin.right;
     return (
+        <div width={1000} style={{overflow: 'scroll'}}>
       <svg className={'feature-parallels-svg'} width={this.props.size[0]} height={this.props.size[1]}>
         <g className={'feature-parallels'} transform={`translate(${this.state.margin.left},${this.state.margin.top})`} >
         <g className={'data-paths'}>
           {this.props.data.map((data, index) =>
-            <path d={this.path(data.features)} fill={"none"}
-            stroke={this.props.colorFunction(data.target)} stroke-width={3}/>)
-          }
+            <path d={this.path(data.features)} fill={"none"} stroke={this.props.colorFunction(data.target)} stroke-width={3}/>
+          )}
         </g>
         {this.props.features.map((feature, index) =>
             <Axis name={feature.name} textname={feature.name} axis={this.state.yScalesDisplay[feature.name]} transform={`translate(${this.props.xScale(feature.name)})`}/>
         )}
         </g>
       </svg>
+          </div>
     )
   }
 }

@@ -14,7 +14,7 @@ class Legend extends React.Component {
   render() {
     console.log(this.props)
     return (
-      <div className={"legend"}>
+      <div className={this.props.className}>
       {this.props.keys.map((key, index) =>
         <div width={50}>
           <div className={"series-marker"}  style={{background: this.props.colors[index]}}></div>

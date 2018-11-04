@@ -9,7 +9,7 @@ import copy
 class CausalGraph:
     def __init__(self, datapath, forbidden_edges, required_edges):
         self.class_node_str = 'CLASS'
-        self.edge_to_dot_src_line_offset = 2
+        self.edge_to_dot_src_line_offset = 1
         self.markov_blanket_selected = True
         self.selected_node = None
         self.selected_edge = None
@@ -21,12 +21,21 @@ class CausalGraph:
         self.edge_selected_color = "\"0.650 0.200 1.000\""
         self.removed_nodes = []
         self.init_dataframe(datapath)
-        self.init_causal_graph_dot_src(forbidden_edges, required_edges)
-        self.edges_to_graph_dict()
-        self.init_spouse_graph()
+        self.init_causal_graph_dot_src(self.df, forbidden_edges, required_edges)
+        self.forbidden_edges = forbidden_edges
+        self.required_edges = required_edges
+        # METHOD TO CONVERT DOT SRC TO MARKOV BLANKET
+        #self.edges_to_graph_dict()
+        #self.init_spouse_graph()
+        #
+
+        self.get_markov_blanket_nodes_from_edges()
+
+        self.generate_subgraph_dot_src_and_graph()
+
         self.find_paths_to_class_node()
-        self.get_markov_blanket_nodes()
-        self.calculate_MB_consistency_score2(list(self.class_markov_blanket))
+        self.get_markov_blanket_nodes_indexes()
+        #self.calculate_MB_consistency_score2(list(self.class_markov_blanket))
         #self.color_markov_blanket('CLASS')
         #self.color_edges_nodes_to_class_node('AC')
 
@@ -38,11 +47,14 @@ class CausalGraph:
         for feature_name in feature_name_array:
             self.removed_nodes.append(feature_name)
         df = self.df.drop(self.removed_nodes, axis=1)
-        self.init_causal_graph_dot_src(df)
-        self.edges_to_graph_dict()
-        self.init_spouse_graph()
+        self.init_causal_graph_dot_src(df, self.forbidden_edges, self.required_edges)
+        #self.edges_to_graph_dict()
+        #self.init_spouse_graph()
+        self.get_markov_blanket_nodes_from_edges()
+
+        self.generate_subgraph_dot_src_and_graph()
         self.find_paths_to_class_node()
-        self.get_markov_blanket_nodes()
+        self.get_markov_blanket_nodes_indexes()
         self.add_removed_node_to_dotlines(self.removed_nodes)
         self.remove_edges_from_dot_lines_and_graph(removed_edges)
         self.dot_src = self.lines_to_dot_src(self.dot_src_lines)
@@ -61,7 +73,7 @@ class CausalGraph:
             node_from_str = edge[0]
             node_to_str = edge[1]
             if node_to_str in self.graph[node_from_str]['edgeTo'].keys():
-                index = self.graph[node_from_str]['edgeTo'][node_to_str]
+                index = self.map_edge_index_to_line_index[self.graph[node_from_str]['edgeTo'][node_to_str]]
                 self.dot_src_lines[index] = ""
                 self.graph[node_from_str]['edgeTo'].pop(node_to_str, None)
                 node_from_index = self.graph[node_from_str]['nodeIndex']
@@ -74,8 +86,6 @@ class CausalGraph:
                     if value == node_from_index:
                         del self.graph[node_to_str]['nodeFrom'][i]
                         del self.graph[node_to_str]['edgeFrom'][i]
-            #else:
-            #    index = self.graph[node1]['edgeTo'][node2]
 
     def add_edge(self, node_from, node_to):
         print node_from, node_to
@@ -100,29 +110,46 @@ class CausalGraph:
             self.dot_src_lines.insert(len(self.dot_src_lines) - 1, feature_name)
         print self
 
-    def init_causal_graph_dot_src(self, forbidden_edges, required_edges):
+    def init_causal_graph_dot_src(self, df, forbidden_edges, required_edges):
         p = pc()
         p.start_vm()
         tetrad = s.tetradrunner()
         prior = pr.knowledge(forbiddirect = forbidden_edges, requiredirect = required_edges)
-        tetrad.run(algoId = 'fges', dfs = self.df, priorKnowledge = prior, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
+        tetrad.run(algoId = 'fges', dfs = df, priorKnowledge = prior, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
         dot_src = p.tetradGraphToDot(tetrad.getTetradGraph())
         self.edges = tetrad.getEdges()
         self.nodes = tetrad.getNodes()
         dot_src = self.trim_init_src_string(dot_src)
         self.dot_src_lines = self.dot_src_to_lines(dot_src)
-        self.insert_node_attr_dot_src()
+        #self.insert_node_attr_dot_src()
         #self.insert_class_node_color()
         self.dot_src = self.lines_to_dot_src(self.dot_src_lines)
         self.init_dot_src = self.dot_src
         self.uncolored_dot_src = self.init_dot_src
         p.stop_vm()
 
-    def insert_node_attr_dot_src(self):
-        self.dot_src_lines.insert(1, 'node [style=filled];')
+    def get_markov_blanket_nodes_from_edges(self):
+        self.markov_blanket_node_names = set()
+        children = set()
+        for edge in self.edges:
+            edgeInfo = edge.split(" ")
+            from_node = str(edgeInfo[0])
+            to_node = str(edgeInfo[2])
+            if (from_node == self.class_node_str):
+                children.add(to_node)
+                self.markov_blanket_node_names.add(to_node)
+            if (to_node == self.class_node_str):
+                self.markov_blanket_node_names.add(from_node)
+        for edge in self.edges:
+            edgeInfo = edge.split(" ")
+            from_node = str(edgeInfo[0])
+            to_node = str(edgeInfo[2])
+            if (to_node in children):
+                self.markov_blanket_node_names.add(from_node)
+        #self.markov_blanket_node_names = list
 
-    def insert_class_node_color(self):
-        self.add_color_node_to_end_src_lines(self.class_node_str, self.class_node_color)
+    #def insert_class_node_color(self):
+    #    self.add_color_node_to_end_src_lines(self.class_node_str, self.class_node_color)
         #elf.dot_src_lines.insert(len(self.dot_src_lines)-1, self.class_node_str + "[color=" + self.class_node_color + "]")
 
     def dot_src_to_lines(self, dot_src):
@@ -167,6 +194,78 @@ class CausalGraph:
             self.graph[toNode]['edgeFrom'].append(self.edge_index)
             self.graph[toNode]['nodeFrom'].append(self.graph[fromNode]['nodeIndex'])
             self.graph[fromNode]['nodeTo'].append(self.graph[toNode]['nodeIndex'])
+
+    def edges_to_graph_dict_subgraph(self, edges, line_index):
+        for index, edge in enumerate(edges):
+            edgeInfo = edge.split(" ")
+            print edgeInfo
+            fromNode = str(edgeInfo[0])
+            toNode = str(edgeInfo[2])
+            if fromNode not in self.graph.keys():
+                self.create_node_dict(fromNode, self.node_index)
+                self.node_index += 1
+            if toNode not in self.graph.keys():
+                self.create_node_dict(toNode, self.node_index)
+                self.node_index += 1
+            self.graph[fromNode]['edgeTo'][toNode] = self.edge_index
+            self.graph[toNode]['edgeFrom'].append(self.edge_index)
+            self.map_edge_index_to_line_index[self.edge_index] = line_index
+            self.graph[toNode]['nodeFrom'].append(self.graph[fromNode]['nodeIndex'])
+            self.graph[fromNode]['nodeTo'].append(self.graph[toNode]['nodeIndex'])
+            self.edge_index += 1
+            line_index += 1
+        return line_index
+
+    def generate_subgraph_dot_src_and_graph(self):
+        graphs = self.get_subgraph_edges()
+        self.generate_graph_from_subgraph(graphs[0], graphs[1])
+        self.generate_subgraph_dot_src(graphs[0], graphs[1])
+
+
+    def get_subgraph_edges(self):
+        markov_blanket_subgraph = []
+        markov_blanket_subgraph_edge_index = []
+        other_subgraph = []
+        other_subgraph_edge_index = []
+        for index, edge in enumerate(self.edges):
+            edgeInfo = edge.split(" ")
+            from_node_str = str(edgeInfo[0])
+            to_node_str = str(edgeInfo[2])
+            if ((from_node_str in self.markov_blanket_node_names or from_node_str == self.class_node_str) and (to_node_str in self.markov_blanket_node_names or to_node_str == self.class_node_str)):
+                markov_blanket_subgraph.append(from_node_str + " -> " + to_node_str + " ;")
+                markov_blanket_subgraph_edge_index.append(index)
+            else:
+                other_subgraph.append(from_node_str + " -> " + to_node_str + " ;")
+                other_subgraph_edge_index.append(index)
+        return [markov_blanket_subgraph, other_subgraph]
+
+    def generate_subgraph_dot_src(self, markov_blanket_subgraph, other_subgraph):
+        markov_blanket_subgraph.insert(0, "subgraph cluster_0 {")
+        markov_blanket_subgraph.append("label = \"Markov Blanket\" ")
+        markov_blanket_subgraph.append("}")
+        other_subgraph.insert(0, "subgraph cluster_1 {")
+        other_subgraph.append("label = \"Other Variables\" ")
+        other_subgraph.append("}")
+        subgraphs_dot_src_lines = markov_blanket_subgraph + other_subgraph
+        subgraphs_dot_src_lines.insert(0, "digraph G {")
+        subgraphs_dot_src_lines.insert(1, "rankdir=LR;")
+        subgraphs_dot_src_lines.insert(2, "splines=\"line\"");
+        subgraphs_dot_src_lines.append("}")
+        self.dot_src_lines = subgraphs_dot_src_lines
+        self.dot_src = self.lines_to_dot_src(subgraphs_dot_src_lines)
+
+    def generate_graph_from_subgraph(self, markov_blanket_subgraph, other_subgraph):
+        self.graph = dict()
+        self.node_index_to_name_map = dict()
+        self.edge_index = 1
+        self.node_index = 1
+        self.map_edge_index_to_line_index = dict()
+        line_index = self.edges_to_graph_dict_subgraph(markov_blanket_subgraph, 4)
+        self.edges_to_graph_dict_subgraph(other_subgraph, line_index + 3)
+        start_index = 1
+        start_index = self.init_spouse_graph(markov_blanket_subgraph, start_index)
+        self.init_spouse_graph(other_subgraph, start_index)
+
 
     def calculate_MB_consistency_score(self, feature_names):
         # have index and names of nodes in the MB, names of selected set
@@ -257,28 +356,32 @@ class CausalGraph:
                 name = self.node_index_to_name_map[node_index]
                 self.calculate_steps_to_node_indexes(name, node_indexes, found_indexes, new_step, MB_nodes)
 
-    def get_markov_blanket_nodes(self):
-        self.class_markov_blanket = set()
+    def get_markov_blanket_nodes_indexes(self):
+        #self.class_markov_blanket = set()
         self.markov_blanket_node_indexes = set()
-        all_node_indexes = [self.graph[self.class_node_str]['nodeFrom'], self.graph[self.class_node_str]['nodeTo'], self.graph[self.class_node_str]['spouseNode']]
-        for node_indexes in all_node_indexes:
-            for node_index in node_indexes:
+        #all_node_indexes = [self.graph[self.class_node_str]['nodeFrom'], self.graph[self.class_node_str]['nodeTo'], self.graph[self.class_node_str]['spouseNode']]
+        for node_name in self.markov_blanket_node_names:
+            self.markov_blanket_node_indexes.add(self.graph[node_name]['nodeIndex'])
+            #for node_index in node_indexes:
             #self.graph[self.class_node_str]['nodeFrom']:
-                self.class_markov_blanket.add(self.node_index_to_name_map[node_index])
-                self.markov_blanket_node_indexes.add(node_index)
+                #self.class_markov_blanket.add(self.node_index_to_name_map[node_index])
+                #self.markov_blanket_node_indexes.add(node_index)
 
-    def init_spouse_graph(self):
-        for index, edge in enumerate(self.edges):
-            dot_src_line_index = index + self.edge_to_dot_src_line_offset
+    def init_spouse_graph(self, edges, start_edge_index):
+        for index, edge in enumerate(edges):
+            #dot_src_line_index = index + self.edge_to_dot_src_line_offset
             edgeInfo = edge.split(" ")
             fromNode = str(edgeInfo[0])
             toNode = str(edgeInfo[2])
+            current_edge = start_edge_index#self.graph[toNode]['edgeFrom'][fromNode]
             for i, edge in enumerate(self.graph[toNode]['edgeFrom']):
-                if edge != dot_src_line_index:
+                if edge != current_edge:
                     node = self.graph[toNode]['nodeFrom'][i]
-                    if  node not in self.graph[fromNode]['nodeFrom'] and edge not in self.graph[fromNode]['nodeTo']:
+                    if node not in self.graph[fromNode]['nodeFrom'] and edge not in self.graph[fromNode]['nodeTo']:
                         self.graph[fromNode]['spouseEdge'].append(edge)
                         self.graph[fromNode]['spouseNode'].append(node)
+            start_edge_index += 1
+        return start_edge_index
 
         #node_names = self.graph.keys()
         #for i in range(len(node_names)):
