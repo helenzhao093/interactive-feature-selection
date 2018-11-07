@@ -1,6 +1,130 @@
-body {
-  background: lightsteelblue;
+.root-div {
+    margin: 0 auto;
+    height: 100%;
+    background: #20232a;
+    width: 1000px;
 }
+
+.animate-right {
+    animation: animateright 0.4s;
+}
+
+.sidebar-card {
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
+}
+
+.sidebar-right {
+    right: 0px;
+    height: 100%;
+    width: 20%;
+    background-color: #ffffff;
+    position: fixed !important;
+    z-index: 1;
+    overflow: auto;
+}
+
+.sidebar-toggle {
+    float: right !important;
+    font-size: 30px !important;
+    border: none;
+    cursor: pointer;
+    background: #20232a;
+    color: #ffffff;
+}
+
+.sidebar-item {
+    width: 100%;
+    display: block;
+    padding: 8px 16px;
+    text-align: left;
+    border: none;
+    white-space: normal;
+    float: none;
+    outline: 0;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.sidebar-item p {
+    margin: 0;
+    font-size:0.8em;
+    /*font-family: "Lucida Grande"; */
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 500px 300px 100px;
+}
+.grid-item {
+    text-align: center;
+}
+
+/* TABS */
+.tabs {
+
+}
+
+.tab{
+  display: inline-block;
+  padding-right: 5px;
+  padding-left: 5px;
+  padding: 16px 30px;
+  cursor: pointer;
+    background: #20232a;
+    color: white;
+    /*font-family: "Lucida Sans";*/
+    font-size: 1em;
+}
+
+.tabs-active-content {
+    background: white;
+}
+
+.tab-link.active {
+    color: #61dafb;
+}
+
+.arrow {
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    padding: 10px;
+    width: 20px;
+    height: 20px;
+    position: fixed;
+    top: 5px;
+}
+
+/* TOOLS BAR */
+.tools-bar {
+    background: #f7f7f7;
+    height: 30px;
+    margin-bottom: 10px;
+    border-bottom-style: solid;
+    border-bottom-color: #757575;
+    border-bottom-width: .1em;
+}
+
+.tools-bar.right-button {
+    float: right;
+}
+
+/* FEATURE IMPORTANCE */
+.feature-node {
+    cursor: pointer;
+}
+
+.feature-node.active ellipse{
+    stroke: darkblue;
+
+    stroke-width: 2px;
+}
+
+/* CHECKBOX */
+
+
 
 .graphline {
   stroke-width: 3px;
@@ -8,6 +132,10 @@ body {
 
 path.link.hidden {
   stroke-width: 0;
+}
+
+.histogram-div {
+  float:left;
 }
 
 .container {
@@ -30,40 +158,6 @@ path.link.hidden {
     width: 0;
 }
 
-.checkmark {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 15px;
-    width: 15px;
-    background-color: #eee;
-}
-
-/* Create the checkmark/indicator (hidden when not checked) */
-.checkmark:after {
-    content: "";
-    position: absolute;
-    display: none;
-}
-
-/* Show the checkmark when checked */
-.container input:checked ~ .checkmark:after {
-    display: block;
-}
-
-/* Style the checkmark/indicator */
-.container .checkmark:after {
-    left: 9px;
-    top: 5px;
-    width: 5px;
-    height: 10px;
-    border: solid white;
-    border-width: 0 3px 3px 0;
-    -webkit-transform: rotate(45deg);
-    -ms-transform: rotate(45deg);
-    transform: rotate(45deg);
-}
-
 .series-marker {
     height: 1em;
     width: 1em;
@@ -76,38 +170,29 @@ path.link.hidden {
 
 .legend  {
     min-width: 200px;
-    display: flex;
+    display: inline-flex;
     justify-content: flex-start;
     flex-wrap: wrap;
     font-size: 16px;
 }
 
+.legend-left {
+    display: block;
+    text-align: left;
+}
+
 .legend p {
     display:inline;
     font-size: 0.8em;
-    font-family: sans-serif;
+    /*font-family: sans-serif;*/
     font-weight: 600;
     margin-right: 5px
 }
 
 .column {
-    float: left;
-    padding: 5px;
-    border-color: grey;
-    border-radius: 5px;
-    border-width: 5px;
-    background: #fbfbfb
+
 }
 
-.column-left {
-    float: left;
-    padding: 5px;
-    border-color: grey;
-    border-radius: 5px;
-    border-width: 5px;
-    background: #fbfbfb;
-    margin-right: 5px
-}
 
 /* Clear floats after the columns */
 .row {
@@ -122,21 +207,27 @@ path.link.hidden {
 
 
 .selected-edgeto path{
-  stroke: #fffbd0;
+  stroke: #42d9f4;
+    stroke-width: 0.2rem;
 }
 
 .selected-edgeto polygon{
-  fill: #fffbd0;
-  stroke: #fffbd0
+  fill: #42d9f4;
+  stroke: #42d9f4;
 }
 
 .selected-edgefrom path{
   stroke: #ff9900;
+    stroke-width: 0.2rem;
 }
 
 .selected-edgefrom polygon{
   fill: #ff9900;
-  stroke: #ff9900
+  stroke: #ff9900;
+}
+
+.ek-selected ellipse{
+  fill:yellow;
 }
 
 .selected-node ellipse{
@@ -148,7 +239,7 @@ path.link.hidden {
 }
 
 .selected-nodeto ellipse{
-  fill: #fffbd0;
+  fill: #42d9f4;
 }
 
 .selected-spousenode ellipse{
@@ -157,6 +248,7 @@ path.link.hidden {
 
 .selected-spouseedge path{
   stroke: green;
+    stroke-width: 0.2rem;
 }
 .selected-spouseedge polygon{
   fill: green;
@@ -169,6 +261,7 @@ path.link.hidden {
 
 .selected-pathto path{
   stroke: orange;
+    stroke-width: 0.2rem;
 }
 .selected-pathto polygon{
   fill: orange;
@@ -200,3 +293,11 @@ path.link.hidden {
  .hidden {
      visibility: hidden;
 }
+
+ ul {
+     margin: 0;
+ }
+
+ * {
+     font-family: "Tahoma";
+ }
