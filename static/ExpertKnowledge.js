@@ -12,60 +12,34 @@ class ContinuousLegend extends React.Component{
     var cellHeight = (this.state.totalHeight/this.props.colors.length);
     return (
       <g transform={`translate(5,${translate})`}>
-          <text y={-5}>{"Rank"}</text>
+          <text y={-25}>{"Importance"}</text>
+          <text y={-5}>{"Most"}</text>
           {
             this.props.colors.map((color, index) =>
                 <g className={"legend-cell"} transform={`translate(0,${index * cellHeight})`}>
                   <rect height={cellHeight} width={this.state.width} stroke={"black"} strokeWidth={1} fill={color}></rect>
-                  <text x={30} y={20} textAnchor={"middle"}>{index}</text>
                 </g>
             )}
+            <text y={255}>{"Least"}</text>
           </g>
   )}
 }
+//                   <text x={30} y={20} textAnchor={"middle"}>{index}</text>
 
 class ExpertKnowledge extends React.Component {
   constructor(props) {
     super(props)
     console.log(props.features);
     var radius = 16;
-    /*const numberCircle = 2;
-    const largeCircleRadius = Math.min(this.props.width, this.props.height)/2 - 2*radius;
-
-    var circleRadii = []
-    for (var i = numberCircle; i > 0; i--) {
-      circleRadii.push(largeCircleRadius/numberCircle * i)
-    } */
-    //var circleRadii = [Math.min(this.props.width, this.props.height)/2];
-
-    /*Object.keys(props.features).map(key =>
-      {
-          var pt_angle = Math.random() * 2 * Math.PI;
-          var randomRadius;
-          if (props.features[key].circleIndex > 0) {
-            randomRadius = Math.random() * (props.circleRadii[props.features[key].circleIndex] - props.circleRadii[props.features[key].circleIndex + 1] - 2 * radius) + (props.circleRadii[props.features[key].circleIndex + 1] + radius);
-          } else {
-            randomRadius = Math.random() * (props.circleRadii[props.features[key].circleIndex] - radius);
-          }
-          var pt_radius_sq = randomRadius * randomRadius;
-          props.features[key].radius = randomRadius;
-          props.features[key].x = Math.sqrt(pt_radius_sq) * Math.cos(pt_angle);
-          props.features[key].y = Math.sqrt(pt_radius_sq) * Math.sin(pt_angle);
-      }
-    ); */
     var colorRange = ['#e9f2fb', '#cfe1f2', '#a6cde4', '#7bb7d9', '#4694c7', '#2574b5', '#1059a1', '#083979'];
     var colorFunction = d3.scaleOrdinal().range(colorRange).domain([0,1,2,3,4,5,6,7])
 
     this.state = {
-      //features: this.props.features,
       featureRadius: radius,
-      //circleRadii: circleRadii,
       width: this.props.width,
       height: this.props.height,
-        colorRange: colorRange,
+      colorRange: colorRange,
       colorFunction: colorFunction,
-      //moves: [],
-      //step: 0
     };
     console.log(this.state)
     //this.addCircle = this.addCircle.bind(this);
@@ -84,12 +58,6 @@ class ExpertKnowledge extends React.Component {
         })
         .on("drag", function(d) {
            d3.select(this).attr("transform", "translate(" + (this.x = d3.event.x) + "," + (this.y=d3.event.y) + ")");
-           //var circle = this.childNodes[0]
-           //var otherChild = this.childNodes[1]
-           //d3.select(circle).attr("cx", d3.event.x).attr("cy", d3.event.y);
-           //d3.select(child).attr("x", d3.event.x).attr("y", d3.event.y);
-           //d3.select(otherChild).attr("cx", d3.event.x).attr("cy", d3.event.y);
-           //d3.select(otherChild).attr("x", d3.event.x).attr("y", d3.event.y);
         })
         .on("end", function(d) {
           const x = that.props.features[this.id].x;

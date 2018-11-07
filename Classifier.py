@@ -2,7 +2,10 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import cross_val_predict
 import pandas as pd
+import numpy as np
 
 # read datafile with features + target in last column
 class Classifier:
@@ -31,10 +34,16 @@ class Classifier:
             y_pred = self.clf.predict(X_test)
             precision.append(precision_score(y_test, y_pred, average='weighted'))
             recall.append(recall_score(y_test, y_pred, average='weighted'))
-        self.predicted = self.clf.predict(X)
-        self.proba = self.clf.predict_proba(X)
+        self.predicted = cross_val_predict(self.clf, X, y, cv=skf)
+        self.proba = cross_val_predict(self.clf, X, y, cv=skf, method='predict_proba')
+        self.init_confusion_matrix(y, self.predicted)
         #print self.predictions
         self.set_average_scores(accurary, precision, recall)
+
+    def init_confusion_matrix(self, y_true, y_pred):
+        self.cm = confusion_matrix(y_true, y_pred)
+        self.cm_normalized = self.cm.astype('float')/self.cm.sum(axis=1)[:, np.newaxis]
+        #print self.cm_normalized
 
     def set_average_scores(self, accuracy, precision, recall):
         self.accuracy = self.get_average(accuracy)

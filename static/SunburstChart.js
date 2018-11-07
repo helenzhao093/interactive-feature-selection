@@ -75,8 +75,6 @@ class SunburstChart extends React.Component {
         var pie3Data = pie2Data.flat();
 
         var arcs3 = pie3(pie3Data);
-        console.log(arcs1);
-        console.log(arcs2);
         return (
             <svg width={this.props.size[0]} height={this.props.size[1]}>
                 <g transform={`translate(${this.state.radii[3]},${this.state.radii[3]})`}>
@@ -92,7 +90,6 @@ class SunburstChart extends React.Component {
                     {arcs2.map((slice, index) =>
                         <g className={"slice"}>
                             <path fill={this.state.colorMB(pie2DataLabel[index])} stroke={"white"} strokeWidth={2} d={arc2(slice)}></path>
-                            <text transform={`translate(${arc2.centroid(slice)})`} textAnchor={"middle"}>{pie2DataLabel[index]}</text>
                         </g>
                     )
                     }
@@ -110,3 +107,8 @@ class SunburstChart extends React.Component {
         )
     }
 }
+
+/*
+                            <!--<text transform={`translate(${arc2.centroid(slice)})`} textAnchor={"middle"}>{pie2DataLabel[index]}</text> -->
+
+ */

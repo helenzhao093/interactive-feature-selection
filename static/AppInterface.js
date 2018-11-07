@@ -68,6 +68,8 @@ class AppInterface extends React.Component {
             accuracy: [],
             precision: []
         },
+        confusionMatrix: [[]],
+        confusionMatrixNormalized: [[]],
         consistencyGraphLegend: {
             keys: ["MB consistency", "Mutual Information"],
             colors: ["red", "green"],
@@ -126,6 +128,7 @@ class AppInterface extends React.Component {
 
       /* OTHER */
       this.toggleAnalysis = this.toggleAnalysis.bind(this);
+      this.goFromAnalysisToSelection = this.goFromAnalysisToSelection.bind(this);
 
 
     this.sendData = this.sendData.bind(this);
@@ -300,10 +303,31 @@ class AppInterface extends React.Component {
     }
 
     initializeFeatureNameToRankMap() {
+        //
+        var featureRankToNamesMap = {};
+        for (var i = 0; i <= this.state.featureImportance.circleRadii.length; i++) {
+            featureRankToNamesMap[i] = [];
+        }
+        Object.keys(this.state.featureImportance.features).map(key => {
+            //featureNameToRankMap[this.state.featureImportance.features[key].name] = this.state.featureImportance.features[key].rank;
+            featureRankToNamesMap[this.state.featureImportance.features[key].rank].push(this.state.featureImportance.features[key].name);
+        });
+
+        var nextRank = 0;
+        var featureRankNoEmpty = {};
+        for (var i = 0; i <= this.state.featureImportance.circleRadii.length; i++) {
+            if (featureRankToNamesMap[i].length != 0) {
+                featureRankNoEmpty[nextRank] = featureRankToNamesMap[i];
+                nextRank = nextRank + 1;
+            }
+        }
         var featureNameToRankMap = {};
-        Object.keys(this.state.featureImportance.features).map(key =>
-            featureNameToRankMap[this.state.featureImportance.features[key].name] = this.state.featureImportance.features[key].rank
+        Object.keys(featureRankNoEmpty).map((rank) =>
+            featureRankNoEmpty[rank].map(name =>
+                featureNameToRankMap[name] = +rank
+            )
         );
+        console.log(featureNameToRankMap)
         this.state.featureRank = featureNameToRankMap;
         return featureNameToRankMap;
     }
@@ -338,7 +362,6 @@ class AppInterface extends React.Component {
             // initialize forbidden and required edges
             var forbiddenEdges = this.initializeForbiddenEdges();
             var requiredEdges = this.initializeRequiredEdges();
-            console.log(requiredEdges)
             // send prior to graph and initialize graph
             this.sendData("/initializeGraph", {forbiddenEdges: forbiddenEdges, requiredEdges: requiredEdges});
         }
@@ -665,6 +688,8 @@ class AppInterface extends React.Component {
         this.state.metrics.precision.push(parseFloat(data.precision.toFixed(3)));
         this.state.metrics.accuracy.push(parseFloat(data.accuracy.toFixed(3)));
         this.setState({
+          confusionMatrixNormalized: data.confusionMatrixNormalized,
+          confusionMatrix: data.confusionMatrix,
           consistencyScores: this.state.consistencyScores,
           currentScores: {
             MI: -1,
@@ -678,7 +703,8 @@ class AppInterface extends React.Component {
           rankLoss: this.state.rankLoss,
           rankLossCurrent: {
               score: -1,
-          }
+          },
+          activeTabIndex: 3
           //featureHistory: this.state.featureHistory,
           //histogramHistory: currentHistogramHistory.concat([ {data: data.histogramData }]),
           //histogramUpdateStep: currentHistogramHistory.length,
@@ -848,6 +874,12 @@ class AppInterface extends React.Component {
         })
     }
 
+    goFromAnalysisToSelection() {
+        this.setState({
+            activeTabIndex: 2
+        })
+    }
+
   render() {
       console.log('app');
       /*let metricsGraph;
@@ -942,8 +974,8 @@ class AppInterface extends React.Component {
               <Tab linkClassName={"Feature Selection"}>
                   <div>
                       <div className={"tools-bar"}>
-                          <button onClick={this.classify}>{"Classify"}</button>
                           <button style={{background: this.state.showAnalysis? "blue" : "white"}} onClick={this.toggleAnalysis}>{"Analysis"}</button>
+                          <button className={"tools-bar right-button"} onClick={this.classify}>{"Classify"}</button>
                           <button className={"tools-bar right-button"} onClick={this.goFromSelectionToGraph}>{"Previous"}</button>
                       </div>
 
@@ -1025,6 +1057,78 @@ class AppInterface extends React.Component {
                           </div>
                       </div>
                   </div>
+              </Tab>
+              <Tab linkClassName={"Performance Analysis"}>
+                  <div className={"tools-bar"}>
+                      <button className={"tools-bar right-button"} onClick={this.goFromAnalysisToSelection}>{"Previous"}</button>
+                  </div>
+                <ConfusionMatrix
+                    matrix={this.state.confusionMatrix}
+                    normalizedMatrix={this.state.confusionMatrixNormalized}
+                    classNames={this.props.classNames}
+                />
+                  <div className={"grid-container"}>
+                  <div>
+                      <ProgressGraph size={[500, 300]}
+                                     max={this.state.consistencyGraphLegend.max}
+                                     min={0}
+                                     name={"consistency"}
+                                     consistencyScores={this.state.consistencyScores}
+                                     metrics={this.state.metrics}
+                                     metricsColors={this.state.metricsGraphLegend.colors}
+                                     currentScores={this.state.currentScores}
+                                     colors={this.state.consistencyGraphLegend.colors}
+                                     selectedIndex={this.state.selectedIndex}
+                                     updateIndex={this.updateIndex}
+                                     xAxisLength={this.state.xAxisLength}
+                                     goToStep={(s) => this.goToStep(s)}
+                      />
+                      <Legend className={"legend"}
+                              keys={this.state.consistencyGraphLegend.keys.concat(this.state.metricsGraphLegend.keys)}
+                              colors={this.state.consistencyGraphLegend.colors.concat(this.state.metricsGraphLegend.colors)}/>
+                  </div>
+                  <div className={"grid-item"}>
+                      <PieChart size={[300,300]}
+                                data={Array.from(this.state.markovBlanketFeatureNames)}
+                                selection={this.state.selectedFeatureNames}
+                      />
+                  </div>
+                  <div className={"grid-item"}>
+                      <Legend className={"legend legend-left"}
+                              keys={["Covered", "Not Covered"]}
+                              colors={["#b9d9ff", "#a9a9a9"]}/>
+                  </div>
+                  <div className={"grid-item"}>
+                      <ProgressGraph size={[500, 300]}
+                                     max={rankLossMax}
+                                     min={0}
+                                     name={"rankLoss"}
+                                     consistencyScores={this.state.rankLoss}
+                                     metrics={{accuracy: [], precision: []}}
+                                     metricsColors={[]}
+                                     currentScores={this.state.rankLossCurrent}
+                                     colors={this.state.rankLossGraphLegend.colors}
+                                     selectedIndex={this.state.selectedIndex}
+                                     updateIndex={this.updateIndex}
+                                     xAxisLength={this.state.xAxisLength}
+                                     goToStep={(s) => this.goToStep(s)}
+                      />
+                      <Legend className={"legend"}
+                              keys={this.state.rankLossGraphLegend.keys}
+                              colors={this.state.rankLossGraphLegend.colors}/>
+                  </div>
+                  <div className={"grid-item"}>
+                      <SunburstChart size={[300,300]}
+                                     data={this.state.rankData}
+                                     selection={this.state.selectedFeatureNames}
+                      />
+                  </div>
+                  <div className={"grid-item"}>
+                      <Legend className={"legend legend-left"}
+                              keys={['In MB', 'Not in MB']}
+                              colors={['#7e6699', '#f08036']}/>
+                  </div>
+              </div>
               </Tab>
           </Tabs>
         </div>

@@ -28,11 +28,8 @@ class CausalGraph:
         #self.edges_to_graph_dict()
         #self.init_spouse_graph()
         #
-
         self.get_markov_blanket_nodes_from_edges()
-
         self.generate_subgraph_dot_src_and_graph()
-
         self.find_paths_to_class_node()
         self.get_markov_blanket_nodes_indexes()
         #self.calculate_MB_consistency_score2(list(self.class_markov_blanket))
@@ -114,6 +111,8 @@ class CausalGraph:
         p = pc()
         p.start_vm()
         tetrad = s.tetradrunner()
+        #print("forbidden_edges:" + forbidden_edges)
+        #print("required_edges:" + required_edges)
         prior = pr.knowledge(forbiddirect = forbidden_edges, requiredirect = required_edges)
         tetrad.run(algoId = 'fges', dfs = df, priorKnowledge = prior, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
         dot_src = p.tetradGraphToDot(tetrad.getTetradGraph())

@@ -126,9 +126,8 @@ def get_histogram_data():
 def initialize_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
-        print data
         global causalGraph
-        causalGraph = CausalGraph(DATA_FOLDER + 'datafile.csv', data['requiredEdges'], data['forbiddenEdges'])
+        causalGraph = CausalGraph(DATA_FOLDER + 'datafile.csv', data['forbiddenEdges'], data['requiredEdges'], )
         interface_data = dict()
         get_graph_information(interface_data)
         interface_data['graph'] = causalGraph.graph
@@ -212,13 +211,13 @@ def classify():
         data['accuracy'] = classifier.accuracy
         data['precision'] = classifier.precision
         data['recall'] = classifier.recall
-
-        target = FEATURE_DATA.target
-        class_names = FEATURE_DATA.class_names
-        global HISTOGRAM
-        HISTOGRAM = Histogram(classifier.predicted, target, classifier.proba, class_names)
-
-        data['histogramData'] = HISTOGRAM.Histogram_info
+        data['confusionMatrix'] = classifier.cm.tolist()
+        data['confusionMatrixNormalized'] = classifier.cm_normalized.tolist()
+        #target = FEATURE_DATA.target
+        #class_names = FEATURE_DATA.class_names
+        #global HISTOGRAM
+        #HISTOGRAM = Histogram(classifier.predicted, target, classifier.proba, class_names)
+        #data['histogramData'] = HISTOGRAM.Histogram_info
     return jsonify(data)
 
 @app.route("/nodeSelected", methods=['POST'])

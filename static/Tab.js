@@ -68,6 +68,7 @@ class Tab extends React.Component {
                 <a className={`tab-link ${this.props.linkClassName} ${this.props.isActive ? 'active' : ''}`}>
                     {this.props.linkClassName}
                 </a>
+                <i className={"arrow"}></i>
             </li>
         );
     }
