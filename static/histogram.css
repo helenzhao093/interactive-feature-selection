@@ -25,7 +25,7 @@
 
 .sidebar-toggle {
     float: right !important;
-    font-size: 30px !important;
+    font-size: 40px !important;
     border: none;
     cursor: pointer;
     background: #20232a;
@@ -53,7 +53,7 @@
 
 .grid-container {
     display: grid;
-    grid-template-columns: 500px 300px 100px;
+    grid-template-columns: 500px 400px 100px;
 }
 .grid-item {
     text-align: center;
@@ -91,10 +91,9 @@
     border-width: 0 2px 2px 0;
     display: inline-block;
     padding: 10px;
-    width: 20px;
-    height: 20px;
-    position: fixed;
-    top: 5px;
+    vertical-align: middle;
+    width: 10px;
+    height: 10px;
 }
 
 /* TOOLS BAR */
@@ -105,10 +104,28 @@
     border-bottom-style: solid;
     border-bottom-color: #757575;
     border-bottom-width: .1em;
+    color: white;
+    font-size: small;
+    border-radius: 5px;
+}
+
+.action-button {
+    background: darkgray;
+    border-color: darkgray;
 }
 
 .tools-bar.right-button {
     float: right;
+}
+
+.next-button {
+    background: #0071e0;
+    border-color: #0071e0;
+}
+
+.previous-button {
+    background: lightgray;
+    border-color: lightgrey;
 }
 
 /* FEATURE IMPORTANCE */

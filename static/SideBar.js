@@ -12,12 +12,13 @@ class SideBarItem extends React.Component {
     }
 
     render() {
+        //console.log(this.props)
         return (
             <div>
-                <button className={"sidebar-item"} onClick={() => this.props.toggleDisplay(this.props.index)}>{this.props.feature.name}</button>
+                <button className={"sidebar-item"} onClick={() => this.props.toggleDisplay(this.props.index)}>{this.props.featureName}</button>
                 <div className={"collapsible-content sidebar-item"} style={{display: this.props.display? "block" : "none"}}>
                     <p>
-                        {this.props.feature.description}
+                        {this.props.featureDescription}
                     </p>
                 </div>
             </div>
@@ -29,7 +30,7 @@ class SideBar extends React.Component {
     constructor(props) {
         super(props);
         console.log(props)
-        var displays = this.props.featureInfo.map((feature) => false);
+        var displays = Object.keys(this.props.featureInfo).map((feature) => false);
         this.state = {
             displays: displays
         };
@@ -50,7 +51,7 @@ class SideBar extends React.Component {
     }
 
     toggleDisplay(itemIndex) {
-        console.log(itemIndex)
+        //console.log(itemIndex)
         var displays = this.state.displays;
         displays[itemIndex] = !this.state.displays[itemIndex];
         this.setState({
@@ -59,12 +60,12 @@ class SideBar extends React.Component {
     }
 
     render() {
-        console.log('sidebar');
+        //console.log(this.props.featureInfo);
         return (
             <div className={"sidebar-right sidebar-card animate-right"} style={{display: this.props.show ? "block" : "none"}}>
                 <button className={"sidebar-item"} onClick={this.props.close}>{"Close x"}</button>
-                {this.props.featureInfo.map((feature, index) =>
-                    <SideBarItem feature={feature} toggleDisplay={this.toggleDisplay} index={index} display={this.state.displays[index]}/>
+                {Object.keys(this.props.featureInfo).map((featureName, index) =>
+                    <SideBarItem featureName={featureName} featureDescription={this.props.featureInfo[featureName]} toggleDisplay={this.toggleDisplay} index={index} display={this.state.displays[index]}/>
                 )}
 
             </div>

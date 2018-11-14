@@ -13,6 +13,7 @@ class PieChart extends React.Component {
     }
 
     render(){
+        console.log(this.props.selection);
         var arc = d3.arc()
             .innerRadius(0)
             .outerRadius(this.state.radius);
@@ -25,7 +26,7 @@ class PieChart extends React.Component {
         var displayGray = true;
         return (
             <svg width={this.props.size[0]} height={this.props.size[1]}>
-                <g transform={`translate(${this.state.radius},${this.state.radius})`}>
+                <g transform={`translate(${this.props.size[0]/2},${this.state.radius})`}>
                     {arcs.map((slice, index) =>
                         <g className={"slice"}>
                             <path fill={this.props.selection.includes(this.props.data[index]) ? "#b9d9ff" : "#a9a9a9"} stroke={"white"} strokeWidth={2} d={arc(slice)}></path>

@@ -12,7 +12,7 @@ class Legend extends React.Component {
   }
 
   render() {
-    console.log(this.props)
+    //console.log(this.props)
     return (
       <div className={this.props.className}>
       {this.props.keys.map((key, index) =>
@@ -183,23 +183,15 @@ class ProgressGraph extends React.Component {
 
   combinePastScoresAndCurrentScores() {
       var scores = {};
-      //console.log(scores)
       var keys = Object.keys(this.props.consistencyScores);
-      //  console.log(keys)
       keys.forEach((key) => {
-          //console.log(this.props.consistencyScores[key])
-          //console.log(this.props.consistencyScores[key].slice())
-          scores[key] = this.props.consistencyScores[key].slice() //.push(this.props.currentScores[key])
+          scores[key] = this.props.consistencyScores[key].slice()
       });
-      //console.log(keys)
-      //console.log(scores)
-      //if (this.props.currentScores) {
       if (this.props.currentScores[keys[0]] >= 0) {
         keys.map((key) => {
           scores[key].push(this.props.currentScores[key])
         })
       }
-      //}
       return scores;
   }
 
@@ -210,7 +202,7 @@ class ProgressGraph extends React.Component {
           xScaleDomain.push(i);
           //xScaleRange.push( this.state.width/(this.props.xAxisLength - 1) * i );
       }
-      var xScale= d3.scaleBand().domain(xScaleDomain).range([0, this.state.width]).padding(0.1);
+      var xScale = d3.scaleBand().domain(xScaleDomain).range([0, this.state.width]).padding(0.1);
       return xScale;
   }
 
@@ -226,25 +218,9 @@ class ProgressGraph extends React.Component {
 
   render(){
     console.log("progress graph");
-    console.log(this.props.metrics);
+    console.log(this.props);
     var scores = this.combinePastScoresAndCurrentScores();
     var keys = this.state.keys;
-    //console.log(this.props.consistencyScores)
-    //console.log(scores)
-    //var MB = this.props.consistencyMB.splice()
-    //MB.push(this.props.currentMB)
-    //var EK = this.props.consistencyEK
-
-    //console.log(this.props.xAxisLength)
-    //console.log(xScaleDomain)
-    //var xScaleDomain = (scores[keys[0]].length > 1) ?
-    //    scores[keys[0]].map((score, index) => index) :
-    //    [0, 1]
-    //var xScaleRange = (scores[keys[0]].length > 1) ?
-    //  scores[keys[0]].map((score, index) => this.state.width/(scores[keys[0]].length - 1) * index) :
-    //  [0, this.state.width]
-    //console.log(xScaleDomain)
-    //console.log(xScaleRange)
 
     var xScale = this.getXAxis();
     //console.log(xScale.bandwidth);

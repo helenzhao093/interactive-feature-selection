@@ -2,11 +2,11 @@ class AppInterface extends React.Component {
   constructor(props) {
     super(props);
     console.log(props);
-    var colorRange = ["#00649b", "#bc4577", "#ff7e5a", "#b2bae4", "#c0392b", "#f1c40f", "#16a085", "#3498db", '#e88c5d', '#23a393' ];
+    var colorRange = ["#e31a1c", "#fdbf6f", "#33a02c", "#a6cee3", "#c0392b", "#f1c40f", "#16a085", "#3498db", '#e88c5d', '#23a393' ];
     var color = d3.scaleOrdinal()
         .range(colorRange)
         .domain(props.classNames);
-    var featureCoordinatesSize = [1000,500];
+    var featureCoordinatesSize = [1200,500];
 
     /* FEATURE IMPORTANCE */
     var circleRadii = [250];
@@ -16,7 +16,7 @@ class AppInterface extends React.Component {
         feature.rank = 0;
         feature.circleIndex = 0;
         var pt_angle = Math.random() * 2 * Math.PI;
-        var randomRadius = Math.random() * (circleRadii[feature.circleIndex] - radius);
+        var randomRadius = Math.sqrt(Math.random() * Math.pow((circleRadii[feature.circleIndex] - radius), 2));
         var pt_radius_sq = randomRadius * randomRadius;
         feature.radius = randomRadius;
         feature.x = Math.sqrt(pt_radius_sq) * Math.cos(pt_angle);
@@ -52,17 +52,21 @@ class AppInterface extends React.Component {
         },
         showAnalysis: false,
         featureSelectionAxisWidthSelected: 75,
-        featureSelectionAxisWidthNotSelected: 30,
+        featureSelectionAxisWidthNotSelected: 50,
         analysis: {
             showComponent: false
         },
-        consistencyScores:{
-            MB: [],
-            MI: []
+        MB:{
+            score: []
         },
-        currentScores: {
-            MB: -1, //parseFloat(this.props.consistencyMB.toFixed(3)),
-            MI: -1 //parseFloat(this.props.MI.toFixed(3))
+        MBCurrent: {
+            score: -1
+        },
+        MI:{
+            score: []
+        },
+        MICurrent: {
+            score: -1
         },
         metrics: {
             accuracy: [],
@@ -72,12 +76,12 @@ class AppInterface extends React.Component {
         confusionMatrixNormalized: [[]],
         consistencyGraphLegend: {
             keys: ["MB consistency", "Mutual Information"],
-            colors: ["red", "green"],
+            colors: ["#e31a1c", "#feb24c"],
             max: 1
         },
         metricsGraphLegend: {
             keys: ["accuracy", "precision"],
-            colors: ["orange", "blue"]
+            colors: ["#3690c0", "#d0d1e6"]
         },
         rankLoss: {
             score:[]
@@ -87,7 +91,7 @@ class AppInterface extends React.Component {
         },
         rankLossGraphLegend: {
             keys: ["rank loss"],
-            colors: ['blue']
+            colors: ['#016450']
         },
         featureData: {
             inputData: this.props.features.inputData,
@@ -96,6 +100,7 @@ class AppInterface extends React.Component {
         selectedFeatureNames: [],
         featureRank: {},
         rankData: [],
+        indexToFeatureMap: {},
         numRanks: 1, // number of circles in feature Importance
         featureHistory: [],
         step: 0,
@@ -104,12 +109,12 @@ class AppInterface extends React.Component {
         colorFunction: color,
         featureCoordinatesSize: featureCoordinatesSize,
         markovBlanketFeatureNames: new Set(),
+        coveredFeatures: new Set(),
         xAxisLength: 2,
         selectedIndex: 0,
         showInfo: false
     };
     //console.log(this.state)
-
     /* FEATURE IMPORTANCE METHODS */
       this.calculateNewCircleRadius = this.calculateNewCircleRadius.bind(this);
       this.addCircle = this.addCircle.bind(this);
@@ -119,12 +124,15 @@ class AppInterface extends React.Component {
 
       /* CAUSAL GRAPH METHODS */
       this.goFromGraphToImportance = this.goFromGraphToImportance.bind(this);
+      this.getGraphDataToLog = this.getGraphDataToLog.bind(this);
 
       /* FEATURE SELECTION METHODS */
       this.calculateFeatureSelectionXScale = this.calculateFeatureSelectionXScale.bind(this);
       this.sendGraphToSelection = this.sendGraphToSelection.bind(this);
       this.featureAxisOnEnd = this.featureAxisOnEnd.bind(this);
       this.goFromSelectionToGraph = this.goFromSelectionToGraph.bind(this);
+      this.calculateCoverage = this.calculateCoverage.bind(this);
+      this.isTherePathToClass = this.isTherePathToClass.bind(this);
 
       /* OTHER */
       this.toggleAnalysis = this.toggleAnalysis.bind(this);
@@ -137,14 +145,12 @@ class AppInterface extends React.Component {
     this.getNodeIndexToFeatureMap = this.getNodeIndexToFeatureMap.bind(this);
     this.getMarkovBlanketFeatureNames = this.getMarkovBlanketFeatureNames.bind(this);
 
-    this.updateData = this.updateData.bind(this);
     this.position = this.position.bind(this);
     this.sendImportanceToGraph = this.sendImportanceToGraph.bind(this);
     this.classify = this.classify.bind(this);
     this.updateIndex = this.updateIndex.bind(this);
     this.goToStep = this.goToStep.bind(this);
     this.getInitialConsistencyScores = this.getInitialConsistencyScores.bind(this);
-    //this.getInitialFeatureRank = this.getInitialFeatureRank.bind(this);
     this.initializeRankData = this.initializeRankData.bind(this);
     this.updateNumRanks = this.updateNumRanks.bind(this);
     this.handleTabClick = this.handleTabClick.bind(this);
@@ -153,72 +159,6 @@ class AppInterface extends React.Component {
     this.initializeForbiddenEdges = this.initializeForbiddenEdges.bind(this);
     this.initializeRequiredEdges = this.initializeRequiredEdges.bind(this);
     this.initializeFeatureNameToRankMap = this.initializeFeatureNameToRankMap.bind(this);
-      /*props.featureData.features.sort(function(a, b) { return a.index - b.index });
-      props.featureData.features.splice(props.markovBlanket.length, 0,
-        { index: props.featureData.features.length,
-          display: true,
-          name: "BOUNDARY",
-          type: "continuous",
-          range: [0,0]
-        }
-      );
-
-      var features = {}
-      props.featureSchema.sort(function (a,b) { return a.index - b.index })
-      props.featureSchema.map(feature => {
-          feature.rank = 0;
-          features[feature.index] = feature;
-      })
-      console.log(features)
-
-      this.props.featureSchema.map((feature) =>
-          feature.rank = 0
-      )
-
-      this.state = {
-        dotSrc: this.props.dotSrc,
-        markovBlanketSelected: this.props.markovBlanketSelected,
-        isEdgeSelected: this.props.isEdgeSelected,
-        isNodeSelected: this.props.isNodeSelected,
-        featureData:this.props.featureData,
-        features: this.props.featureData.features,
-        xScaleDomain: xScaleDomain,
-        xScale: xScale,
-        featureCoordinatesSize: featureCoordinatesSize,
-        featureSchema:features,
-        dragging: {},
-        colorRange: colorRange,
-        colorFunction: color,
-        selectedIndex: 0,
-        progressGraphKeys: ["Ranking consistency", "MB consistency", "Mutual Information"],
-        progressGraphKeyColor: ["red", "green", "blue"],
-        xAxisLength: 2,
-        consistencyScores: { EK: [],
-                             MB: [],
-                             MI: []
-                             } ,//[0.99, this.props.consistencyEK]
-        currentScores: { EK: 0.22,
-                         MB: parseFloat(this.props.consistencyMB.toFixed(3)),
-                         MI: parseFloat(this.props.MI.toFixed(3)) },
-        metrics: { accuracy: [],
-                   precision: [] },
-        featureHistory: [],
-        step: 0,
-        histogramHistory: [],
-        histogramUpdateStep: -1,
-        currentHistogramHistory: [],
-        currentHistogramStep: -1,
-        histogramSize: [300,300],
-        margin: {top: 5, right: 5, bottom: 15, left: 0},
-      };
-      this.sendData = this.sendData.bind(this);
-      this.handleClassSelection = this.handleClassSelection.bind(this);
-
-      this.position = this.position.bind(this);
-      this.featureAxisOnEnd = this.featureAxisOnEnd.bind(this);
-
-      this.histogramSettingSelection = this.histogramSettingSelection.bind(this)
-       */
 
   }
 
@@ -242,10 +182,18 @@ class AppInterface extends React.Component {
     addCircle() {
         const newCircleRadii = this.calculateNewCircleRadius(); //currentCircleRadii.concat(newRadius)
         this.state.featureImportanceMoves.push({type: "circle", circleRadii: this.state.featureImportance.circleRadii, features: this.state.featureImportance.features});
+
+        client.recordEvent('feature_importance_moves', {
+            user: userID,
+            type: "add_circle",
+            numCircles: this.state.featureImportance.circleRadii.length
+        });
+
         this.state.featureImportanceStep = this.state.featureImportanceStep + 1;
         Object.keys(this.state.featureImportance.features).map((key) => {
             this.updateFeatureRank(key, this.state.featureImportance.circleRadii.length - this.state.featureImportance.features[key].circleIndex)
         });
+
         this.setState({
             featureImportance: {
                 circleRadii: newCircleRadii,
@@ -255,6 +203,20 @@ class AppInterface extends React.Component {
     }
 
     addMove(move) {
+        client.recordEvent('feature_importance_moves', {
+           user: userID,
+           type: "move_feature",
+           feature: {
+               name: this.state.featureImportance.features[move.id].name,
+               id : move.id
+           },
+           circleIndex: {
+               old: move.circleIndex,
+               new: move.newCircleIndex
+           },
+           numCircles: this.state.featureImportance.circleRadii.length
+        });
+
         this.state.featureImportanceMoves.push(move);
         this.state.featureImportanceStep = this.state.featureImportanceStep + 1;
         if (move.type == 'feature') {
@@ -268,7 +230,6 @@ class AppInterface extends React.Component {
         if (this.state.featureImportanceStep > 0) {
             const step = this.state.featureImportanceStep;
             const lastStep = this.state.featureImportanceMoves[step - 1];
-            //console.log(lastStep);
             if (lastStep.type == "feature"){
                 const featureId = lastStep.id;
                 this.state.featureImportance.features[featureId].circleIndex = lastStep.circleIndex;
@@ -278,7 +239,6 @@ class AppInterface extends React.Component {
                 const selector = '[id=\"' + featureId + '"]';
                 console.log(d3.select(selector).attr("transform", "translate(" + lastStep.position.x +  "," + lastStep.position.y + ")"));
                 this.state.featureImportanceMoves.splice(step - 1);
-                //this.state.featureImportanceStep = step - 1;
                 this.setState({
                     featureImportanceMoves: this.state.featureImportanceMoves,
                     featureImportanceStep: step - 1
@@ -297,13 +257,13 @@ class AppInterface extends React.Component {
     }
 
     updateFeatureRank(featureId, rank) {
-        console.log(featureId, rank);
+        //console.log(featureId, rank);
         this.state.featureImportance.features[featureId].rank = rank;
         this.state.featureRank[this.state.featureImportance.features[featureId].name] = rank;
     }
 
     initializeFeatureNameToRankMap() {
-        //
+
         var featureRankToNamesMap = {};
         for (var i = 0; i <= this.state.featureImportance.circleRadii.length; i++) {
             featureRankToNamesMap[i] = [];
@@ -327,44 +287,69 @@ class AppInterface extends React.Component {
                 featureNameToRankMap[name] = +rank
             )
         );
-        console.log(featureNameToRankMap)
+        //console.log(featureNameToRankMap)
         this.state.featureRank = featureNameToRankMap;
-        return featureNameToRankMap;
+        return { featureNameToRankMap: featureNameToRankMap, featureRankToNamesMap: featureRankToNamesMap } ;
     }
 
     initializeForbiddenEdges() {
         var forbiddenEdges = [];
+        var lowestRankFeatures = [];
         Object.keys(this.state.featureImportance.features).map(key => {
             if (this.state.featureImportance.features[key].circleIndex == -1) {
                 forbiddenEdges.push([this.state.featureImportance.features[key].name, "CLASS"]);
+                lowestRankFeatures.push(this.state.featureImportance.features[key].name);
             }
         });
-        return forbiddenEdges;
+        return { forbiddenEdges: forbiddenEdges, lowestRankFeatures: lowestRankFeatures } ;
     }
 
     initializeRequiredEdges() {
         var requiredEdges = [];
+        var highestRankFeatures = [];
         if (this.state.featureImportance.circleRadii.length > 1) {
             Object.keys(this.state.featureImportance.features).map(key => {
                 if (this.state.featureImportance.features[key].circleIndex == this.state.featureImportance.circleRadii.length - 1) {
                     requiredEdges.push([this.state.featureImportance.features[key].name, "CLASS"]);
+                    highestRankFeatures.push(this.state.featureImportance.features[key].name);
                 }
             });
         }
-        return requiredEdges;
+        return { requiredEdges: requiredEdges, highestRankFeatures: highestRankFeatures } ;
     }
 
     // 1 -> 2
     sendImportanceToGraph() {
         if (this.state.shouldInitializeGraph) {
-            var featureNameToRankMap = this.initializeFeatureNameToRankMap();
+            var featureRanks = this.initializeFeatureNameToRankMap();
 
             // initialize forbidden and required edges
-            var forbiddenEdges = this.initializeForbiddenEdges();
-            var requiredEdges = this.initializeRequiredEdges();
+            var forbiddenEdgesInfo = this.initializeForbiddenEdges();
+            var requiredEdgesInfo = this.initializeRequiredEdges();
+
+            /* capture feature importance */
+            client.recordEvent('feature_importance_snap_shot', {
+                user: userID,
+                lowestRankFeatures: forbiddenEdgesInfo.lowestRankFeatures,
+                highestRankFeatures: requiredEdgesInfo.highestRankFeatures,
+                featureNameToRank: featureRanks.featureNameToRankMap,
+                featureRankToNames: featureRanks.featureRankToNamesMap
+            });
+
             // send prior to graph and initialize graph
-            this.sendData("/initializeGraph", {forbiddenEdges: forbiddenEdges, requiredEdges: requiredEdges});
+            this.sendData("/initializeGraph", {
+                forbiddenEdges: forbiddenEdgesInfo.forbiddenEdges,
+                requiredEdges: requiredEdgesInfo.requiredEdges
+            });
+
+        } else {
+
+            /* record user viewing feature importance */
+            client.recordEvent('feature_importance_view_page_only', {
+                user: userID
+            });
         }
+
         // set tab index to graph index
         this.setState({
             activeTabIndex: 1,
@@ -398,6 +383,20 @@ class AppInterface extends React.Component {
       });
     }
 
+  getGraphDataToLog(inputGraph) {
+        var graph = {};
+        Object.keys(inputGraph).map((featureName) => {
+            graph[featureName] = []
+            //graph[featureName].edgeTo = []
+        });
+        Object.keys(inputGraph).map((featureName) => {
+            Object.keys(inputGraph[featureName].edgeTo).map((toNodeName) => {
+                graph[featureName].push(toNodeName);
+            });
+        });
+        return graph;
+  }
+
   sendData(url, dataToSend) {
     //console.log(dataToSend);
     fetch(url, {
@@ -406,6 +405,37 @@ class AppInterface extends React.Component {
     }).then(function(response) {
       return response.json();
     }).then(data => {
+        var graph = this.getGraphDataToLog(data.graph);
+        //this.props.sendData("/addEdge", {"nodeFrom": firstNode, "nodeTo": secondNode });
+        if (url == '/addEdge') {
+            client.recordEvent('graph_history', {
+                user: userID,
+                type: "add_edge",
+                info: [dataToSend.nodeFrom, dataToSend.nodeTo],
+                graph: graph
+            });
+        }
+
+        //this.props.sendData("/redrawGraph", {features: [removedNode], removedEdges: this.state.removedEdges } )
+        if (url == '/redrawGraph') {
+            client.recordEvent('graph_history', {
+                user: userID,
+                type: "remove_node",
+                info: dataToSend.features[0],
+                graph: graph
+            });
+        }
+
+        // this.sendData("/initializeGraph", {forbiddenEdges: forbiddenEdgesInfo.forbiddenEdges,requiredEdges: requiredEdgesInfo.requiredEdges});
+        if (url == "/initializeGraph") {
+            client.recordEvent('graph_history', {
+                user: userID,
+                type: "initial_graph",
+                info: dataToSend,
+                graph: graph
+            });
+        }
+
         const currentGraphHistory = this.state.causalGraph.graphHistory.splice(0, this.state.graphIndex + 1);
         this.setState({
             causalGraph: {
@@ -431,6 +461,14 @@ class AppInterface extends React.Component {
       }).then(function(response) {
           return response.json();
       });
+      var inputGraph = this.state.causalGraph.graphHistory[currentIndex - 1];
+      var graph = this.getGraphDataToLog(inputGraph);
+      client.recordEvent('graph_history', {
+         user: userID,
+         type: "undo",
+         info: [],
+         graph: graph
+      });
       this.setState({
           graphIndex: currentIndex - 1
       });
@@ -441,6 +479,14 @@ class AppInterface extends React.Component {
           method: 'POST',
       }).then(function(response) {
           return response.json();
+      });
+      var inputGraph = this.state.causalGraph.graphHistory[0];
+      var graph = this.getGraphDataToLog(inputGraph);
+      client.recordEvent('graph_history', {
+          user: userID,
+          type: "clear",
+          info: [],
+          graph: graph
       });
       this.setState({
           graphIndex: 0
@@ -459,11 +505,14 @@ class AppInterface extends React.Component {
   getMarkovBlanketFeatureNames(indexToFeatureMap, classNode) {
     const nodeList = [classNode.spouseNode, classNode.nodeTo, classNode.nodeFrom]
     var markovBlanketFeatureNames = new Set();
+    var markovBlanketFeatureIndexes = new Set();
     nodeList.map((nodes) => {
       nodes.map((nodeIndex) => {
-        markovBlanketFeatureNames.add(indexToFeatureMap[nodeIndex])
+        markovBlanketFeatureNames.add(indexToFeatureMap[nodeIndex]);
+        markovBlanketFeatureIndexes.add(nodeIndex);
       })
     });
+    this.state.markovBlanketFeatureIndexes = markovBlanketFeatureIndexes;
     return markovBlanketFeatureNames;
   }
 
@@ -520,6 +569,7 @@ class AppInterface extends React.Component {
           const currentIndex = this.state.graphIndex;
           const currentGraph = this.state.causalGraph.graphHistory[currentIndex].graph;
           var indexToFeatureMap = this.getNodeIndexToFeatureMap(currentGraph);
+          this.state.indexToFeatureMap = indexToFeatureMap;
           var markovBlanketFeatureNames = this.getMarkovBlanketFeatureNames(indexToFeatureMap, currentGraph.CLASS);
           this.state.markovBlanketFeatureNames = markovBlanketFeatureNames;
 
@@ -547,16 +597,24 @@ class AppInterface extends React.Component {
 
           var allFeatureNames = this.getInitialConsistencyScores(featuresWithBoundary);
 
+          /*client.recordEvent('feature_selections', {
+
+          }); */
+
           this.setState({
               featureSelection: {
                   xScaleDomain: xScaleInfo.xScaleDomain,
                   xScale: xScaleInfo.xScale,
                   features: featuresWithBoundary
               },
+              MBCurrent: {
+                  score: 1
+              },
               selectedFeatureNames: allFeatureNames,
               activeTabIndex: 2,
               featureCoordinatesSize: [xScaleInfo.featureSelectionTotalWidth, 500],
-              shouldInitializeSelection: false
+              shouldInitializeSelection: false,
+              coveredFeatures: this.state.markovBlanketFeatureNames
           });
       } else {
 
@@ -599,14 +657,21 @@ class AppInterface extends React.Component {
             var xScaleInfo = this.calculateFeatureSelectionXScale(features); //this.state.featureSelection.xScale.domain(xScaleDomain);
 
             this.calculateScores({ features: allFeatureIndexes, names: allFeatureNames, featureOrder: features, featureRank: this.state.featureRank });
+            let coveredFeatures = this.calculateCoverage(allFeatureNames);
+            let MBScore = coveredFeatures.size/ this.state.markovBlanketFeatureNames.size
+            //console.log(coveredFeatures)
             this.setState({
                 featureSelection: {
                     xScale: xScaleInfo.xScale,
                     xScaleDomain: xScaleInfo.xScaleDomain,
                     features: features
                 },
+                MBCurrent: {
+                    score: MBScore
+                },
                 selectedFeatureNames: allFeatureNames,
-                featureCoordinatesSize: [xScaleInfo.featureSelectionTotalWidth, 500]
+                featureCoordinatesSize: [xScaleInfo.featureSelectionTotalWidth, 500],
+                coveredFeatures: coveredFeatures
             });
         }
     }
@@ -617,41 +682,8 @@ class AppInterface extends React.Component {
       })
     }
 
-  updateData(data) {
-    console.log(data);
-    var keys = Object.keys(data);
-    //console.log(this.state.consistencyMB)
-    //console.log(data.consistencyMB.toFixed(3))
-    if (keys.includes("featureData")) {
-      this.setState({
-        featureData: data.featureData
-      })
-    } else if(keys.includes("histogramData")) {
-        const currentHistogramHistory = this.state.currentHistogramHistory.splice(0, this.state.currentHistogramStep + 1)
-        this.setState({
-            currentHistogramHistory: currentHistogramHistory.concat([{data: data.histogramData }]),
-            currentHistogramStep: currentHistogramHistory.length
-        })
-
-    } else {
-      var axisLength = this.state.xAxisLength;
-      if (this.state.consistencyScores.MB.length >= 2 && this.state.currentScores.MB == -1) {
-        axisLength = axisLength + 1
-      }
-      console.log(axisLength);
-      this.setState({
-        currentScores: {
-          MB: parseFloat(data.consistencyMB.toFixed(3)),
-          MI: parseFloat(data.MI.toFixed(3)),
-          EK: 0.5
-        },
-        xAxisLength: axisLength,
-      })
-    }
-  }
-
   classify() {
-    if (this.state.currentScores.MI >= 0) {
+    if (this.state.MICurrent.score >= 0) {
 
       // names of features in feature set
       const allFeatureNames = this.state.featureSelection.features.map((feature) =>
@@ -674,27 +706,35 @@ class AppInterface extends React.Component {
       }).then(function(response) {
         return response.json();
       }).then(data => {
-        console.log(data);
-        //const currentHistogramHistory = this.state.histogramHistory.splice(0, this.state.histogramUpdateStep + 1)
-        //var currentFeatureHistory = this.state.featureData.features.slice();
-        //this.state.featureHistory.push(currentFeatureHistory);
-        //console.log(this.state.featureHistory);
-        var keys = Object.keys(this.state.consistencyScores);
-        keys.forEach((key) =>
-          this.state.consistencyScores[key].push(this.state.currentScores[key])
-        );
+        this.state.MI.score.push(this.state.MICurrent.score);
+        this.state.MB.score.push(this.state.MBCurrent.score);
         this.state.rankLoss.score.push(this.state.rankLossCurrent.score);
-        console.log(this.state.consistencyScores);
         this.state.metrics.precision.push(parseFloat(data.precision.toFixed(3)));
         this.state.metrics.accuracy.push(parseFloat(data.accuracy.toFixed(3)));
+
+        client.recordEvent('classify_results', {
+           user: userID,
+           MI: this.state.MICurrent.score,
+           MB: this.state.MBCurrent.score,
+           rankLoss: this.state.rankLossCurrent.score,
+           accuracy: +data.accuracy.toFixed(3),
+           precision: +data.precision.toFixed(3),
+           features: features.features
+        });
         this.setState({
           confusionMatrixNormalized: data.confusionMatrixNormalized,
           confusionMatrix: data.confusionMatrix,
-          consistencyScores: this.state.consistencyScores,
-          currentScores: {
-            MI: -1,
-            MB: -1,
-            EK: -1
+          MI: {
+              score: this.state.MI.score
+          },
+          MB: {
+              score: this.state.MB.score
+          },
+          MICurrent: {
+              score: -1
+          },
+          MBCurrent: {
+              score: -1
           },
           metrics: {
             precision: this.state.metrics.precision,
@@ -740,15 +780,22 @@ class AppInterface extends React.Component {
           console.log(data);
           var axisLength = this.state.xAxisLength;
           var selectedIndex = this.state.selectedIndex;
-          if (this.state.consistencyScores.MB.length >= 2 && this.state.currentScores.MB == -1) {
+          if (this.state.MB.score.length >= 2 && this.state.MBCurrent.score == -1) {
               axisLength = axisLength + 1;
               selectedIndex = selectedIndex + 1;
           }
-          console.log(axisLength);
+          //console.log(axisLength);
+          client.recordEvent('feature_selection' ,{
+              MI: parseFloat(data.MI.toFixed(3)),
+              //MB: parseFloat(data.consistencyMB.toFixed(3)),
+              rankLoss: parseFloat(data.rankLoss.toFixed(3)),
+              features: dataToSend.names
+          });
+
           this.setState({
-              currentScores: {
-                  MB: parseFloat(data.consistencyMB.toFixed(3)),
-                  MI: parseFloat(data.MI.toFixed(3)),
+              MICurrent: {
+                  //MB: parseFloat(data.consistencyMB.toFixed(3)),
+                  score: parseFloat(data.MI.toFixed(3)),
               },
               rankLossCurrent: {
                   score: parseFloat(data.rankLoss.toFixed(3))
@@ -761,6 +808,86 @@ class AppInterface extends React.Component {
       });
   }
 
+  calculateCoverage(selectedFeatures) {
+    // start with the nodes directly linked to class node
+      var graph = this.state.causalGraph.graphHistory[this.state.graphIndex].graph;
+      console.log(graph)
+      var selectedFeatureIndexes = [];
+      var coveredNodeIndexes = new Set();
+      //console.log(selectedFeatures);
+      selectedFeatures.map(feature => {
+          console.log(feature)
+          selectedFeatureIndexes.push(graph[feature].nodeIndex);
+      });
+
+      var visited = [];
+      var coveredIndexes = new Set();
+      selectedFeatureIndexes.map(index => {
+          if (!visited.includes(index)) {
+              var currentVisit = this.isTherePathToClass(graph, selectedFeatureIndexes, this.state.markovBlanketFeatureIndexes, visited, coveredIndexes, index);
+              visited = currentVisit;
+          }
+      });
+      var visitedBackwards = [];
+      selectedFeatureIndexes.map(index => {
+          if (!visitedBackwards.includes(index)) {
+              var currentVisit = this.isTherePathFromClass(graph, selectedFeatureIndexes, this.state.markovBlanketFeatureIndexes, visitedBackwards, coveredIndexes, index);
+              visitedBackwards = currentVisit;
+          }
+      });
+      //this.state.coveredFeatures
+      //console.log(coveredIndexes);
+
+      var coveredFeatures = new Set();
+      Array.from(coveredIndexes).map((index) =>
+        coveredFeatures.add(this.state.indexToFeatureMap[index])
+      );
+
+      return coveredFeatures;
+  }
+
+  isTherePathFromClass(graph, selectedFeatureIndexes, markovBlanketFeatureIndexes, visitedIndexes, coveredIndexes, currentFeatureIndex) {
+      var nodeFrom = graph[this.state.indexToFeatureMap[currentFeatureIndex]].nodeFrom;
+      var visited = visitedIndexes.slice();
+      visited.push(currentFeatureIndex);
+      if (markovBlanketFeatureIndexes.has(currentFeatureIndex)) {
+          coveredIndexes.add(currentFeatureIndex);
+          return visited;
+      }
+      nodeFrom.map((node) =>{
+          console.log(node);
+          console.log(markovBlanketFeatureIndexes);
+          console.log(markovBlanketFeatureIndexes.has(node));
+          if (markovBlanketFeatureIndexes.has(node)) {
+              coveredIndexes.add(node);
+          }
+          if (selectedFeatureIndexes.includes(node)) {
+              return this.isTherePathFromClass(graph, selectedFeatureIndexes, markovBlanketFeatureIndexes, visited, coveredIndexes, node);
+          }
+      });
+      return visited;
+  }
+
+  isTherePathToClass(graph, selectedFeatureIndexes, markovBlanketFeatureIndexes, visitedIndexes, coveredIndexes, currentFeatureIndex) {
+      var nodeTo = graph[this.state.indexToFeatureMap[currentFeatureIndex]].nodeTo;
+      var visited = visitedIndexes.slice();
+      visited.push(currentFeatureIndex);
+      if (markovBlanketFeatureIndexes.has(currentFeatureIndex)) {
+          coveredIndexes.add(currentFeatureIndex);
+          return visited;
+      }
+      console.log(nodeTo);
+      console.log(selectedFeatureIndexes);
+      nodeTo.map((node) =>{
+          if (markovBlanketFeatureIndexes.has(node)) {
+              coveredIndexes.add(node);
+          }
+          if (selectedFeatureIndexes.includes(node)) {
+              return this.isTherePathToClass(graph, selectedFeatureIndexes, markovBlanketFeatureIndexes, visited, coveredIndexes, node);
+          }
+      });
+      return visited;
+  }
 
   goToStep(step) {
     //var featureHistory = this.state.featureHistory
@@ -795,6 +922,11 @@ class AppInterface extends React.Component {
         return response.json();
     }).then(data => {
         console.log(data);
+        client.recordEvent('class_display_settings', {
+            user: userID,
+            class: className,
+            display: currentDisplay
+        });
         this.setState({
             featureData: data.featureData
         })
@@ -881,50 +1013,7 @@ class AppInterface extends React.Component {
     }
 
   render() {
-      console.log('app');
-      /*let metricsGraph;
-      let metricsLegend;
-      if (this.state.metrics.precision.length > 0) {
-          metricsGraph = <ProgressGraph size={[500, 300]}
-                                        name={"metrics"}
-                                        consistencyScores={this.state.metrics}
-                                        colors={this.state.metricsGraphLegend.colors}
-                                        selectedIndex={this.state.selectedIndex}
-                                        updateIndex={this.updateIndex}
-                                        xAxisLength={this.state.xAxisLength}
-                                        goToStep={(s) => this.goToStep(s)}
-          />;
-          metricsLegend = <Legend keys={Object.keys(this.state.metrics)} colors={["orange", "blue"]}/>
-
-      } else {
-          metricsGraph = <div></div>;
-          metricsLegend = <div></div>;
-      } */
-    /*
-      const currentHistogramData = (this.state.currentHistogramStep >= 0) ?
-          this.state.currentHistogramHistory[this.state.currentHistogramStep] :
-          {};
-
-      let histograms;
-      let settings;
-      if (this.state.currentHistogramStep > -1) {
-          histograms = currentHistogramData.data.HistogramData.map((data, index) =>
-              <Histogram data={data} max={currentHistogramData.data.range[0]} min={currentHistogramData.data.range[1]}
-                         size={this.state.histogramSize} margin={this.state.margin}
-                         maxNeg={currentHistogramData.data.maxNeg} maxPos={currentHistogramData.data.maxPos}
-                         index={index}
-                         colorRange={this.state.colorRange}
-                         colorFunction={this.state.colorFunction}
-                         index={index}
-              />)
-          settings = <Settings display={currentHistogramData.data.display}
-                               onClick={(c, d) => this.histogramSettingSelection(c, d)}/>
-      }
-      else {
-          histograms = <div></div>
-          settings = <div></div>
-      } */
-    var metricsGraphMax = Math.max(this.state.consistencyGraphLegend.max, this.state.currentScores.MI);
+    var metricsGraphMax = Math.max(this.state.consistencyGraphLegend.max, this.state.MICurrent.score);
     this.state.consistencyGraphLegend.max = metricsGraphMax;
     var featureInfo = [{name: "hi", description: "hello"}];
     var rankLossMax = this.state.rankLossCurrent.score;
@@ -937,7 +1026,7 @@ class AppInterface extends React.Component {
     }
       return (
         <div className={'root-div'}>
-            <SideBar featureInfo={featureInfo} show={this.state.showInfo} close={() => this.showInfoFalse()}/>
+            <SideBar featureInfo={this.props.description} show={this.state.showInfo} close={() => this.showInfoFalse()}/>
             <button className={"sidebar-toggle"} onClick={this.showInfoTrue}>{"☰"}</button>
           <Tabs activeTabIndex={this.state.activeTabIndex} handleTabClick={(t) => this.handleTabClick(t)}>
               <Tab linkClassName={"Feature Importance"}>
@@ -969,14 +1058,15 @@ class AppInterface extends React.Component {
                       clearGraph={this.clearGraph}
                       nextStep={this.sendGraphToSelection}
                       prevStep={this.goFromGraphToImportance}
+                      getGraphDataToLog={this.getGraphDataToLog}
                   />
               </Tab>
               <Tab linkClassName={"Feature Selection"}>
                   <div>
                       <div className={"tools-bar"}>
-                          <button style={{background: this.state.showAnalysis? "blue" : "white"}} onClick={this.toggleAnalysis}>{"Analysis"}</button>
-                          <button className={"tools-bar right-button"} onClick={this.classify}>{"Classify"}</button>
-                          <button className={"tools-bar right-button"} onClick={this.goFromSelectionToGraph}>{"Previous"}</button>
+                          <button className={"tools-bar"} style={{background: this.state.showAnalysis? "#0071e0" : "darkgray"}} onClick={this.toggleAnalysis}>{"Analysis"}</button>
+                          <button className={"tools-bar right-button next-button"} onClick={this.classify}>{"CLASSIFY »"}</button>
+                          <button className={"tools-bar right-button previous-button"} onClick={this.goFromSelectionToGraph}>{"« PREVIOUS"}</button>
                       </div>
 
                       <div style={{display: this.state.showAnalysis? "none" : "block"}}>
@@ -991,6 +1081,9 @@ class AppInterface extends React.Component {
                           sendData={this.sendData}
                           colorFunction={this.state.colorFunction}
                       />
+                          <Legend className={"legend"}
+                                  keys={this.props.classNames}
+                                  colors={this.state.colorRange}/>
                       <CheckboxMultiSelect options={this.state.featureData.classDisplay}
                                            handleChange={(c, d) => this.handleClassSelection(c, d)}/>
                       </div>
@@ -1000,10 +1093,10 @@ class AppInterface extends React.Component {
                                              max={this.state.consistencyGraphLegend.max}
                                              min={0}
                                              name={"consistency"}
-                                             consistencyScores={this.state.consistencyScores}
-                                             metrics={this.state.metrics}
+                                             consistencyScores={{MB: this.state.MB.score, MI: this.state.MI.score }}
+                                             metrics={{accuracy: [], precision: []}}
                                              metricsColors={this.state.metricsGraphLegend.colors}
-                                             currentScores={this.state.currentScores}
+                                             currentScores={{ MB: this.state.MBCurrent.score, MI: this.state.MICurrent.score }}
                                              colors={this.state.consistencyGraphLegend.colors}
                                              selectedIndex={this.state.selectedIndex}
                                              updateIndex={this.updateIndex}
@@ -1011,13 +1104,13 @@ class AppInterface extends React.Component {
                                              goToStep={(s) => this.goToStep(s)}
                               />
                               <Legend className={"legend"}
-                                  keys={this.state.consistencyGraphLegend.keys.concat(this.state.metricsGraphLegend.keys)}
-                                      colors={this.state.consistencyGraphLegend.colors.concat(this.state.metricsGraphLegend.colors)}/>
+                                  keys={this.state.consistencyGraphLegend.keys}
+                                      colors={this.state.consistencyGraphLegend.colors}/>
                           </div>
                           <div className={"grid-item"}>
-                              <PieChart size={[300,300]}
+                              <PieChart size={[400,300]}
                                         data={Array.from(this.state.markovBlanketFeatureNames)}
-                                        selection={this.state.selectedFeatureNames}
+                                        selection={Array.from(this.state.coveredFeatures)}
                               />
                           </div>
                           <div className={"grid-item"}>
@@ -1045,7 +1138,7 @@ class AppInterface extends React.Component {
                                       colors={this.state.rankLossGraphLegend.colors}/>
                           </div>
                           <div className={"grid-item"}>
-                              <SunburstChart size={[300,300]}
+                              <SunburstChart size={[400,300]}
                                              data={this.state.rankData}
                                              selection={this.state.selectedFeatureNames}
                               />
@@ -1060,7 +1153,7 @@ class AppInterface extends React.Component {
               </Tab>
               <Tab linkClassName={"Performance Analysis"}>
                   <div className={"tools-bar"}>
-                      <button className={"tools-bar right-button"} onClick={this.goFromAnalysisToSelection}>{"Previous"}</button>
+                      <button className={"tools-bar right-button previous-button"} onClick={this.goFromAnalysisToSelection}>{"« PREVIOUS"}</button>
                   </div>
                 <ConfusionMatrix
                     matrix={this.state.confusionMatrix}
@@ -1070,63 +1163,22 @@ class AppInterface extends React.Component {
                   <div className={"grid-container"}>
                   <div>
                       <ProgressGraph size={[500, 300]}
-                                     max={this.state.consistencyGraphLegend.max}
+                                     max={1}
                                      min={0}
                                      name={"consistency"}
-                                     consistencyScores={this.state.consistencyScores}
-                                     metrics={this.state.metrics}
-                                     metricsColors={this.state.metricsGraphLegend.colors}
-                                     currentScores={this.state.currentScores}
-                                     colors={this.state.consistencyGraphLegend.colors}
-                                     selectedIndex={this.state.selectedIndex}
-                                     updateIndex={this.updateIndex}
-                                     xAxisLength={this.state.xAxisLength}
-                                     goToStep={(s) => this.goToStep(s)}
-                      />
-                      <Legend className={"legend"}
-                              keys={this.state.consistencyGraphLegend.keys.concat(this.state.metricsGraphLegend.keys)}
-                              colors={this.state.consistencyGraphLegend.colors.concat(this.state.metricsGraphLegend.colors)}/>
-                  </div>
-                  <div className={"grid-item"}>
-                      <PieChart size={[300,300]}
-                                data={Array.from(this.state.markovBlanketFeatureNames)}
-                                selection={this.state.selectedFeatureNames}
-                      />
-                  </div>
-                  <div className={"grid-item"}>
-                      <Legend className={"legend legend-left"}
-                              keys={["Covered", "Not Covered"]}
-                              colors={["#b9d9ff", "#a9a9a9"]}/>
-                  </div>
-                  <div className={"grid-item"}>
-                      <ProgressGraph size={[500, 300]}
-                                     max={rankLossMax}
-                                     min={0}
-                                     name={"rankLoss"}
-                                     consistencyScores={this.state.rankLoss}
+                                     consistencyScores={this.state.metrics}
                                      metrics={{accuracy: [], precision: []}}
-                                     metricsColors={[]}
-                                     currentScores={this.state.rankLossCurrent}
-                                     colors={this.state.rankLossGraphLegend.colors}
+                                     metricsColors={this.state.metricsGraphLegend.colors}
+                                     currentScores={{accuracy: -1, precision: -1}}
+                                     colors={this.state.metricsGraphLegend.colors}
                                      selectedIndex={this.state.selectedIndex}
                                      updateIndex={this.updateIndex}
                                      xAxisLength={this.state.xAxisLength}
                                      goToStep={(s) => this.goToStep(s)}
                       />
                       <Legend className={"legend"}
-                              keys={this.state.rankLossGraphLegend.keys}
-                              colors={this.state.rankLossGraphLegend.colors}/>
-                  </div>
-                  <div className={"grid-item"}>
-                      <SunburstChart size={[300,300]}
-                                     data={this.state.rankData}
-                                     selection={this.state.selectedFeatureNames}
-                      />
-                  </div>
-                  <div className={"grid-item"}>
-                      <Legend className={"legend legend-left"}
-                              keys={['In MB', 'Not in MB']}
-                              colors={['#7e6699', '#f08036']}/>
+                              keys={this.state.metricsGraphLegend.keys}
+                              colors={this.state.metricsGraphLegend.colors}/>
                   </div>
               </div>
               </Tab>
@@ -1135,86 +1187,3 @@ class AppInterface extends React.Component {
       )
   }
 }
-
-/*
-
-
-
-
-                  <button onClick={this.sendGraphToSelection}>{"Next"}</button>
-              </Tab>
-
-
-              </Tab>
-
-
-<ProgressGraph size={[500, 300]}
-                                     name={"metrics"}
-                                     consistencyScores={this.state.metrics}
-                                     colors={this.state.metricsGraphLegend.colors}
-                                     selectedIndex={this.state.selectedIndex}
-                                     updateIndex={this.updateIndex}
-                                     xAxisLength={this.state.xAxisLength}
-                                     goToStep={(s) => this.goToStep(s)}
-                      />
-
-              <Tab linkClassName={"Importance"}>
-                  <ExpertKnowledge
-                      featureSchema={this.state.featureSchema}
-                      updateFeatureRank={(r, f) => this.updateFeatureRank(r, f)}
-                      width={500}
-                      height={500}
-                  />
-              </Tab>
-              <Tab linkClassName={"Selection"}>
-                  <div>
-                      <div style={{width: "100%", height: 20}}>
-                          <CheckboxMultiSelect options={this.state.featureData.classDisplay}
-                                               handleChange={(c, d) => this.handleClassSelection(c, d)}/>
-                      </div>
-                      <Legend keys={["N", "P", "S"]} colors={this.state.progressGraphKeyColor}/>
-                      <div style={{width: "100%", height: 20}}>
-                          <button onClick={this.classify}>{"Classify"}</button>
-                      </div>
-                      <FeatureParallelCoordinates
-                          data={this.state.featureData.inputData}
-                          features={this.state.features}
-                          xScaleDomain={this.state.xScaleDomain}
-                          xScale={this.state.xScale}
-                          dragging={this.state.dragging}
-                          featureAxisOnEnd={this.featureAxisOnEnd}
-                          size={this.state.featureCoordinatesSize}
-                          sendData={this.sendData}
-                          colorFunction={this.state.colorFunction}
-                          markovBlanket={this.props.markovBlanket}
-                      />
-                  </div>
-              </Tab>
-              <Tab linkClassName={"Metrics Graph"}>
-                  <div className={"column"}>
-                      <ProgressGraph size={[500, 300]}
-                                     name={"consistency"}
-                                     consistencyScores={this.state.consistencyScores}
-                                     currentScores={this.state.currentScores}
-                                     colors={this.state.progressGraphKeyColor}
-                                     selectedIndex={this.state.selectedIndex}
-                                     updateIndex={this.updateIndex}
-                                     xAxisLength={this.state.xAxisLength}
-                                     goToStep={(s) => this.goToStep(s)}
-                      />
-                      <Legend keys={this.state.progressGraphKeys} colors={this.state.progressGraphKeyColor}/>
-                  </div>
-              </Tab>
-              <Tab linkClassName={"Results"}>
-                  <div className={"column-left"}>
-                      {metricsGraph}
-                      {metricsLegend}
-                  </div>
-              </Tab>
-              <Tab linkClassName={"Histograms"}>
-                  <div className={"column"}>
-                      {settings}
-                      {histograms}
-                  </div>
-              </Tab>
- */

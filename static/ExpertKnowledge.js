@@ -1,6 +1,6 @@
 class ContinuousLegend extends React.Component{
   constructor(props) {
-    super(props)
+    super(props);
       this.state = {
         width: 20,
           totalHeight: 240
@@ -11,7 +11,7 @@ class ContinuousLegend extends React.Component{
     var translate = (this.props.totalHeight - this.state.totalHeight)/2;
     var cellHeight = (this.state.totalHeight/this.props.colors.length);
     return (
-      <g transform={`translate(5,${translate})`}>
+      <g transform={`translate(20,${translate})`}>
           <text y={-25}>{"Importance"}</text>
           <text y={-5}>{"Most"}</text>
           {
@@ -28,7 +28,7 @@ class ContinuousLegend extends React.Component{
 
 class ExpertKnowledge extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     console.log(props.features);
     var radius = 16;
     var colorRange = ['#e9f2fb', '#cfe1f2', '#a6cde4', '#7bb7d9', '#4694c7', '#2574b5', '#1059a1', '#083979'];
@@ -41,20 +41,15 @@ class ExpertKnowledge extends React.Component {
       colorRange: colorRange,
       colorFunction: colorFunction,
     };
-    console.log(this.state)
-    //this.addCircle = this.addCircle.bind(this);
-    //this.calculateNewCircleRadius = this.calculateNewCircleRadius.bind(this);
+    console.log(this.state);
     this.setPointPositions = this.setPointPositions.bind(this);
-    this.undo = this.undo.bind(this);
   }
 
   componentDidMount() {
     var that = this;
     d3.selectAll(".feature-node").call(d3.drag()
         .on("start", function(d) {
-          //var circle = this.childNodes[0]
           d3.select(this).raise().classed("active", true);
-          //d3.select(circle).attr("cx", d3.event.x).attr("cy", d3.event.y);
         })
         .on("drag", function(d) {
            d3.select(this).attr("transform", "translate(" + (this.x = d3.event.x) + "," + (this.y=d3.event.y) + ")");
@@ -82,8 +77,6 @@ class ExpertKnowledge extends React.Component {
             that.props.updateFeatureRank(this.id, 0)
           } else {
             for (var i = that.props.circleRadii.length - 2; i >= 0; i--) {
-              //console.log(radius)
-              //console.log(that.props.circleRadii[i])
               if (radius <= that.props.circleRadii[i] - that.state.featureRadius && radius >= that.props.circleRadii[i+1] && that.props.features[this.id].circleIndex != i) {
                 that.props.features[this.id].circleIndex = i;
                 that.props.addMove({type: "feature", id: this.id, position: {x: x, y: y }, radius: currentRadius, circleIndex: currentIndex, newCircleIndex: i });
@@ -93,89 +86,8 @@ class ExpertKnowledge extends React.Component {
               }
             }
           }
-
-          //console.log(that.state.features[circle.id])
           d3.select(this).classed("active", false);
         }));
-  }
-
-  //shouldComponentUpdate(nextProps, nextState) {
-    //return nextProps.circleRadii.length != this.props.circleRadii.length
-  //}
-
-  componentDidUpdate() {
-  }
-
-  calculateNewCircleRadius(){
-    //var lastRadius = this.state.circleRadii[this.state.circleRadii.length-1]
-    //return this.state.circleRadii[0]/t
-    const numberCircle = this.state.circleRadii.length + 1
-    const largeCircleRadius = this.state.circleRadii[0]
-    //var newCircleRadii = this.state.circleRadii.map((radius, index) =>
-    //  largeCircleRadius/numberCircle * index
-    var newCircleRadii = []
-    for (var i = numberCircle; i > 0; i--) {
-      newCircleRadii.push(largeCircleRadius/numberCircle * i)
-    }
-    return newCircleRadii
-  }
-
-  undo() {
-    if (this.state.step > 0) {
-      const lastStep = this.state.moves[this.state.step - 1]
-      console.log(lastStep)
-      if (lastStep.type == "feature"){
-        const featureId = lastStep.id
-        this.props.features[featureId].circleIndex = lastStep.circleIndex
-        this.props.features[featureId].radius = lastStep.radius
-        this.props.features[featureId].x = lastStep.position.x
-        this.props.features[featureId].y = lastStep.position.y
-        const selector = '[id=\"' + featureId + '"]'
-        console.log(d3.select(selector).attr("transform", "translate(" + lastStep.position.x +  "," + lastStep.position.y + ")"))
-        this.state.moves.splice(this.state.step - 1)
-        this.state.step = this.state.step - 1
-
-      } else {
-        //  const features = lastStep.features;
-        /*features.map((feature, index) => {
-          const selector = '[id=\"' + index + '"]'
-          //console.log(feature)
-          //console.log(d3.select(selector).attr("transform", "translate(" + feature.x +  "," + feature.y + ")"))
-          this.state.features[index].x = feature.x;
-          this.state.features[index].y = feature.y;
-          this.state.features[index].radius = feature.radius;
-          this.state.features[index].circleIndex = feature.circleIndex;
-          }
-        )*/
-        this.state.moves.splice(this.state.step - 1)
-        this.state.step = this.state.step - 1
-        this.setState({
-          circleRadii: lastStep.circleRadii,
-          //features: features
-        })
-      }
-
-      console.log(this.state.moves)
-      console.log(this.state.step)
-    }
-    // decrement step
-  }
-
-  addCircle() {
-    //const lastRadius = this.state.circleRadii[this.state.circleRadii.length-1]
-    //const newRadius = this.calculateNewCircleRadius()
-    //const currentCircleRadii = this.state.circleRadii
-    const newCircleRadii = this.calculateNewCircleRadius()//currentCircleRadii.concat(newRadius)
-    console.log(newCircleRadii)
-    this.props.moves.push({type: "circle", circleRadii: this.props.circleRadii, features: this.props.features})
-    this.props.step = this.props.step + 1
-    Object.keys(this.props.features).map((key) => {
-      this.props.updateFeatureRank(key, this.state.circleRadii.length - this.props.features[key].circleIndex)
-    });
-    this.props.updateNumRanks(newCircleRadii.length);
-    this.setState({
-      circleRadii: newCircleRadii,
-    })
   }
 
   setPointPositions(){
@@ -212,9 +124,9 @@ class ExpertKnowledge extends React.Component {
     return (
       <div>
       <div width={"100%"} className={"tools-bar"}>
-        <button onClick={this.props.addCircle}>{"Add Layer"}</button>
-        <button onClick={this.props.undo}>{"Undo"}</button>
-          <button className={"tools-bar right-button"} onClick={this.props.nextStep}>{"Next"}</button>
+        <button className={"tools-bar action-button"} onClick={this.props.addCircle}>{"Add Layer"}</button>
+        <button className={"tools-bar action-button"} onClick={this.props.undo}>{"Undo"}</button>
+          <button className={"tools-bar right-button next-button"} onClick={this.props.nextStep}>{"NEXT »"}</button>
       </div>
       <svg width={this.state.width} height={this.state.height} style={{display: "block", margin: "auto"}}>
       <g id={"expert-knowledge"} transform={`translate(${this.state.width/2},${this.state.height/2 })`} >
@@ -232,7 +144,6 @@ class ExpertKnowledge extends React.Component {
         }
       </g>
           <ContinuousLegend totalHeight={this.state.height} colors={colors}/>
-
       </svg>
       </div>
     )

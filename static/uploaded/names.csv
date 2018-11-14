@@ -1,0 +1,30 @@
+school: GP, MS.
+gender: M, F.
+age: 15, 16, 17, 18, 19, 20, 21, 22.
+address: Urban, Rural.
+famsize: greater_than_3, less_than_3.
+parentstatus: Apart, Together.
+motheredu: none, primary, intermediate, secondary, higher.
+fatheredu: none, primary, intermediate, secondary, higher.
+motherjob: teacher, health_care, civil_services, at_home, other.
+fatherjob: teacher, health_care, civil_services, at_home, other.
+reason: close, reputation, course, other.
+guardian: mother, father, other.
+traveltime: less_than_15min, 15_to_30min, 30min_to_1hr, greater_than_1hr.
+studytime: less_than_2hr, 2_to_5hr, 5_to_10hr, greater_than_10.
+failures: 0, 1, 2, 3.
+schoolsupport: yes, no.
+famsupport: yes, no.
+extraclasses: yes, no.
+extracurriculars: yes, no.
+attendednursery: yes, no.
+wantshigheredu: yes, no.
+internetaccess: yes, no.
+romanticrel: yes, no.
+famrelrating: 1, 2, 3, 4, 5.
+freetimerating: 1, 2, 3, 4, 5.
+gooutrating: 1, 2, 3, 4, 5.
+alcweekday: 1, 2, 3, 4, 5.
+alcweekend: 1, 2, 3, 4, 5.
+healthrating: 1, 2, 3, 4, 5.
+absences: continuous.

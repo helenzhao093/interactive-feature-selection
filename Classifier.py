@@ -4,22 +4,40 @@ from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import cross_val_predict
+from sklearn import preprocessing
 import pandas as pd
 import numpy as np
 
 # read datafile with features + target in last column
 class Classifier:
     def __init__(self, filename):
-        self.df = pd.read_csv(filename)
+        self.df_og = pd.read_csv(filename)
         self.clf = GaussianNB()
         self.accuracy = 0
         self.precision = 0
         self.recall = 0
+        self.process_discrete_features()
         # classify :
         # input is array of feature names
+
+    def process_discrete_features(self):
+        numeric_data = []
+        self.les = {}
+        column_names = list(self.df_og.columns.values)
+        for feature in column_names:
+            print self.df_og[feature].dtype
+            if self.df_og[feature].dtype != 'int64' or self.df_og[feature].dtype != 'float64':
+                le = preprocessing.LabelEncoder()
+                le.fit(np.sort(self.df_og[feature].unique()))
+                numeric_data.append(le.transform(self.df_og[feature]))
+                self.les[feature] = le
+            else:
+                numeric_data.append(list(self.df_og[feature]))
+        self.df = pd.DataFrame(np.asarray(numeric_data).T, columns=column_names)
+        print self.df.iloc[0]
+
     def classify(self, feature_names):
         X, y = self.get_X_and_y(feature_names)
-
         skf = StratifiedKFold(n_splits=5)
         skf.get_n_splits(X, y)
         accurary = []

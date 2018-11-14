@@ -77,7 +77,7 @@ class SunburstChart extends React.Component {
         var arcs3 = pie3(pie3Data);
         return (
             <svg width={this.props.size[0]} height={this.props.size[1]}>
-                <g transform={`translate(${this.state.radii[3]},${this.state.radii[3]})`}>
+                <g transform={`translate(${this.props.size[0]/2},${this.state.radii[3]})`}>
                     {arcs1.map((slice, index) =>
                         <g className={"slice"}>
                             <path fill={this.state.colorFunction(this.props.data[index].rank)} stroke={"white"} strokeWidth={2} d={arc1(slice)}></path>
@@ -86,7 +86,7 @@ class SunburstChart extends React.Component {
                     )
                     }
                 </g>
-                <g transform={`translate(${this.state.radii[3]},${this.state.radii[3]})`}>
+                <g transform={`translate(${this.props.size[0]/2},${this.state.radii[3]})`}>
                     {arcs2.map((slice, index) =>
                         <g className={"slice"}>
                             <path fill={this.state.colorMB(pie2DataLabel[index])} stroke={"white"} strokeWidth={2} d={arc2(slice)}></path>
@@ -94,14 +94,18 @@ class SunburstChart extends React.Component {
                     )
                     }
                 </g>
-                <g transform={`translate(${this.state.radii[3]},${this.state.radii[3]})`}>
+                <g transform={`translate(${this.props.size[0]/2},${this.state.radii[3]})`}>
                     {arcs3.map((slice, index) =>
                         <g className={"slice"}>
                             <path fill={this.props.selection.includes(pie3Data[index])? "#b9d9ff" : "#a9a9a9"} stroke={"white"} strokeWidth={2} d={arc3(slice)}></path>
-                            <text transform={`translate(${arc3.centroid(slice)})`} textAnchor={"middle"}>{pie3Data[index]}</text>
                         </g>
-                    )
-                    }
+                    )}
+                    {arcs3.map((slice, index) =>
+                        <g className={"slice-text"}>
+                            <text transform={`translate(${arc3.centroid(slice)})`} textAnchor={"middle"} fontSize={"0.7em"}>{pie3Data[index]}</text>
+                        </g>
+                    )}
+
                 </g>
             </svg>
         )

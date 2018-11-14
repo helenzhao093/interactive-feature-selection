@@ -1,6 +1,10 @@
+from pycausal.pycausal import pycausal as pc
+from pycausal import prior as pr
+from pycausal import search as s
 import os
 import requests
 import csv
+import pandas as pd
 from histogram import Histogram
 from FeatureData import FeatureData
 from parse_features import *
@@ -13,12 +17,13 @@ from flask import Flask, render_template, flash, request, redirect, jsonify, url
 from werkzeug.utils import secure_filename
 from scipy.stats import rankdata
 
+#DATA_FOLDER = 'static/student_performance/'
 #DATA_FOLDER = 'static/iris/'
 DATA_FOLDER = 'static/cardiotocography3/'
 #DATA_FOLDER = 'static/cardiotocography10/'
 #DATA_FOLDER = 'static/spam_1000/'
 #DATA_FOLDER = 'static/parkinson/'
-UPLOAD_FOLDER = 'static/'
+UPLOAD_FOLDER = 'static/uploaded/'
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
 app = Flask(__name__)
@@ -30,6 +35,9 @@ FEATURE_DATA = None
 INTERFACE_DATA = None
 causalGraph = None
 classifier = None
+p = None
+tetrad = None
+prior = None
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -37,8 +45,7 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
-    #request.files.getlist("file[]")
-    save_filenames = ['feature.csv', 'target.csv', 'proba.csv', 'predicted.csv']
+    save_filenames = ['datafile.csv', 'names.csv', 'description.csv']
     if request.method == 'POST':
         all_files = request.files.getlist('file')
         for i, file in enumerate(all_files):
@@ -50,84 +57,57 @@ def upload_file():
 @app.route("/index")
 def uploaded_file():
     # call method that will calculate histogram data)
+    global DATA_FOLDER
+    DATA_FOLDER = UPLOAD_FOLDER
     return render_template('index.html')
-
-def calculate_feature_rank(features, target):
-    num_features = len(features[0])
-    MI = []
-    for i in range(num_features):
-        MI.append(calculate_MI(features, [i], target))
-    feature_rank = (num_features - rankdata(MI, method='ordinal')).astype(int)
-    print feature_rank
-    return feature_rank
-
-def sort_features_by_rank(rank, features, names):
-    num_features = len(features[0])
-    new_features = np.zeros((len(features), num_features))
-    features = np.asarray(features)
-    for i, rank in enumerate(rank):
-        new_features[:,rank] = features[:,i]
-        temp = names[rank]
-        names[rank] = names[i]
-        names[i] = temp
-    return new_features.tolist(), names
 
 # first call to get all features!
 @app.route("/getFeatures")
 def get_histogram_data():
-    # list of list
-    #dot_str = init_causal_graph(DATA_FOLDER + 'datafile.csv')
+    des = dict()
+    if os.path.exists(DATA_FOLDER + 'description.csv'):
+        des = parse_description(DATA_FOLDER + 'description.csv')
     feature_names = parse_features(DATA_FOLDER + 'names.csv')
-    #print feature_names
-    predicted = convert_csv_to_array(DATA_FOLDER + 'prediction.csv', True, csv.QUOTE_NONNUMERIC)
-    target = convert_csv_to_array(DATA_FOLDER + 'target.csv', True, csv.QUOTE_NONNUMERIC)
-    proba = convert_csv_to_array(DATA_FOLDER + 'proba.csv', False, csv.QUOTE_NONNUMERIC)
-    features = convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
-    class_names = convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
-    target = [d[0] for d in target]
-    predicted = [d[0] for d in predicted]
-    class_names = class_names[0]
-    #cal_MI(features, [0, 1], target)
-    #calculate_MI(features, [0, 1, 2], target)
-    #rank = calculate_feature_rank(features, target)
-    #features, feature_names = sort_features_by_rank(rank, features, feature_names)
-    #global HISTOGRAM
-    #HISTOGRAM = Histogram(predicted, target, proba, class_names)
-
-    #global causalGraph
-    #causalGraph = CausalGraph(DATA_FOLDER + 'datafile.csv')
+    dataframe = pd.read_csv(DATA_FOLDER + 'datafile.csv')
+    class_name = dataframe.columns.values[-1]
+    features = dataframe.drop([class_name], axis=1)
+    target = pd.DataFrame(dataframe[class_name])#pd.read_csv(DATA_FOLDER + 'features.csv')#convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
+    class_values = np.sort(dataframe[class_name].unique())#convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
 
     global FEATURE_DATA
-    FEATURE_DATA = FeatureData(predicted, target, features, proba, feature_names, class_names)
-
+    FEATURE_DATA = FeatureData(target, features, feature_names, class_values)
     global classifier
     classifier = Classifier(DATA_FOLDER + 'datafile.csv')
-
+    init_pc()
     interface_data = dict()
-    #get_graph_information(interface_data)
-
-    #interface_data['graph'] = causalGraph.graph
-    #INTERFACE_DATA['dotSrc'] = causalGraph.dot_src
-    #INTERFACE_DATA['graph'] = causalGraph.graph
-    #interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
-
-    #INTERFACE_DATA['histogramData'] = HISTOGRAM.Histogram_info
-    #INTERFACE_DATA['summaryData'] = HISTOGRAM.summary_data
     interface_data['featureData'] = FEATURE_DATA.feature_data
-    #interface_data['featureSchema'] = FEATURE_DATA.feature_data['features']
-    ##interface_data['featureSchema'] = FEATURE_DATA.feature_d
-    interface_data['classNames'] = FEATURE_DATA.class_names
-    #interface_data['markovBlanket'] = list(FEATURE_DATA.class_markov_blanket)
-    #interface_data['MI'] = FEATURE_DATA.MI
-    #interface_data['consistencyMB'] = causalGraph.decay_score #FEATURE_DATA.feature_distribution
+    interface_data['classNames'] = list(FEATURE_DATA.class_names)
+    interface_data['description'] = des
     return jsonify(interface_data)
+
+def init_pc():
+    global p
+    global tetrad
+    p = pc()
+    p.start_vm()
+    tetrad = s.tetradrunner()
+
+def make_causal_graph(df, prior):
+    tetrad.run(algoId = 'fges', dfs = df, priorKnowledge = prior, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
+    dot_src = p.tetradGraphToDot(tetrad.getTetradGraph())
+    edges = tetrad.getEdges()
+    nodes = tetrad.getNodes()
+    return dot_src, edges, nodes
 
 @app.route("/initializeGraph", methods=['POST'])
 def initialize_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
+        global prior
+        prior = pr.knowledge(forbiddirect = data['forbiddenEdges'], requiredirect = data['requiredEdges'])
+        dot_src, edges, nodes = make_causal_graph(classifier.df, prior)
         global causalGraph
-        causalGraph = CausalGraph(DATA_FOLDER + 'datafile.csv', data['forbiddenEdges'], data['requiredEdges'], )
+        causalGraph = CausalGraph(classifier.df, dot_src, edges, nodes)
         interface_data = dict()
         get_graph_information(interface_data)
         interface_data['graph'] = causalGraph.graph
@@ -147,7 +127,11 @@ def add_edge_to_causal_graph():
 def remove_nodes_from_causal_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
-        causalGraph.recalculate_causal_graph(data['features'], data['removedEdges'])
+        for feature_name in data['features']:
+            causalGraph.removed_nodes.append(feature_name)
+        removed_feature_df = classifier.df.drop(causalGraph.removed_nodes, axis=1)
+        dot_src, edges, nodes = make_causal_graph(removed_feature_df, prior)
+        causalGraph.recalculate_causal_graph(dot_src, edges, nodes, data['removedEdges'])
         interface_data = dict()
         get_graph_information(interface_data)
         interface_data['graph'] = causalGraph.graph
@@ -186,17 +170,17 @@ def get_graph_information(data_dict):
 def send_new_calculated_MI():
     if request.method == 'POST':
         data = json.loads(request.data)
-        print (data['features'])
+        #print (data['features'])
         data['names']
         rank_loss = FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['names'])
         rank_loss_listwise = FEATURE_DATA.calculate_rank_loss_listwise(data['featureRank'], data['names'])
 
-        FEATURE_DATA.calculate_mutual_information(data['features'])#calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
+        FEATURE_DATA.calculate_mutual_information(data['features'], data['names'])#calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
         #FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['features'])
-        causalGraph.calculate_MB_consistency_score2(data['names'])
+        #causalGraph.calculate_MB_consistency_score2(data['names'])
         interface_data = dict()
         interface_data['MI'] = FEATURE_DATA.MI
-        interface_data['consistencyMB'] = causalGraph.score
+        #interface_data['consistencyMB'] = causalGraph.score
         interface_data['rankLoss'] = rank_loss_listwise
         #interface_data['featureData'] = FEATURE_DATA.feature_data
         return jsonify(interface_data)

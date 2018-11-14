@@ -6,21 +6,22 @@ class Axis extends React.Component {
 
   componentDidMount() {
     var id = '#' + this.props.name;//className = ".feature-axis-" + this.props.name
-    var axisG = d3.select(id).call(d3.axisRight(this.props.axis))//.tickFormat(d3.format(".3n")))
+    var axisG = d3.select(id).call(d3.axisRight(this.props.axis));//.tickFormat(d3.format(".3n")))
     if (this.props.name == 'BOUNDARY') {
       var g = d3.select(id)
-      g.select("path").attr("stroke", "darkgrey").attr("stroke-width", 5)
+      g.select("path").attr("stroke", "darkgrey").attr("stroke-width", 5);
       g.select(".tick").style("display", "none")
     }
   }
 
   componentDidUpdate() {
+    //console.log('axis update')
     var id = '#' + this.props.name;
-    var axisG = d3.select(id).call(d3.axisRight(this.props.axis))
-    var g = d3.select(id)
+    d3.select(id).selectAll('.tick').remove();
+    var axisG = d3.select(id).call(d3.axisRight(this.props.axis));
+    var g = d3.select(id);
     if (this.props.name == 'BOUNDARY') {
-
-      g.select("path").attr("stroke", "darkgrey").attr("stroke-width", 5)
+      g.select("path").attr("stroke", "darkgrey").attr("stroke-width", 5);
       g.select(".tick").style("display", "none")
     } else {
       g.select("path").attr("stroke", "black").attr("stroke-width", 1)
@@ -28,11 +29,11 @@ class Axis extends React.Component {
   }
 
   render(){
-    console.log('feature-axis')
-    const textColor = this.props.name == "BOUNDARY" ? "darkgrey": "black"
+    console.log('feature-axis');
+    const textColor = this.props.name == "BOUNDARY" ? "darkgrey": "black";
     return (
-      <g className={'feature-axis'} id={this.props.name} transform={this.props.transform} style={{fontSize: 11, fontFamily: "san-serif"}}>
-        <text x={0} y={-5} fill={textColor} >{this.props.textname}</text>
+      <g className={'feature-axis'} id={this.props.name} transform={this.props.transform}>
+        <text x={10} y={-5} transform={'rotate(-45)'} fill={textColor} style={{fontWeight: "bold"}} >{this.props.textname}</text>
       </g>
     )
   }
@@ -42,7 +43,7 @@ class FeatureParallelCoordinates extends React.Component {
   constructor(props) {
     console.log(props)
     super(props)
-    var margin = {left: 10, right: 30, top: 20, bottom:10};
+    var margin = {left: 10, right: 30, top: 60, bottom:10};
     var width = props.size[0] - margin.left - margin.right;
     var height = props.size[1] - margin.top - margin.bottom;
 
@@ -60,15 +61,14 @@ class FeatureParallelCoordinates extends React.Component {
         yScalesDisplay[this.props.features[i].name] = d3.scaleOrdinal().domain(this.props.features[i].values).range(rangeDomain)
       }
     }
-    var yScales = this.props.features.map((feature) =>
+    /*var yScales = this.props.features.map((feature) =>
       d3.scaleLinear().domain(feature.range).range([0, height])
-    );
+    ); */
 
     this.state = {
       margin: margin,
       width: width,
       height: height,
-      yScales: yScales,
       yScalesDisplay: yScalesDisplay,
       axisWidth: axisWidth
     };
@@ -90,53 +90,19 @@ class FeatureParallelCoordinates extends React.Component {
         that.props.featureAxisOnEnd(this)
       })
     )
-    //{this.props.data.map((data, index) =>
-    //  <path d={this.path(data.features, draw)} fill=
-    //{"none"} stroke={this.props.colorFunction(data.target)}/>)
-    /*d3.select(".feature-parallels")
-      .append("g")
-      .attr("class", "data-paths")
-      .selectAll("path")
-      .data(that.props.data)
-      .enter().append("path")
-      .attr("class", "datapath")
-      .attr("d", function(d) {return that.path(d.features, that.state.draw)})
-      .attr("fill", "none")
-      .attr("stroke", function(d){ return that.props.colorFunction(d.target) })
 
-    d3.select(".feature-parallels")
-      .selectAll(".feature-axis")
-      .data(this.state.displayFeatures)
-      .enter().append("g")
-      .attr("class", 'feature-axis')
-      .attr("id", function(d) { console.log(d.name); return d.name})
-      .attr("transform", function(d) {
-        return "translate(" + that.state.xScale(d.name) + ")"
-      })
-      .each(function(d) { d3.select(this).call(d3.axisRight(that.state.yScalesDisplay[d.name])) })
-      .append("text")
-      .style("text-anchor", "middle")
-      .attr("y", -5)
-      .attr("x", 0)
-      .attr("fill", "black")
-      .text(function(d) { return d.name })
-    //}
-
-
-      /*{displayFeatures.map((feature, index) =>
-          <Axis name={'axis' + index} textname={feature.name} axis={yScalesDisplay[index]} transform={`translate(${xScale(index)})`}/>
-      )}
-      <g className={'feature-axis'} id={this.props.name} transform={this.props.transform} style={{fontSize: 9}}>
-        <text x={0} y={-5} fill={"black"} >{this.props.textname}</text>
-      </g>
-
-      */
-
+    d3.selectAll('.feature-axis')
+        .selectAll('.tick')
+        .selectAll('text')
+        .attr("transform", "rotate(-45)")
   }
 
   componentDidUpdate() {
     var that = this
-
+      d3.selectAll('.feature-axis')
+          .selectAll('.tick')
+          .selectAll('text')
+          .attr("transform", "rotate(-45)")
 
     /*var selection = d3.select(".feature-parallels")
       .selectAll(".datapath")
@@ -160,19 +126,18 @@ class FeatureParallelCoordinates extends React.Component {
     //console.log(drawFunction)
     //var drawData = data.map((point, index) =>
     //  [this.state.featureNames[index], point]
-    //)
-    //console.log(this.state.displayFeatures)
-    var xScale = this.props.xScale
-    var yScalesDisplay = this.state.yScalesDisplay
+    //
+    var xScale = this.props.xScale;
+    var yScalesDisplay = this.state.yScalesDisplay;
     var draw = d3.line()
       .x(function(d) {
         return xScale(d[0])
       })
       .y(function(d) {
         return yScalesDisplay[d[0]](d[1])
-      })
+      });
 
-    var drawData = []
+    var drawData = [];
 
     for (var i = 0; i < this.props.features.length; i++) {
       if (this.props.features[i].name == "BOUNDARY") {
@@ -181,33 +146,11 @@ class FeatureParallelCoordinates extends React.Component {
         drawData.push([this.props.features[i].name, data[this.props.features[i].index]])
       }
     }
-    /*i in this.state.displayFeatures.map((feature) =>
-      [feature.name, data[feature.index]]
-    )*/
-    //console.log(this.state.xScale(0), this.state.yScales[0](data[0]))
     return draw(drawData)
   }
 
   render(){
-    console.log('render feature parallels')
-    //console.log(this.state.displayFeatures)
-    //console.log(this.state.xScale('e'))
-    /*var displayData = this.props.featureValues.filter((feature, index) =>
-      this.props.dataIndex[index] == true
-    )
-    console.log(displayData)
-
-    var displayTarget = this.props.targetValues.filter((feature, index) =>
-      this.props.dataIndex[index] = true
-    )
-    console.log(displayTarget)
-    */
-
-    //var xScaleDomain = this.props.features.map((feature, index) =>
-    //  feature.name
-    //)
-    //var xScale = this.state.xScale.domain(xScaleDomain)
-    //var width = this.props.features.length * 75 + this.state.margin.left + this.state.margin.right;
+    console.log('render feature parallels');
     return (
         <div width={1000} style={{overflow: 'scroll'}}>
       <svg className={'feature-parallels-svg'} width={this.props.size[0]} height={this.props.size[1]}>
@@ -226,20 +169,3 @@ class FeatureParallelCoordinates extends React.Component {
     )
   }
 }
-
-// props: feature range
-// x scale for the path
-// y scale for each attribute
-// function that returns a line for each datapoint
-//
-// create path component for each data item - function path
-/*
-<g className={'data-paths'}>
-  {this.props.data.map((data, index) =>
-    <path d={this.path(data.features, draw)} fill={"none"} stroke={this.props.colorFunction(data.target)}/>)
-  }
-</g>
-{displayFeatures.map((feature, index) =>
-    <Axis name={'axis' + index} textname={feature.name} axis={yScalesDisplay[index]} transform={`translate(${xScale(index)})`}/>
-)}
-*/
