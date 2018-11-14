@@ -92,8 +92,8 @@ def init_pc():
     p.start_vm()
     tetrad = s.tetradrunner()
 
-def make_causal_graph(df, prior):
-    tetrad.run(algoId = 'fges', dfs = df, priorKnowledge = prior, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
+def make_causal_graph(df):
+    tetrad.run(algoId = 'fges', dfs = df, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
     dot_src = p.tetradGraphToDot(tetrad.getTetradGraph())
     edges = tetrad.getEdges()
     nodes = tetrad.getNodes()
@@ -104,8 +104,8 @@ def initialize_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
         global prior
-        prior = pr.knowledge(forbiddirect = data['forbiddenEdges'], requiredirect = data['requiredEdges'])
-        dot_src, edges, nodes = make_causal_graph(classifier.df, prior)
+        #prior = pr.knowledge(forbiddirect = data['forbiddenEdges'], requiredirect = data['requiredEdges'])
+        dot_src, edges, nodes = make_causal_graph(classifier.df)
         global causalGraph
         causalGraph = CausalGraph(classifier.df, dot_src, edges, nodes)
         interface_data = dict()
