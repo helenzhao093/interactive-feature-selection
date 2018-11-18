@@ -14,7 +14,7 @@ class CausalGraph extends React.Component {
       selectedEdgeFromTo: [],
       removedElements: {},
       removeStep: 0,
-      removedEdges: [] //[from, to]
+      removedEdges: []
     };
     this.renderGraph = this.renderGraph.bind(this);
     this.updateGraphSelection = this.updateGraphSelection.bind(this);
@@ -82,15 +82,10 @@ class CausalGraph extends React.Component {
   }
 
   componentDidUpdate() {
-    //console.log('update causal graph')
-    //console.log(this.props)
     this.renderGraph()
-
-    //d3.select('#graph').select('svg').attr("width", 700).attr("height", 500)
   }
 
   updateGraphSelection(selected) {
-    console.log(selected)
     if (selected == this.state.pathToFromTarget && this.state.markovBlanketSelected == true) {
       this.setState({
           markovBlanketSelected: false
@@ -143,9 +138,6 @@ class CausalGraph extends React.Component {
         info: [nodeFrom, nodeTo],
         graph: graph
     })
-
-    //console.log(this.props.graph[nodeFrom])
-    //console.log(this.props.graph[nodeTo])
   }
 
   addRemovedEdgeToGraph(edgeFromTo, edgeId) {
@@ -363,8 +355,7 @@ class CausalGraph extends React.Component {
   }
 
   clear() {
-    //d3.selectAll('.edge').classed("removed", false);
-    this.state.removedElements = {}
+    this.state.removedElements = {};
     this.props.clearGraph()
   }
 
@@ -384,12 +375,29 @@ class CausalGraph extends React.Component {
       <div width={700} height={500}>
           <div className={"tools-bar"}>
             <button className={"tools-bar action-button"} onClick={() => this.updateGraphSelection(this.state.markovBlanket)} style={{ background:  colorMB}}>
-              {this.state.markovBlanket}</button>
+              {this.state.markovBlanket}
+              </button>
+              <div className={"tools-bar-help"}>?
+                  <span className={"tools-bar-help-text"}>
+                      {"Highlights the set of nodes (markov blanket) that cuts the selected node from the rest of the graph."}
+                  </span>
+              </div>
             <button className={"tools-bar action-button"} onClick={() => this.updateGraphSelection(this.state.pathToFromTarget)} style={{ background: this.state.markovBlanketSelected ? "darkgray" : "yellowgreen" }}>
-            {this.state.pathToFromTarget}</button>
+            {this.state.pathToFromTarget}
+            </button>
+              <div className={"tools-bar-help"}>?
+                  <span className={"tools-bar-help-text"}>
+                      {"Highlights the path from the selected node to the target node"}
+                  </span>
+              </div>
             <button className={"tools-bar action-button"} onClick={() => this.removeSelected()}>
               {"Remove"}
             </button>
+              <div className={"tools-bar-help"}>?
+                  <span className={"tools-bar-help-text"}>
+                      {"Removes the currently selected node or edge"}
+                  </span>
+              </div>
               <button className={"tools-bar action-button"} onClick={() => this.toggleAddEdge()} style={{ background: this.state.addEdge ? "#0071e0" : "darkgray" }}>{"Add Edge"}</button>
             <button className={"tools-bar action-button"} onClick={() => this.undo()}>
               {"Undo"}
@@ -402,7 +410,10 @@ class CausalGraph extends React.Component {
               <button className={"tools-bar right-button previous-button"} onClick={this.props.prevStep}>{"« PREVIOUS"}</button>
 
           </div>
-        <div id={"graph"} style={{textAlign: "center"}}/>
+        <div className={"causal-graph-container"}>
+            <div className={"grid-item"} id={"graph"} style={{textAlign: "center"}}/>
+            <div className={"grid-item"}/>
+        </div>
       </div>
     )
   }

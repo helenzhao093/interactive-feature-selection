@@ -47,5 +47,10 @@ def parse_values(value_string):
         raw = raw.strip()
         if len(raw) > 1 and raw[0] == '"' and raw[-1] == '"':
             raw = raw[1:-1].strip()
+        try:
+            raw = int(raw)
+        except ValueError:
+            raw = raw
         values.append(raw)
+    print values
     return values

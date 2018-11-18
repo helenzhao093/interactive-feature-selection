@@ -1,4 +1,5 @@
 import math
+import copy
 import numpy as np
 from sklearn.preprocessing import normalize
 
@@ -10,7 +11,7 @@ class FeatureData:
     CLASSIFICATIONS = [FP_KEY, FN_KEY, TP_KEY, TN_KEY]
     DEFAULT_NUM_BINS = 10
 
-    def __init__(self, target, features, feature_info, class_names):
+    def __init__(self, target, features, numeric_data, feature_info, class_names):
         #self.predicted = predicted
         self.target = target
         self.features = features
@@ -35,14 +36,7 @@ class FeatureData:
         #self.order_by_class_MB()
         self.calculate_proba_y()
         self.init_data_no_predictions()
-        #self.init_mutual_information_dataset()
-        #self.init_MI()
-
-    #def init_MI(self):
-    #    indexes = []
-    #    for i in range(len(self.class_markov_blanket)):
-    #        indexes.append(i)
-    #    self.calculate_mutual_information(indexes)
+        self.convert_discrete_to_continous()
 
     # add index to feature_data['features']
     # create map of feature name to column index in self.features
@@ -52,33 +46,8 @@ class FeatureData:
             self.feature_data['features'][i]['index'] = i
             self.feature_name_to_index_map[self.feature_data['features'][i]['name']] = i
 
-    # order columns of self.features by MB
-    # self.feature_data['feature'] index is updated
-    #def order_by_class_MB(self):
-        # get column index from names in markov_blanket
-    #    column_indexes = []
-    #    for name in self.class_markov_blanket:
-    #        column_indexes.append(self.feature_name_to_index_map[name])
 
-    #    features = np.asarray(self.features)
-    #    sorted_features = np.zeros((self.num_examples, self.num_features))
-        #feature_info = self.feature_data
-    #    for i, column_index in enumerate(column_indexes):
-    #        sorted_features[:,i] = features[:,column_index]
-    #        self.feature_data['features'][column_index]['index'] = i
 
-    #    j = len(column_indexes)
-        #print column_indexes
-    #    for k in range(self.num_features):
-    #        if k not in column_indexes:
-    #            print j, k
-    #            sorted_features[:,j] = features[:,k]
-    #            self.feature_data['features'][k]['index'] = j
-    #            j += 1
-    #    self.features = sorted_features.tolist()
-        #print (self.features[0])
-
-    # self.X : normalized features
     def init_mutual_information_dataset(self):
         #self.X = np.around(normalize(self.features), 10)
         self.X = pd.DataFrame()
@@ -198,6 +167,38 @@ class FeatureData:
                 example['features'] = list(self.features.iloc[i].values)
                 example['target'] = class_name #self.target[i]
                 self.feature_data['inputData'].append(example)
+
+    def init_feature_mapping(self):
+        self.feature_mapping = dict()
+        for feature in self.feature_data['features']:
+            if feature['type'] == 'nominal':
+                feature_name = feature['name']
+                self.feature_mapping[feature_name] = dict()
+                values_sorted = sorted(feature['values'])
+                value_num = []
+                for i, value in enumerate(values_sorted):
+                    self.feature_mapping[feature_name][value] = float(i)
+                    value_num.append((self.features[feature_name] == value).sum())
+                self.feature_mapping[feature_name]['increment'] = 1.0/max(value_num)
+
+    def convert_example(self, example):
+        converted = copy.copy(example)
+        for feature in self.feature_data['features']:
+            if feature['type'] == 'nominal':
+                #print feature['index']
+                #print self.feature_mapping[feature['name']]
+                #print example[feature['index']]
+                converted[feature['index']] = self.feature_mapping[feature['name']][example[feature['index']]]
+                self.feature_mapping[feature['name']][example[feature['index']]] += self.feature_mapping[feature['name']]['increment']
+        return converted
+
+    def convert_discrete_to_continous(self):
+        self.init_feature_mapping()
+        self.feature_data['convertedData'] = []
+        #num_examples = len(self.feature_data['inputData'])
+        for data in self.feature_data['inputData']:
+            converted = self.convert_example(data['features'])
+            self.feature_data['convertedData'].append(converted)
 
 
     def init_data(self):

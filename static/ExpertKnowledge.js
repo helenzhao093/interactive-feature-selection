@@ -125,6 +125,11 @@ class ExpertKnowledge extends React.Component {
       <div>
       <div width={"100%"} className={"tools-bar"}>
         <button className={"tools-bar action-button"} onClick={this.props.addCircle}>{"Add Layer"}</button>
+          <div className={"tools-bar-help"}>?
+              <span className={"tools-bar-help-text"}>
+                      {"Add an innermost circle representing features of most importance."}
+                  </span>
+          </div>
         <button className={"tools-bar action-button"} onClick={this.props.undo}>{"Undo"}</button>
           <button className={"tools-bar right-button next-button"} onClick={this.props.nextStep}>{"NEXT »"}</button>
       </div>

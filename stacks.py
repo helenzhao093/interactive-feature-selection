@@ -74,10 +74,13 @@ def get_histogram_data():
     target = pd.DataFrame(dataframe[class_name])#pd.read_csv(DATA_FOLDER + 'features.csv')#convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
     class_values = np.sort(dataframe[class_name].unique())#convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
 
-    global FEATURE_DATA
-    FEATURE_DATA = FeatureData(target, features, feature_names, class_values)
     global classifier
     classifier = Classifier(DATA_FOLDER + 'datafile.csv')
+
+    global FEATURE_DATA
+    numeric_data = classifier.df
+    FEATURE_DATA = FeatureData(target, features, numeric_data, feature_names, class_values)
+
     init_pc()
     interface_data = dict()
     interface_data['featureData'] = FEATURE_DATA.feature_data
@@ -92,8 +95,8 @@ def init_pc():
     p.start_vm()
     tetrad = s.tetradrunner()
 
-def make_causal_graph(df):
-    tetrad.run(algoId = 'fges', dfs = df, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
+def make_causal_graph(df, prior):
+    tetrad.run(algoId = 'fges', dfs = df, priorKnowledge=prior, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
     dot_src = p.tetradGraphToDot(tetrad.getTetradGraph())
     edges = tetrad.getEdges()
     nodes = tetrad.getNodes()
@@ -104,8 +107,8 @@ def initialize_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
         global prior
-        #prior = pr.knowledge(forbiddirect = data['forbiddenEdges'], requiredirect = data['requiredEdges'])
-        dot_src, edges, nodes = make_causal_graph(classifier.df)
+        prior = pr.knowledge(forbiddirect = data['forbiddenEdges'], requiredirect = data['requiredEdges'])
+        dot_src, edges, nodes = make_causal_graph(classifier.df, prior)
         global causalGraph
         causalGraph = CausalGraph(classifier.df, dot_src, edges, nodes)
         interface_data = dict()

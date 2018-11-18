@@ -24,7 +24,28 @@ class AppInterface extends React.Component {
         rankedFeatures[feature.index] = feature;
     });
 
+    let helptext = [
+        "-Express prior knowledge about the predictive power of features.\n" +
+        "-Place features with higher predictive powers closer to the innermost circle.\n" +
+        "-Features outside of the circles have no predictive power.\n" +
+        "-Feature importance is used to in building the causal graph.",
+
+        "-A causal graph is a possible model of the causes and effects relationships between features.\n" +
+        "-Each feature is represented as a node in the graph.\n" +
+        "-A feature this is a direct cause of another has an edge starting from the cause and going to the effect.\n" +
+        "-Graph can be modified to be consistent with your prior knowledge about the features.\n",
+
+        "-Each axis represents a feature. \n" +
+        "-Each line represents an example. Th example intersects each feature axis at the value for the feature.  \n" +
+        "-Default feature selection is the markov blanket of the target variable.\n" +
+        "-Features to the left of the BOUNDARY line is the selected feature set.\n" +
+        "-Drag axis to reposition them or add/remove them from selected feature set.",
+
+        "-The performance of the classifier build using the selected feature set."
+    ];
+
     this.state = {
+        helptext: helptext,
         activeTabIndex: 0,
         featureSelectionMargin : {left: 10, right: 30, top: 20, bottom:10 },
         causalGraph: {
@@ -95,7 +116,8 @@ class AppInterface extends React.Component {
         },
         featureData: {
             inputData: this.props.features.inputData,
-            classDisplay: this.props.features.classDisplay
+            classDisplay: this.props.features.classDisplay,
+            convertedData: this.props.features.convertedData
         },
         selectedFeatureNames: [],
         featureRank: {},
@@ -551,6 +573,7 @@ class AppInterface extends React.Component {
               nextPosition = nextPosition + this.state.featureSelectionAxisWidthSelected;
           }
       }
+      console.log(xScaleRange)
 
       var xScaleDomain = features.map((feature, index) =>
           feature.name
@@ -654,12 +677,11 @@ class AppInterface extends React.Component {
                 EK.select(stringId).raise().classed("ek-selected", true)
             });
 
-            var xScaleInfo = this.calculateFeatureSelectionXScale(features); //this.state.featureSelection.xScale.domain(xScaleDomain);
+            var xScaleInfo = this.calculateFeatureSelectionXScale(features);
 
             this.calculateScores({ features: allFeatureIndexes, names: allFeatureNames, featureOrder: features, featureRank: this.state.featureRank });
             let coveredFeatures = this.calculateCoverage(allFeatureNames);
-            let MBScore = coveredFeatures.size/ this.state.markovBlanketFeatureNames.size
-            //console.log(coveredFeatures)
+            let MBScore = coveredFeatures.size/ this.state.markovBlanketFeatureNames.size;
             this.setState({
                 featureSelection: {
                     xScale: xScaleInfo.xScale,
@@ -745,11 +767,6 @@ class AppInterface extends React.Component {
               score: -1,
           },
           activeTabIndex: 3
-          //featureHistory: this.state.featureHistory,
-          //histogramHistory: currentHistogramHistory.concat([ {data: data.histogramData }]),
-          //histogramUpdateStep: currentHistogramHistory.length,
-          //currentHistogramHistory: [ { data: data.histogramData }],
-          //currentHistogramStep: 0
         })
       }).catch(function(error) {
         console.log(error)
@@ -988,13 +1005,6 @@ class AppInterface extends React.Component {
           }
       });
 
-      /* convert key to object
-      var rankDataArray = [];
-      Object.keys(rankData).map((key) => {
-          rankData[key].rank = key
-          rankDataArray.push(rankData[key])
-      }); */
-
       this.state.rankData = rankData;
       return rankData;
   }
@@ -1028,6 +1038,11 @@ class AppInterface extends React.Component {
         <div className={'root-div'}>
             <SideBar featureInfo={this.props.description} show={this.state.showInfo} close={() => this.showInfoFalse()}/>
             <button className={"sidebar-toggle"} onClick={this.showInfoTrue}>{"☰"}</button>
+            <div className={'help-icon-tooltip'}>?
+                <span className={"tooltip-text"}>
+                    {this.state.helptext[this.state.activeTabIndex]}
+                </span>
+            </div>
           <Tabs activeTabIndex={this.state.activeTabIndex} handleTabClick={(t) => this.handleTabClick(t)}>
               <Tab linkClassName={"Feature Importance"}>
                 <ExpertKnowledge
@@ -1072,6 +1087,7 @@ class AppInterface extends React.Component {
                       <div style={{display: this.state.showAnalysis? "none" : "block"}}>
                       <FeatureParallelCoordinates
                           data={this.state.featureData.inputData}
+                          convertedData={this.state.featureData.convertedData}
                           features={this.state.featureSelection.features}
                           xScaleDomain={this.state.featureSelection.xScaleDomain}
                           xScale={this.state.featureSelection.xScale}

@@ -34,7 +34,7 @@ class Classifier:
             else:
                 numeric_data.append(list(self.df_og[feature]))
         self.df = pd.DataFrame(np.asarray(numeric_data).T, columns=column_names)
-        print self.df.iloc[0]
+        #print self.df.iloc[0]
 
     def classify(self, feature_names):
         X, y = self.get_X_and_y(feature_names)

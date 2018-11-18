@@ -14,12 +14,6 @@ class CausalGraph:
         self.selected_node = None
         self.selected_edge = None
         self.df = df
-        #self.color_to_class = "\"0.578 0.289 1.000\""  #parent
-        #self.color_from_class = "\"0.00 0.500 1.000\"" #child
-        #self.color_spouse = "\"0.578 0.289 1.000\""
-        #self.class_node_color = "\"0.000 1.000 0.750\"" #0.650 0.200 1.000
-        #self.selected_node_color = "yellow"
-        #self.edge_selected_color = "\"0.650 0.200 1.000\""
         self.removed_nodes = []
         #self.init_dataframe(df)
         self.init_causal_graph_dot_src(dot_src, edges, nodes)
