@@ -3,7 +3,7 @@ class CheckboxOption extends React.Component {
     console.log('checkbox')
     const { value, isChecked, children } = this.props
     return (
-      <div className={"checkbox"} width={100}>
+      <div className={"checkbox"}  width={100}>
         <input
             id={value}
           type={"checkbox"}
@@ -12,7 +12,6 @@ class CheckboxOption extends React.Component {
           checked={isChecked}
           onChange={this.props.onChange}
         />
-          <label for={value}>{children}</label>
       </div>
     )
   }
@@ -34,9 +33,8 @@ class CheckboxMultiSelect extends React.Component {
     var displayValues = Object.keys(this.props.options).filter((option) =>
        this.props.options[option].TP.display == true
     )
-    console.log(displayValues)
     return (
-        <div>
+        <div style={{position: "relative", float: "left"}}>
             {Object.keys(this.props.options).map((option) =>
               <CheckboxOption value={option} isChecked={this.props.options[option].TP.display}
                 onChange={() => this.props.handleChange(option, this.props.options[option].TP.display)}>

@@ -36,7 +36,7 @@ class AppInterface extends React.Component {
         "-Graph can be modified to be consistent with your prior knowledge about the features.\n",
 
         "-Each axis represents a feature. \n" +
-        "-Each line represents an example. Th example intersects each feature axis at the value for the feature.  \n" +
+        "-Each line represents an example. The example intersects each feature axis at the value for the feature.  \n" +
         "-Default feature selection is the markov blanket of the target variable.\n" +
         "-Features to the left of the BOUNDARY line is the selected feature set.\n" +
         "-Drag axis to reposition them or add/remove them from selected feature set.",
@@ -77,53 +77,38 @@ class AppInterface extends React.Component {
         analysis: {
             showComponent: false
         },
-        MB:{
-            score: []
-        },
-        MBCurrent: {
-            score: -1
-        },
-        MI:{
-            score: []
-        },
-        MICurrent: {
-            score: -1
-        },
+        MB: [],
+        MBCurrent: -1,
+        MI: [],
+        MICurrent: -1,
         metrics: {
             accuracy: [],
             precision: []
         },
         confusionMatrix: [[]],
         confusionMatrixNormalized: [[]],
-        consistencyGraphLegend: {
-            keys: ["MB consistency", "Mutual Information"],
-            colors: ["#e31a1c", "#feb24c"],
-            max: 1
-        },
-        metricsGraphLegend: {
-            keys: ["accuracy", "precision"],
-            colors: ["#3690c0", "#d0d1e6"]
-        },
-        rankLoss: {
-            score:[]
-        },
-        rankLossCurrent: {
-            score: -1
-        },
-        rankLossGraphLegend: {
-            keys: ["rank loss"],
-            colors: ['#016450']
-        },
+        consistencyGraphLegend: [
+            { value: "MB Consistency", color: '#e31a1c', helptext: "Percentage of the markov blanket feature that is covered" },
+            { value: "Mutual Information", color: "#feb24c", helptext: "Amount of information explained by selected features" }
+        ],
+        consistencyGraphLegendMax: 1,
+        metricsGraphLegend: [
+            { value: "accuracy", color: '#3690c0', helptext: "% of correct predictions " },
+            { value: "precision", color: "#d0d1e6", helptext: "correct predictions/number of examples" }
+        ],
+        rankLoss: [],
+        rankLossCurrent: -1,
+        rankLossGraphLegend: [{ value: "rank loss", color: '#016450', helptext: "how much the importance of the selected features differ from the importance described in the feature importance tab" }],
+        classDisplay:this.props.features.classDisplay,
         featureData: {
             inputData: this.props.features.inputData,
-            classDisplay: this.props.features.classDisplay,
             convertedData: this.props.features.convertedData
         },
         selectedFeatureNames: [],
         featureRank: {},
         rankData: [],
         indexToFeatureMap: {},
-        numRanks: 1, // number of circles in feature Importance
+        numRanks: 1,
         featureHistory: [],
         step: 0,
         dragging: {},
@@ -155,6 +140,8 @@ class AppInterface extends React.Component {
       this.goFromSelectionToGraph = this.goFromSelectionToGraph.bind(this);
       this.calculateCoverage = this.calculateCoverage.bind(this);
       this.isTherePathToClass = this.isTherePathToClass.bind(this);
+
+      /* PROGRESS GRAPH METHODS */
 
       /* OTHER */
       this.toggleAnalysis = this.toggleAnalysis.bind(this);
@@ -538,21 +525,6 @@ class AppInterface extends React.Component {
     return markovBlanketFeatureNames;
   }
 
-  /*getInitialFeatureRank(markovBlanketFeatureNames) {
-      var rankedFeatures = {};
-      this.props.features.features.sort(function (a,b) { return a.index - b.index });
-      this.props.features.features.map(feature => {
-          rankedFeatures[feature.index] = feature;
-          if (markovBlanketFeatureNames.has(feature.name)) {
-              rankedFeatures[feature.index].rank = 0;
-              rankedFeatures[feature.index].circleIndex = 1;
-          } else {
-              rankedFeatures[feature.index].rank = 1;
-              rankedFeatures[feature.index].circleIndex = 0;
-          }
-      });
-      return rankedFeatures;
-  }*/
 
   /* FEATURE SELECTION METHODS */
   calculateFeatureSelectionXScale(features) {
@@ -630,9 +602,7 @@ class AppInterface extends React.Component {
                   xScale: xScaleInfo.xScale,
                   features: featuresWithBoundary
               },
-              MBCurrent: {
-                  score: 1
-              },
+              MBCurrent: 1,
               selectedFeatureNames: allFeatureNames,
               activeTabIndex: 2,
               featureCoordinatesSize: [xScaleInfo.featureSelectionTotalWidth, 500],
@@ -688,9 +658,7 @@ class AppInterface extends React.Component {
                     xScaleDomain: xScaleInfo.xScaleDomain,
                     features: features
                 },
-                MBCurrent: {
-                    score: MBScore
-                },
+                MBCurrent: MBScore,
                 selectedFeatureNames: allFeatureNames,
                 featureCoordinatesSize: [xScaleInfo.featureSelectionTotalWidth, 500],
                 coveredFeatures: coveredFeatures
@@ -705,7 +673,7 @@ class AppInterface extends React.Component {
     }
 
   classify() {
-    if (this.state.MICurrent.score >= 0) {
+    if (this.state.MICurrent >= 0) {
 
       // names of features in feature set
       const allFeatureNames = this.state.featureSelection.features.map((feature) =>
@@ -728,17 +696,17 @@ class AppInterface extends React.Component {
       }).then(function(response) {
         return response.json();
       }).then(data => {
-        this.state.MI.score.push(this.state.MICurrent.score);
-        this.state.MB.score.push(this.state.MBCurrent.score);
-        this.state.rankLoss.score.push(this.state.rankLossCurrent.score);
+        this.state.MI.push(this.state.MICurrent);
+        this.state.MB.push(this.state.MBCurrent);
+        this.state.rankLoss.push(this.state.rankLossCurrent);
         this.state.metrics.precision.push(parseFloat(data.precision.toFixed(3)));
         this.state.metrics.accuracy.push(parseFloat(data.accuracy.toFixed(3)));
 
         client.recordEvent('classify_results', {
            user: userID,
-           MI: this.state.MICurrent.score,
-           MB: this.state.MBCurrent.score,
-           rankLoss: this.state.rankLossCurrent.score,
+           MI: this.state.MICurrent,
+           MB: this.state.MBCurrent,
+           rankLoss: this.state.rankLossCurrent,
            accuracy: +data.accuracy.toFixed(3),
            precision: +data.precision.toFixed(3),
            features: features.features
@@ -746,31 +714,25 @@ class AppInterface extends React.Component {
         this.setState({
           confusionMatrixNormalized: data.confusionMatrixNormalized,
           confusionMatrix: data.confusionMatrix,
-          MI: {
-              score: this.state.MI.score
-          },
-          MB: {
-              score: this.state.MB.score
-          },
-          MICurrent: {
-              score: -1
-          },
-          MBCurrent: {
-              score: -1
-          },
+          MI: this.state.MI,
+          MB: this.state.MB,
+          MICurrent: -1,
+          MBCurrent: -1,
           metrics: {
             precision: this.state.metrics.precision,
             accuracy: this.state.metrics.accuracy
           },
           rankLoss: this.state.rankLoss,
-          rankLossCurrent: {
-              score: -1,
-          },
+          rankLossCurrent: -1,
           activeTabIndex: 3
         })
       }).catch(function(error) {
         console.log(error)
       })
+    } else {
+        this.setState({
+            activeTabIndex: 3
+        })
     }
   }
 
@@ -797,11 +759,10 @@ class AppInterface extends React.Component {
           console.log(data);
           var axisLength = this.state.xAxisLength;
           var selectedIndex = this.state.selectedIndex;
-          if (this.state.MB.score.length >= 2 && this.state.MBCurrent.score == -1) {
+          if (this.state.MB.length >= 2 && this.state.MBCurrent == -1) {
               axisLength = axisLength + 1;
               selectedIndex = selectedIndex + 1;
           }
-          //console.log(axisLength);
           client.recordEvent('feature_selection' ,{
               MI: parseFloat(data.MI.toFixed(3)),
               //MB: parseFloat(data.consistencyMB.toFixed(3)),
@@ -810,13 +771,8 @@ class AppInterface extends React.Component {
           });
 
           this.setState({
-              MICurrent: {
-                  //MB: parseFloat(data.consistencyMB.toFixed(3)),
-                  score: parseFloat(data.MI.toFixed(3)),
-              },
-              rankLossCurrent: {
-                  score: parseFloat(data.rankLoss.toFixed(3))
-              },
+              MICurrent: parseFloat(data.MI.toFixed(3)),
+              rankLossCurrent: parseFloat(data.rankLoss.toFixed(3)),
               xAxisLength: axisLength,
               selectedIndex: selectedIndex
           });
@@ -931,7 +887,12 @@ class AppInterface extends React.Component {
   }
 
   handleClassSelection(className, currentDisplay){
-    console.log(className, currentDisplay);
+      var classDisplay = this.state.classDisplay;
+      classDisplay[className].TP.display = !currentDisplay;
+      this.setState({
+          classDisplay: classDisplay
+      })
+    /*console.log(className, currentDisplay);
     fetch("/classSelected", {
         method: 'POST',
         body: JSON.stringify({"className": className, "currentDisplay": currentDisplay })
@@ -949,19 +910,8 @@ class AppInterface extends React.Component {
         })
     }).catch(function(error) {
         console.log(error)
-    });
+    }); */
   }
-
-  /*
-    histogramSettingSelection(classification, display) {
-      console.log('clicked settings')
-        this.sendData('/postHistogramDisplay',
-          { "classification": classification,
-            "display": display}
-        )
-  } */
-
-
 
   getInitialConsistencyScores(features) {
       var allFeatureIndexes = features.map((feature) =>
@@ -982,11 +932,7 @@ class AppInterface extends React.Component {
       this.state.numRanks = numRanks;
   }
 
-  initializeRankData() { //initialize map of feature name to rank
-      /*var featureRankMap = {};
-      Object.keys(this.state.featureImportance.features).map(key =>
-          featureRankMap[this.state.featureImportance.features[key].name] = this.state.featureImportance.features[key].circleIndex + 1
-      ); */
+  initializeRankData() {
       var featureNameToRankMap = this.state.featureRank;
       console.log(featureNameToRankMap);
       var featureNames = Object.keys(featureNameToRankMap);
@@ -997,8 +943,6 @@ class AppInterface extends React.Component {
       // sort featureNames by MB or Not MB and by rank
       featureNames.map((name) => {
           if (this.state.markovBlanketFeatureNames.has(name)) {
-              //console.log(rankData)
-              //console.log(featureNameToRankMap[name])
               rankData[featureNameToRankMap[name]].MB.push(name);
           } else {
               rankData[featureNameToRankMap[name]].NotMB.push(name);
@@ -1023,27 +967,32 @@ class AppInterface extends React.Component {
     }
 
   render() {
-    var metricsGraphMax = Math.max(this.state.consistencyGraphLegend.max, this.state.MICurrent.score);
-    this.state.consistencyGraphLegend.max = metricsGraphMax;
-    var featureInfo = [{name: "hi", description: "hello"}];
-    var rankLossMax = this.state.rankLossCurrent.score;
-    rankLossMax = Math.max(rankLossMax, Math.max.apply(null, this.state.rankLoss.score)) + 1;
-      var currentGraphHistory;
+    // set graph max for consistency graph
+    var metricsGraphMax = Math.max(this.state.consistencyGraphLegendMax, this.state.MICurrent);
+    this.state.consistencyGraphLegendMax = metricsGraphMax;
+
+    var rankLossMax = this.state.rankLossCurrent;
+    rankLossMax = Math.max(rankLossMax, Math.max.apply(null, this.state.rankLoss.score)) + 1; // TODO: when rankloss is 0
+
+    var currentGraphHistory;
     if (this.state.graphIndex >= 0) {
         currentGraphHistory = this.state.causalGraph.graphHistory[this.state.graphIndex];
     } else {
         currentGraphHistory = {graph: {}, dotSrc: ""}
     }
+
       return (
         <div className={'root-div'}>
             <SideBar featureInfo={this.props.description} show={this.state.showInfo} close={() => this.showInfoFalse()}/>
+
             <button className={"sidebar-toggle"} onClick={this.showInfoTrue}>{"☰"}</button>
-            <div className={'help-icon-tooltip'}>?
-                <span className={"tooltip-text"}>
+            <div className={'help-icon-tooltip'}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0z"/><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>                <span className={"tooltip-text"}>
                     {this.state.helptext[this.state.activeTabIndex]}
                 </span>
             </div>
-          <Tabs activeTabIndex={this.state.activeTabIndex} handleTabClick={(t) => this.handleTabClick(t)}>
+
+            <Tabs activeTabIndex={this.state.activeTabIndex} handleTabClick={(t) => this.handleTabClick(t)}>
               <Tab linkClassName={"Feature Importance"}>
                 <ExpertKnowledge
                     colorRange={this.state.colorRange}
@@ -1061,7 +1010,7 @@ class AppInterface extends React.Component {
                     nextStep={this.sendImportanceToGraph}
                 />
               </Tab>
-              <Tab linkClassName={"Causal Graph"}>
+                <Tab linkClassName={"Causal Graph"}>
                   <CausalGraph
                       dotSrc={currentGraphHistory.dotSrc}
                       sendData={this.sendData}
@@ -1076,11 +1025,18 @@ class AppInterface extends React.Component {
                       getGraphDataToLog={this.getGraphDataToLog}
                   />
               </Tab>
+
               <Tab linkClassName={"Feature Selection"}>
                   <div>
                       <div className={"tools-bar"}>
-                          <button className={"tools-bar"} style={{background: this.state.showAnalysis? "#0071e0" : "darkgray"}} onClick={this.toggleAnalysis}>{"Analysis"}</button>
-                          <button className={"tools-bar right-button next-button"} onClick={this.classify}>{"CLASSIFY »"}</button>
+                          <button className={"tools-bar action-button"} style={{background: this.state.showAnalysis? "#0071e0" : "darkgray"}} onClick={this.toggleAnalysis}>{"Analysis of Feature Set"}</button>
+                          <div className={"tools-bar-help"}>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                              <span className={"tools-bar-help-text"}>
+                                {"Analysis of how the current selected feature set relates to features importance and causal graph"}
+                                </span>
+                          </div>
+                          <button className={"tools-bar right-button next-button"} onClick={this.classify}>{"CREATE CLASSIFER »"}</button>
                           <button className={"tools-bar right-button previous-button"} onClick={this.goFromSelectionToGraph}>{"« PREVIOUS"}</button>
                       </div>
 
@@ -1096,62 +1052,81 @@ class AppInterface extends React.Component {
                           size={this.state.featureCoordinatesSize}
                           sendData={this.sendData}
                           colorFunction={this.state.colorFunction}
+                          classDisplay={this.state.classDisplay}
                       />
-                          <Legend className={"legend"}
+                          <Legend className={"legend legend-left class-legend"}
                                   keys={this.props.classNames}
                                   colors={this.state.colorRange}/>
-                      <CheckboxMultiSelect options={this.state.featureData.classDisplay}
+                      <CheckboxMultiSelect options={this.state.classDisplay}
                                            handleChange={(c, d) => this.handleClassSelection(c, d)}/>
                       </div>
-                      <div className={"grid-container"} style={{display: this.state.showAnalysis? "grid" : "none"}}>
-                          <div className={"grid-item"}>
-                              <ProgressGraph size={[500, 300]}
-                                             max={this.state.consistencyGraphLegend.max}
-                                             min={0}
-                                             name={"consistency"}
-                                             consistencyScores={{MB: this.state.MB.score, MI: this.state.MI.score }}
-                                             metrics={{accuracy: [], precision: []}}
-                                             metricsColors={this.state.metricsGraphLegend.colors}
-                                             currentScores={{ MB: this.state.MBCurrent.score, MI: this.state.MICurrent.score }}
-                                             colors={this.state.consistencyGraphLegend.colors}
-                                             selectedIndex={this.state.selectedIndex}
-                                             updateIndex={this.updateIndex}
-                                             xAxisLength={this.state.xAxisLength}
-                                             goToStep={(s) => this.goToStep(s)}
-                              />
-                              <Legend className={"legend"}
-                                  keys={this.state.consistencyGraphLegend.keys}
-                                      colors={this.state.consistencyGraphLegend.colors}/>
+                      <div className={""} style={{display: this.state.showAnalysis? "grid" : "none"}}>
+                          <div className={"confusion-matrix-title"} style={{marginLeft: "350px", marginBottom: "20px"}}>Consistency with Causal Graph
+                              <svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                              <span className={"tools-bar-help-text"} style={{float: "none"}}>
+                                {""}
+                              </span>
                           </div>
-                          <div className={"grid-item"}>
-                              <PieChart size={[400,300]}
-                                        data={Array.from(this.state.markovBlanketFeatureNames)}
-                                        selection={Array.from(this.state.coveredFeatures)}
-                              />
+                          <div className={"grid-container"}>
+                              <div className={"grid-item"}>
+                                  <VerticalLegend legend={this.state.consistencyGraphLegend} width={170}/>
+                                  <ProgressGraph size={[500, 300]}
+                                                 max={this.state.consistencyGraphLegendMax}
+                                                 min={0}
+                                                 name={"consistency"}
+                                                 scores={{
+                                                     MB: (this.state.MBCurrent >= 0) ? this.state.MB.concat([this.state.MBCurrent]) : this.state.MB ,
+                                                     MI: (this.state.MICurrent >= 0) ? this.state.MI.concat([this.state.MICurrent]) : this.state.MI }}
+                                                 colors={this.state.consistencyGraphLegend.map((item) => item.color)}
+                                                 selectedIndex={this.state.selectedIndex}
+                                                 updateIndex={this.updateIndex}
+                                                 xAxisLength={this.state.xAxisLength}
+                                                 goToStep={(s) => this.goToStep(s)}
+                                  />
+                              </div>
+
+                              <div className={"grid-item"}>
+                                  <VerticalLegend legend={[
+                                      { value: "Covered", color: "#b9d9ff", helptext: "Either a selected feature or there is a subset of selected features that make up a path to/from this feature" },
+                                      { value: 'Not Covered', color: '#a9a9a9', helptext: "Not a selected feature and no subset of selected features make up a path to/from this feature" }
+                                  ]} width={120}/>
+                              </div>
+                              <div className={"grid-item"}>
+                                  <PieChart size={[400,300]}
+                                            data={Array.from(this.state.markovBlanketFeatureNames)}
+                                            selection={Array.from(this.state.coveredFeatures)}
+                                  />
+                              </div>
+                        </div>
+
+                          <div className={"confusion-matrix-title"} style={{marginLeft: "350px", marginBottom: "20px"}}>Consistency with Feature Importance
+                              <svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                              <span className={"tools-bar-help-text"} style={{float: "none"}}>
+                                {""}
+                              </span>
                           </div>
+
+                          <div className={"grid-container"}>
                           <div className={"grid-item"}>
-                              <Legend className={"legend legend-left"}
-                                  keys={["Covered", "Not Covered"]}
-                                      colors={["#b9d9ff", "#a9a9a9"]}/>
-                          </div>
-                          <div className={"grid-item"}>
+                              <VerticalLegend legend={this.state.rankLossGraphLegend} width={100}/>
                               <ProgressGraph size={[500, 300]}
                                              max={rankLossMax}
                                              min={0}
                                              name={"rankLoss"}
-                                             consistencyScores={this.state.rankLoss}
-                                             metrics={{accuracy: [], precision: []}}
-                                             metricsColors={[]}
-                                             currentScores={this.state.rankLossCurrent}
-                                             colors={this.state.rankLossGraphLegend.colors}
+                                             scores={{ rankloss: this.state.rankLossCurrent >= 0 ? this.state.rankLoss.concat([this.state.rankLossCurrent]) : this.state.rankLoss}}
+                                             colors={this.state.rankLossGraphLegend.map((item) => item.color)}
                                              selectedIndex={this.state.selectedIndex}
                                              updateIndex={this.updateIndex}
                                              xAxisLength={this.state.xAxisLength}
                                              goToStep={(s) => this.goToStep(s)}
                               />
-                              <Legend className={"legend"}
-                                  keys={this.state.rankLossGraphLegend.keys}
-                                      colors={this.state.rankLossGraphLegend.colors}/>
+                          </div>
+
+                          <div className={"grid-item"}>
+                              <VerticalLegend legend={[
+                                  { value: "In MB", color: "#7e6699", helptext: "in the markov blanket of the target node in the causal graph" },
+                                  { value: 'Not in MB', color: '#f08036', helptext: "not in the markov blanket of the target node in the causal graph" }
+                              ]} width={120}/>
                           </div>
                           <div className={"grid-item"}>
                               <SunburstChart size={[400,300]}
@@ -1159,11 +1134,7 @@ class AppInterface extends React.Component {
                                              selection={this.state.selectedFeatureNames}
                               />
                           </div>
-                          <div className={"grid-item"}>
-                              <Legend className={"legend legend-left"}
-                                  keys={['In MB', 'Not in MB']}
-                                      colors={['#7e6699', '#f08036']}/>
-                          </div>
+                        </div>
                       </div>
                   </div>
               </Tab>
@@ -1171,13 +1142,41 @@ class AppInterface extends React.Component {
                   <div className={"tools-bar"}>
                       <button className={"tools-bar right-button previous-button"} onClick={this.goFromAnalysisToSelection}>{"« PREVIOUS"}</button>
                   </div>
-                <ConfusionMatrix
-                    matrix={this.state.confusionMatrix}
-                    normalizedMatrix={this.state.confusionMatrixNormalized}
-                    classNames={this.props.classNames}
-                />
-                  <div className={"grid-container"}>
-                  <div>
+                  <div className={"confusion-matrix-container"}>
+                      <div className={"confusion-matrix-title"}>Confusion Matrix
+                            <svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                          <span className={"tools-bar-help-text"} style={{float: "none"}}>
+                            {"CM"}
+                        </span>
+                    </div>
+                      <div id={"matrix"}>
+                        <ConfusionMatrix
+                            matrix={this.state.confusionMatrix}
+                            normalizedMatrix={this.state.confusionMatrixNormalized}
+                            classNames={this.props.classNames}
+                        />
+                      </div>
+                  </div>
+                  <div className={"confusion-matrix-title"} style={{marginLeft: "445px", marginBottom: "10px", marginTop: "20px"}}> Statistical Metrics
+                      <svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                      <span className={"tools-bar-help-text"} style={{float: "none"}}>
+                                {""}
+                                </span>
+                  </div>
+                  <div style={{textAlign: "center"}} >
+                      <BarGraph size={[500,300]} metrics={this.state.metrics} colors={this.state.metricsGraphLegend.map((item) => item.color)} xAxisLength={this.state.xAxisLength}/>
+                      <VerticalLegend legend={this.state.metricsGraphLegend} width={100}  marginLeft={"450px"}/>
+                      <div>
+                  </div>
+              </div>
+              </Tab>
+          </Tabs>
+        </div>
+      )
+  }
+}
+
+/*
                       <ProgressGraph size={[500, 300]}
                                      max={1}
                                      min={0}
@@ -1190,16 +1189,8 @@ class AppInterface extends React.Component {
                                      selectedIndex={this.state.selectedIndex}
                                      updateIndex={this.updateIndex}
                                      xAxisLength={this.state.xAxisLength}
-                                     goToStep={(s) => this.goToStep(s)}
-                      />
-                      <Legend className={"legend"}
+                                     goToStep={(s) => this.goToStep(s)}/>
+                                     <Legend className={"legend"}
                               keys={this.state.metricsGraphLegend.keys}
                               colors={this.state.metricsGraphLegend.colors}/>
-                  </div>
-              </div>
-              </Tab>
-          </Tabs>
-        </div>
-      )
-  }
-}
+ */

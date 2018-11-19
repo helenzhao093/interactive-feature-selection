@@ -22,12 +22,18 @@ class Axis extends React.Component {
           })
           .on("end", function () {
               if (!d3.event.sourceEvent) return;
-              if (!that.props.isDiscrete) return;
-              var top = Math.floor(d3.event.selection[0] / binSize) * binSize;
-              var bottom = Math.floor(d3.event.selection[1] / binSize) * binSize;
-              d3.select(this).transition().call(d3.event.target.move, [top, bottom]);
-              that.props.setFeatureDisplayRange([top, bottom], [Math.floor(d3.event.selection[0] / binSize), Math.floor(d3.event.selection[1] / binSize)]);
-
+              if (that.props.isNominal) {
+                  let binSize = that.computeBinSize();
+                  var top = Math.floor(d3.event.selection[0] / binSize) * binSize;
+                  var bottom = Math.floor(d3.event.selection[1] / binSize) * binSize;
+                  d3.select(this).transition().call(d3.event.target.move, [top, bottom]);
+                  that.props.setFeatureDisplayRange([top, bottom], [Math.floor(d3.event.selection[0] / binSize), Math.floor(d3.event.selection[1] / binSize)]);
+              } else {
+                  let domain = that.props.axis.domain();
+                  var rangeTop = d3.event.selection[0] / that.props.height * (domain[1] - domain[0]) + domain[0];
+                  var rangeBottom = d3.event.selection[1] / that.props.height * (domain[1] - domain[0]) + domain[0];
+                  that.props.setFeatureDisplayRange(d3.event.selection, [rangeTop, rangeBottom]);
+              }
           });
       return brush;
   }
@@ -40,14 +46,12 @@ class Axis extends React.Component {
     axisG.append("g").attr('class', 'axis-brush');
     var axisBrush = axisG.select('.axis-brush');
 
-    let binSize = this.computeBinSize();
-
     if (this.props.name == 'BOUNDARY') {
         //var g = d3.select(id);
         axisG.select("path").attr("stroke", "darkgrey").attr("stroke-width", 5);
         axisG.select(".tick").style("display", "none")
     } else {
-        var brush = this.getBrush(binSize);
+        var brush = this.getBrush();
         axisBrush.call(brush);
         //brush.move(d3.select(id).select('.axis-brush'), [10, 500]);
 
@@ -67,7 +71,7 @@ class Axis extends React.Component {
     d3.select(id).select('.axis-brush').remove();
     axisG.append("g").attr('class', 'axis-brush');
     var axisBrush = axisG.select('.axis-brush');
-    let binSize = this.computeBinSize();
+    //let binSize = this.computeBinSize();
 
     var g = d3.select(id);
     if (this.props.name == 'BOUNDARY') {
@@ -75,9 +79,8 @@ class Axis extends React.Component {
         g.select(".tick").style("display", "none")
     } else {
         g.select("path").attr("stroke", "black").attr("stroke-width", 1);
-        var brush = this.getBrush(binSize);
+        var brush = this.getBrush();
         axisBrush.call(brush);
-
         if (that.props.extent[0] != 0 || that.props.extent[1] != 0) {
             brush.move(d3.select(id).select('.axis-brush'), that.props.extent);
         }
@@ -86,7 +89,6 @@ class Axis extends React.Component {
 
   render(){
     console.log('feature-axis');
-    console.log(this.props)
     const textColor = this.props.name == "BOUNDARY" ? "darkgrey": "black";
     return (
       <g className={'feature-axis'} id={this.props.name} transform={this.props.transform}>
@@ -128,9 +130,6 @@ class FeatureParallelCoordinates extends React.Component {
               extent[this.props.features[i].name] = [0,0];
           }
       }
-      /*this.props.convertedData.map((data) =>
-        data.display = true
-      ); */
 
     this.state = {
       margin: margin,
@@ -229,20 +228,21 @@ class FeatureParallelCoordinates extends React.Component {
   }
 
   inRange(value, range) {
-        if (value >= range[0] && value <= range[1]){
-            return true;
-        }
-        return false
-    }
+      if (value >= range[0] && value <= range[1]){
+          return true;
+      }
+      return false
+  }
 
   highlightSelected() {
       this.state.displayRanges;
-      this.props.convertedData.map((data) => {
+      this.props.convertedData.map((ex) => {
           var featureArrayIndex = 0;
-          data.display = true;
-          while (featureArrayIndex < this.props.features.length - 1 && data.display == true) {
-              if (this.inRange(data[featureArrayIndex], this.state.displayRanges[featureArrayIndex]) == false) {
-                  data.display = false;
+          ex.display = true;
+          while (featureArrayIndex < this.props.features.length - 1 && ex.display == true) {
+              if (this.inRange(ex.data[featureArrayIndex], this.state.displayRanges[featureArrayIndex]) == false ||
+                  this.props.classDisplay[ex.target].TP.display == false) {
+                  ex.display = false;
               }
               featureArrayIndex = featureArrayIndex + 1;
           }
@@ -259,22 +259,22 @@ class FeatureParallelCoordinates extends React.Component {
           <svg className={'feature-parallels-svg'} width={this.props.size[0]} height={this.props.size[1]}>
             <g className={'feature-parallels'} transform={`translate(${this.state.margin.left},${this.state.margin.top})`} >
             <g className={'data-paths'}>
-              {unDisplayExamples.map((data, index) =>
-                <path d={this.path(data, this.state.yScalesDisplay)} fill={"none"}
+              {unDisplayExamples.map((ex) =>
+                <path d={this.path(ex.data, this.state.yScalesDisplay)} fill={"none"}
                       stroke={'lightgray'} stroke-width={3}/>
               )}
             </g>
                 <g className={'data-paths-foreground'}>
-                    {displayExamples.map((data, index) =>
-                        <path d={this.path(data, this.state.yScalesDisplay)} fill={"none"}
-                              stroke={this.props.colorFunction(this.props.data[index].target)} stroke-width={3}/>
+                    {displayExamples.map((ex) =>
+                        <path d={this.path(ex.data, this.state.yScalesDisplay)} fill={"none"}
+                              stroke={this.props.colorFunction(ex.target)} stroke-width={3}/>
                     )}
                 </g>
             {this.props.features.map((feature, index) =>
                 <Axis name={feature.name} textname={feature.name} axis={this.state.yScalesDisplay[feature.name]}
                       setFeatureDisplayRange={(e, r) => this.setFeatureDisplayRange(feature.index, feature.name, e, r)}
                       axisDisplay={this.state.yScalesAxesDisplay[feature.name]}
-                      isDiscrete={feature.type == 'nominal'}
+                      isNominal={feature.type == 'nominal'}
                       extent={this.state.extent[feature.name]}
                       height={this.state.height} transform={`translate(${this.props.xScale(feature.name)})`}/>
             )}

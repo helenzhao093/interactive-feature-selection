@@ -197,9 +197,10 @@ class FeatureData:
         self.feature_data['convertedData'] = []
         #num_examples = len(self.feature_data['inputData'])
         for data in self.feature_data['inputData']:
-            converted = self.convert_example(data['features'])
+            converted = dict()
+            converted['data'] = self.convert_example(data['features'])
+            converted['target'] = data['target']
             self.feature_data['convertedData'].append(converted)
-
 
     def init_data(self):
         self.feature_data['data'] = []

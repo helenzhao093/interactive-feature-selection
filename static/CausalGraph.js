@@ -14,7 +14,13 @@ class CausalGraph extends React.Component {
       selectedEdgeFromTo: [],
       removedElements: {},
       removeStep: 0,
-      removedEdges: []
+      removedEdges: [],
+      legend: [
+          { value: "Selected", color: "yellow", helptext: "selected edge or feature that the other highlighted nodes relate to" },
+          { value: "Parent", color:'#ff9900', helptext: "features that are direct causes of the selected feature"},
+          { value: "Child", color:'#42d9f4', helptext: "features that are direct effects of the selected feature" },
+          { value: "Spouse", color: "green", helptext: "features that are also direct causes of the selected feature's children/direct effects" }
+      ],
     };
     this.renderGraph = this.renderGraph.bind(this);
     this.updateGraphSelection = this.updateGraphSelection.bind(this);
@@ -30,6 +36,8 @@ class CausalGraph extends React.Component {
   renderGraph() {
       if (this.props.dotSrc) {
           this.state.graphviz.renderDot(this.props.dotSrc);
+          var element = document.getElementById('graph-overlay');
+          element.style.visibility = "hidden";
       }
       var nodes = d3.selectAll('.node');
       var that = this;
@@ -54,7 +62,7 @@ class CausalGraph extends React.Component {
           .attr("font-size", 24);
 
       d3.select('#graph').select('svg').select("#graph0").select("polygon");
-      svg.attr("width", 800).attr("height", 500);
+      svg.attr("width", 850).attr("height", 500);
       var step = this.state.removeStep;
       //console.log(this.state.removedElements[step])
       var that = this;
@@ -69,20 +77,15 @@ class CausalGraph extends React.Component {
     this.renderGraph()
   }
 
-  /*shouldComponentUpdate(nextProps, nextState) {
-
-    if (this.props.dotSrc != nextProps.dotSrc && this.state.selectedEdge != nextState.selectedEdge && this.state.selectedNode != nextState.selectedNode && this.state.markovBlanketSelected != nextState.markovBlanketSelected) {
-      return true
-    }
-    return false
-  }*/
 
   shouldComponentUpdate(nextProps, nextState) {
-      return !(nextProps.dotSrc == this.props.dotSrc) || !(nextState.markovBlanketSelected == this.state.markovBlanketSelected);
+      return !(nextProps.dotSrc == this.props.dotSrc) || !(nextState.markovBlanketSelected == this.state.markovBlanketSelected) || (nextState.addEdge != this.state.addEdge);
   }
 
   componentDidUpdate() {
-    this.renderGraph()
+      var element = document.getElementById('graph-overlay');
+      element.style.visibility = "hidden";
+      this.renderGraph()
   }
 
   updateGraphSelection(selected) {
@@ -317,9 +320,11 @@ class CausalGraph extends React.Component {
       this.state.removedElements[this.state.removeStep] = {element: this.state.selectedEdge, type: "edge", edgeFromTo: this.state.selectedEdgeFromTo }
       this.state.selectedEdge = ""
       this.removedEdgeFromGraph(this.state.selectedEdgeFromTo)
-        //console.log(this.state)
     }
     if (this.state.isNodeSelected) {
+      var element = document.getElementById('graph-overlay');
+      element.style.visibility = "visible";
+      console.log(element)
       this.state.removedElements[this.state.removeStep] = {element: this.state.selectedNode, type: "node" };
       const removedNode = this.state.selectedNode;
       this.state.selectedNode = "";
@@ -377,7 +382,8 @@ class CausalGraph extends React.Component {
             <button className={"tools-bar action-button"} onClick={() => this.updateGraphSelection(this.state.markovBlanket)} style={{ background:  colorMB}}>
               {this.state.markovBlanket}
               </button>
-              <div className={"tools-bar-help"}>?
+              <div className={"tools-bar-help"}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
                   <span className={"tools-bar-help-text"}>
                       {"Highlights the set of nodes (markov blanket) that cuts the selected node from the rest of the graph."}
                   </span>
@@ -385,7 +391,8 @@ class CausalGraph extends React.Component {
             <button className={"tools-bar action-button"} onClick={() => this.updateGraphSelection(this.state.pathToFromTarget)} style={{ background: this.state.markovBlanketSelected ? "darkgray" : "yellowgreen" }}>
             {this.state.pathToFromTarget}
             </button>
-              <div className={"tools-bar-help"}>?
+              <div className={"tools-bar-help"}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
                   <span className={"tools-bar-help-text"}>
                       {"Highlights the path from the selected node to the target node"}
                   </span>
@@ -393,13 +400,20 @@ class CausalGraph extends React.Component {
             <button className={"tools-bar action-button"} onClick={() => this.removeSelected()}>
               {"Remove"}
             </button>
-              <div className={"tools-bar-help"}>?
+              <div className={"tools-bar-help"}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
                   <span className={"tools-bar-help-text"}>
-                      {"Removes the currently selected node or edge"}
+                      {"Select a node or edge in the graph. Click remove to rerender the graph without the node/edge."}
                   </span>
               </div>
-              <button className={"tools-bar action-button"} onClick={() => this.toggleAddEdge()} style={{ background: this.state.addEdge ? "#0071e0" : "darkgray" }}>{"Add Edge"}</button>
-            <button className={"tools-bar action-button"} onClick={() => this.undo()}>
+              <button className={this.state.addEdge ? "tools-bar action-button add-edge": "tools-bar action-button"} onClick={() => this.toggleAddEdge()}>{"Add Edge"}</button>
+              <div className={"tools-bar-help"}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                  <span className={"tools-bar-help-text"}>
+                      {"Click on button to enable adding edges. Click on the node the edge is coming from and then click on the node the edge is going to"}
+                  </span>
+              </div>
+              <button className={"tools-bar action-button"} onClick={() => this.undo()}>
               {"Undo"}
             </button>
             <button className={"tools-bar action-button"} onClick={() => this.clear()}>
@@ -410,9 +424,30 @@ class CausalGraph extends React.Component {
               <button className={"tools-bar right-button previous-button"} onClick={this.props.prevStep}>{"« PREVIOUS"}</button>
 
           </div>
+          <div id={"graph-overlay"}>
+              <div id="overlay-info">Building Graph
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/><path d="M0 0h24v24H0z" fill="none"/></svg>
+              </div>
+          </div>
         <div className={"causal-graph-container"}>
+
             <div className={"grid-item"} id={"graph"} style={{textAlign: "center"}}/>
-            <div className={"grid-item"}/>
+            <div className={"grid-item"}>
+                <div className={"legend legend-left cg-legend"}>
+                    {this.state.legend.map((item) =>
+                        <div style={{width: "100px"}}>
+                            <div className={"series-marker"} style={{background: item.color}}></div>
+                            <p>{item.value}</p>
+                            <div className={"tools-bar-help legend-help"}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                                <span className={"tools-bar-help-text legend-helptext"}>
+                                    {item.helptext}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
       </div>
     )
