@@ -115,7 +115,6 @@ class FeatureParallelCoordinates extends React.Component {
               const scale = d3.scaleLinear().domain(this.props.features[i].range).range([0, height]);
               yScalesDisplay[this.props.features[i].name] = scale;
               yScalesAxesDisplay[this.props.features[i].name] = scale;
-              //this.props.features[i].displayRange = this.props[i].range;
               displayRanges[this.props.features[i].index] = this.props.features[i].range;
               extent[this.props.features[i].name] = [0,0];
           }
@@ -125,7 +124,6 @@ class FeatureParallelCoordinates extends React.Component {
               rangeDomain.push(height);
               yScalesAxesDisplay[this.props.features[i].name] = d3.scaleOrdinal().domain(this.props.features[i].values).range(rangeDomain);
               yScalesDisplay[this.props.features[i].name] = d3.scaleLinear().domain([0, this.props.features[i].values.length]).range([0, height]);
-              //this.props.features[i].displayRange = [0, this.props.features[i].values.length]
               displayRanges[this.props.features[i].index] = [0, this.props.features[i].values.length];
               extent[this.props.features[i].name] = [0,0];
           }
@@ -166,15 +164,15 @@ class FeatureParallelCoordinates extends React.Component {
     d3.selectAll('.feature-axis')
         .selectAll('.tick')
         .selectAll('text')
-        .attr("transform", "rotate(-45)")
+        .attr("transform", "translate(0,40) rotate(-45)")
   }
 
   componentDidUpdate() {
-    var that = this
+    var that = this;
       d3.selectAll('.feature-axis')
           .selectAll('.tick')
           .selectAll('text')
-          .attr("transform", "rotate(-45)")
+          .attr("transform", "translate(0,40) rotate(-45)")
 
     /*var selection = d3.select(".feature-parallels")
       .selectAll(".datapath")
@@ -191,8 +189,6 @@ class FeatureParallelCoordinates extends React.Component {
 
     selection.exit().remove()*/
   }
-
-
 
   path(data, yScalesDisplay) {
     var xScale = this.props.xScale;
@@ -228,6 +224,9 @@ class FeatureParallelCoordinates extends React.Component {
   }
 
   inRange(value, range) {
+      if (range[0] == range[1]) {
+          return true;
+      }
       if (value >= range[0] && value <= range[1]){
           return true;
       }

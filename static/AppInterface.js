@@ -6,7 +6,9 @@ class AppInterface extends React.Component {
     var color = d3.scaleOrdinal()
         .range(colorRange)
         .domain(props.classNames);
-    var featureCoordinatesSize = [1200,500];
+      var FIcolorFunction = d3.scaleOrdinal().range(d3.schemeBlues[5]).domain([0, 1, 2, 3, 4]);
+
+      var featureCoordinatesSize = [1200,500];
 
     /* FEATURE IMPORTANCE */
     var circleRadii = [250];
@@ -62,6 +64,7 @@ class AppInterface extends React.Component {
             circleRadii: [250],
             features: rankedFeatures, // initialized to null object
         },
+        FIcolorFunction: FIcolorFunction,
         featureImportanceMoves: [],
         featureImportanceStep: 0,
         shouldInitializeSelection: true,
@@ -306,7 +309,7 @@ class AppInterface extends React.Component {
         var lowestRankFeatures = [];
         Object.keys(this.state.featureImportance.features).map(key => {
             if (this.state.featureImportance.features[key].circleIndex == -1) {
-                forbiddenEdges.push([this.state.featureImportance.features[key].name, "CLASS"]);
+                forbiddenEdges.push([this.state.featureImportance.features[key].name, this.props.targetName]);
                 lowestRankFeatures.push(this.state.featureImportance.features[key].name);
             }
         });
@@ -319,7 +322,7 @@ class AppInterface extends React.Component {
         if (this.state.featureImportance.circleRadii.length > 1) {
             Object.keys(this.state.featureImportance.features).map(key => {
                 if (this.state.featureImportance.features[key].circleIndex == this.state.featureImportance.circleRadii.length - 1) {
-                    requiredEdges.push([this.state.featureImportance.features[key].name, "CLASS"]);
+                    requiredEdges.push([this.state.featureImportance.features[key].name, this.props.targetName]);
                     highestRankFeatures.push(this.state.featureImportance.features[key].name);
                 }
             });
@@ -393,6 +396,7 @@ class AppInterface extends React.Component {
     }
 
   getGraphDataToLog(inputGraph) {
+        console.log(inputGraph)
         var graph = {};
         Object.keys(inputGraph).map((featureName) => {
             graph[featureName] = []
@@ -464,7 +468,7 @@ class AppInterface extends React.Component {
 
   removeLastGraph(node) {
       const currentIndex = this.state.graphIndex;
-      fetch('/addRemovedNode', {
+      /*fetch('/addRemovedNode', {
           method: 'POST',
           body: JSON.stringify({ node: node })
       }).then(function(response) {
@@ -477,10 +481,12 @@ class AppInterface extends React.Component {
          type: "undo",
          info: [],
          graph: graph
-      });
-      this.setState({
-          graphIndex: currentIndex - 1
-      });
+      }); */
+      if (currentIndex > 0) {
+          this.setState({
+              graphIndex: currentIndex - 1
+          });
+      }
   }
 
   clearGraph() {
@@ -565,10 +571,10 @@ class AppInterface extends React.Component {
           const currentGraph = this.state.causalGraph.graphHistory[currentIndex].graph;
           var indexToFeatureMap = this.getNodeIndexToFeatureMap(currentGraph);
           this.state.indexToFeatureMap = indexToFeatureMap;
-          var markovBlanketFeatureNames = this.getMarkovBlanketFeatureNames(indexToFeatureMap, currentGraph.CLASS);
+          var markovBlanketFeatureNames = this.getMarkovBlanketFeatureNames(indexToFeatureMap, currentGraph[this.props.targetName]);
           this.state.markovBlanketFeatureNames = markovBlanketFeatureNames;
 
-          this.initializeRankData();
+          var rankData = this.initializeRankData();
 
           var featuresWithBoundary = [];
           Object.keys(this.state.featureImportance.features).map((featureKey) => {
@@ -597,6 +603,7 @@ class AppInterface extends React.Component {
           }); */
 
           this.setState({
+              rankData: rankData,
               featureSelection: {
                   xScaleDomain: xScaleInfo.xScaleDomain,
                   xScale: xScaleInfo.xScale,
@@ -610,7 +617,6 @@ class AppInterface extends React.Component {
               coveredFeatures: this.state.markovBlanketFeatureNames
           });
       } else {
-
           this.setState({
               activeTabIndex: 2,
           });
@@ -696,6 +702,7 @@ class AppInterface extends React.Component {
       }).then(function(response) {
         return response.json();
       }).then(data => {
+          console.log(this.state.rankLossCurrent)
         this.state.MI.push(this.state.MICurrent);
         this.state.MB.push(this.state.MBCurrent);
         this.state.rankLoss.push(this.state.rankLossCurrent);
@@ -949,7 +956,9 @@ class AppInterface extends React.Component {
           }
       });
 
-      this.state.rankData = rankData;
+      /*this.setState({
+          rankData:rankData
+      }); */
       return rankData;
   }
 
@@ -972,7 +981,7 @@ class AppInterface extends React.Component {
     this.state.consistencyGraphLegendMax = metricsGraphMax;
 
     var rankLossMax = this.state.rankLossCurrent;
-    rankLossMax = Math.max(rankLossMax, Math.max.apply(null, this.state.rankLoss.score)) + 1; // TODO: when rankloss is 0
+    rankLossMax = Math.max(rankLossMax, Math.max.apply(null, this.state.rankLoss)) + 1; // TODO: when rankloss is 0
 
     var currentGraphHistory;
     if (this.state.graphIndex >= 0) {
@@ -980,6 +989,23 @@ class AppInterface extends React.Component {
     } else {
         currentGraphHistory = {graph: {}, dotSrc: ""}
     }
+
+    var SBLegend = [
+        { value: "In MB", color: "#7e6699", helptext: "in the markov blanket of the target node in the causal graph" },
+        { value: 'Not in MB', color: '#f08036', helptext: "not in the markov blanket of the target node in the causal graph" }
+    ]
+
+    for (var i = this.state.featureImportance.circleRadii.length - 1; i >= 0 ; i--) {
+        if (i == this.state.featureImportance.circleRadii.length - 1) {
+            SBLegend.push({value: "Most Important", color: this.state.FIcolorFunction(i), helptext: ""})
+        } else if (i == 0) {
+            SBLegend.push({ value: "Least Important", color: this.state.FIcolorFunction(i), helptext: "" })
+        } else {
+            SBLegend.push({ value: "", color: this.state.FIcolorFunction(i), helptext: "" })
+        }
+    }
+
+    SBLegend.push({ value: "No Importance", color: "white", helptext: ""});
 
       return (
         <div className={'root-div'}>
@@ -1008,6 +1034,7 @@ class AppInterface extends React.Component {
                     width={1000}
                     height={500}
                     nextStep={this.sendImportanceToGraph}
+                    colorFunction={this.state.FIcolorFunction}
                 />
               </Tab>
                 <Tab linkClassName={"Causal Graph"}>
@@ -1019,6 +1046,7 @@ class AppInterface extends React.Component {
                       isEdgeSelected={this.state.causalGraph.isEdgeSelected}
                       isNodeSelected={this.state.causalGraph.isNodeSelected}
                       undoNodeRemoval={(n) => this.removeLastGraph(n)}
+                      undo={(n) => this.removeLastGraph(n)}
                       clearGraph={this.clearGraph}
                       nextStep={this.sendGraphToSelection}
                       prevStep={this.goFromGraphToImportance}
@@ -1054,6 +1082,7 @@ class AppInterface extends React.Component {
                           colorFunction={this.state.colorFunction}
                           classDisplay={this.state.classDisplay}
                       />
+                          <div className={"className-legend-title"}>{`Displayed ${this.props.targetName}`}</div>
                           <Legend className={"legend legend-left class-legend"}
                                   keys={this.props.classNames}
                                   colors={this.state.colorRange}/>
@@ -1071,6 +1100,7 @@ class AppInterface extends React.Component {
                               <div className={"grid-item"}>
                                   <VerticalLegend legend={this.state.consistencyGraphLegend} width={170}/>
                                   <ProgressGraph size={[500, 300]}
+                                                 yAxisLabel={"MB Consistency/Mutual Information"}
                                                  max={this.state.consistencyGraphLegendMax}
                                                  min={0}
                                                  name={"consistency"}
@@ -1110,6 +1140,7 @@ class AppInterface extends React.Component {
                           <div className={"grid-item"}>
                               <VerticalLegend legend={this.state.rankLossGraphLegend} width={100}/>
                               <ProgressGraph size={[500, 300]}
+                                             yAxisLabel={"rank loss"}
                                              max={rankLossMax}
                                              min={0}
                                              name={"rankLoss"}
@@ -1123,15 +1154,14 @@ class AppInterface extends React.Component {
                           </div>
 
                           <div className={"grid-item"}>
-                              <VerticalLegend legend={[
-                                  { value: "In MB", color: "#7e6699", helptext: "in the markov blanket of the target node in the causal graph" },
-                                  { value: 'Not in MB', color: '#f08036', helptext: "not in the markov blanket of the target node in the causal graph" }
-                              ]} width={120}/>
+                              <VerticalLegend legend={SBLegend} width={150}/>
                           </div>
                           <div className={"grid-item"}>
                               <SunburstChart size={[400,300]}
                                              data={this.state.rankData}
                                              selection={this.state.selectedFeatureNames}
+                                             numImportance={this.state.featureImportance.circleRadii.length}
+                                             colorFunction={this.state.FIcolorFunction}
                               />
                           </div>
                         </div>

@@ -32,6 +32,39 @@
     color: #ffffff;
 }
 
+.help-icon-tooltip {
+    float: right;
+    color: white;
+    width: 20px;
+    text-align: center;
+    font-size: x-large;
+    margin-top: 18px;
+    position: relative;
+    white-space: pre-wrap;
+    fill: white;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: 300px;
+    color: #fff;
+    text-align: left;
+    border-radius: 4px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1;
+    background-color: black;
+    right: 0px;
+    font-size: 12px;
+    top: 44px;
+    opacity: 0;
+}
+
+.help-icon-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 0.7;
+}
+
 .sidebar-item {
     width: 100%;
     display: block;
@@ -48,13 +81,13 @@
 .sidebar-item p {
     margin: 0;
     font-size:0.8em;
-    /*font-family: "Lucida Grande"; */
 }
 
 .grid-container {
     display: grid;
-    grid-template-columns: 500px 400px 100px;
+    grid-template-columns: 500px 150px 350px;
 }
+
 .grid-item {
     text-align: center;
 }
@@ -72,7 +105,6 @@
   cursor: pointer;
     background: #20232a;
     color: white;
-    /*font-family: "Lucida Sans";*/
     font-size: 1em;
 }
 
@@ -109,9 +141,63 @@
     border-radius: 5px;
 }
 
+.tools-bar-help {
+    position: relative;
+    width: 12px;
+    float: left;
+    fill: lightgray;
+    text-align: center;
+    font-size: 14px;
+    top: 3px;
+    margin-right: 15px;
+    margin-left: 2px;
+    cursor: default;
+    z-index: 1;
+    height: 20px;
+}
+
+.legend-help {
+    float: right;
+    position: inherit;
+}
+
+.tools-bar-help.legend-help:hover .tools-bar-help-text {
+    visibility: visible;
+}
+
+.tools-bar-help:hover .tools-bar-help-text {
+    visibility: visible;
+}
+
+.tools-bar-help-text {
+    position: relative;
+    float: left;
+    color: black;
+    text-align: center;
+    font-size: 10px;
+    margin-right: 5px;
+    margin-left: 2px;
+    width: 150px;
+    left: -10px;
+    background: rgba(211,211,211, 0.8);
+    border-radius: 4px;
+    border: solid black 1px;
+    visibility: hidden;
+}
+
+.legend-helptext {
+    left: 22px;
+    top: -30px;
+}
+
 .action-button {
-    background: darkgray;
+    float:left;
+    background: #BEBEBE;
     border-color: darkgray;
+}
+
+.add-edge {
+    background: #0071e0;
 }
 
 .tools-bar.right-button {
@@ -139,9 +225,27 @@
     stroke-width: 2px;
 }
 
-/* CHECKBOX */
+.feature-axis text {
+    cursor: pointer;
+}
 
+/*graph */
+#graph {
+    position: absolute;
+}
 
+.causal-graph-container {
+    display: grid;
+    grid-template-columns: 800px 100px;
+    position: absolute;
+}
+.causal-graph-container #graph{
+    margin-left: 150px;
+}
+
+.graph .node, .graph .edge {
+    cursor: pointer;
+}
 
 .graphline {
   stroke-width: 3px;
@@ -198,16 +302,19 @@ path.link.hidden {
     text-align: left;
 }
 
+.cg-legend {
+    margin-left: 20px;
+}
+
 .legend p {
     display:inline;
     font-size: 0.8em;
-    /*font-family: sans-serif;*/
-    font-weight: 600;
-    margin-right: 5px
 }
 
-.column {
-
+.class-legend {
+    position: relative;
+    float: left;
+    min-width: 0px;
 }
 
 
@@ -224,23 +331,44 @@ path.link.hidden {
 
 
 .selected-edgeto path{
-  stroke: #42d9f4;
+  stroke: yellowgreen;
     stroke-width: 0.2rem;
 }
 
 .selected-edgeto polygon{
-  fill: #42d9f4;
-  stroke: #42d9f4;
+  fill: yellowgreen;
+  stroke: yellowgreen;
+}
+
+.selected-nodeto ellipse{
+    fill: yellowgreen;
 }
 
 .selected-edgefrom path{
-  stroke: #ff9900;
+  stroke: #ffae42;
     stroke-width: 0.2rem;
 }
 
 .selected-edgefrom polygon{
-  fill: #ff9900;
-  stroke: #ff9900;
+  fill: #ffae42;
+  stroke: #ffae42;
+}
+
+.selected-nodefrom ellipse{
+    fill: #ffae42;
+}
+
+.selected-pathedge path {
+    stroke: yellow;
+    stroke-width: 0.2rem;
+}
+
+.selected-pathedge polygon {
+    fill: yellow;
+    stroke: yellow;
+}
+.selected-pathnode ellipse {
+    fill: yellow;
 }
 
 .ek-selected ellipse{
@@ -251,29 +379,17 @@ path.link.hidden {
   fill: yellow;
 }
 
-.selected-nodefrom ellipse{
-  fill: #ff9900;
-}
-
-.selected-nodeto ellipse{
-  fill: #42d9f4;
-}
-
 .selected-spousenode ellipse{
-  fill: green;
+  fill: #0d98ba;
 }
 
 .selected-spouseedge path{
-  stroke: green;
+  stroke: #0d98ba;
     stroke-width: 0.2rem;
 }
 .selected-spouseedge polygon{
-  fill: green;
-  stroke: green;
-}
-
-.selected-pathnode ellipse{
-  fill: orange;
+  fill: #0d98ba;
+  stroke: #0d98ba;
 }
 
 .selected-pathto path{
@@ -305,16 +421,51 @@ path.link.hidden {
     border-radius: 8px;
     pointer-events: none;
     color: #fff;
- }
-
- .hidden {
-     visibility: hidden;
 }
 
- ul {
-     margin: 0;
- }
+.hidden {
+    visibility: hidden;
+}
 
- * {
-     font-family: "Tahoma";
- }
+ul {
+    margin: 0;
+}
+
+* {
+    font-family: "Tahoma";
+}
+
+#graph-overlay {
+    margin-top: -10px;
+    width: 1000px;
+    height: 1000px;
+    position: fixed;
+    background: black;
+    z-index: 1;
+    opacity: 0.3;
+    font-size: 20px;
+}
+
+#overlay-info {
+    text-align: center;
+    color: white;
+    margin-top: 200px;
+    fill: white;
+}
+
+.confusion-matrix-container {
+}
+
+.confusion-matrix-title {
+    margin-left:450px;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+#matrix {
+    text-align: center;
+}
+
+.matrix-icon:hover .tools-bar-help-text {
+    visibility: visible;
+}

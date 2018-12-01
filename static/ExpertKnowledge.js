@@ -31,15 +31,13 @@ class ExpertKnowledge extends React.Component {
     super(props);
     console.log(props.features);
     var radius = 16;
-    var colorRange = ['#e9f2fb', '#cfe1f2', '#a6cde4', '#7bb7d9', '#4694c7', '#2574b5', '#1059a1', '#083979'];
-    var colorFunction = d3.scaleOrdinal().range(colorRange).domain([0,1,2,3,4,5,6,7])
+    var colorRange = d3.schemeBlues[5];//['#e9f2fb', '#cfe1f2', '#a6cde4', '#7bb7d9', '#4694c7', '#2574b5', '#1059a1', '#083979'];
 
-    this.state = {
+      this.state = {
       featureRadius: radius,
       width: this.props.width,
       height: this.props.height,
-      colorRange: colorRange,
-      colorFunction: colorFunction,
+      colorRange: colorRange
     };
     console.log(this.state);
     this.setPointPositions = this.setPointPositions.bind(this);
@@ -121,6 +119,7 @@ class ExpertKnowledge extends React.Component {
       colorIndex = colorIndex + 1;
       numColors = numColors + 1;
     }
+    //var colorDivideNum = this.props.circleRadii.length == 1 ? 1 : this.props.circleRadii.length - 1;
     return (
       <div>
       <div width={"100%"} className={"tools-bar"}>
@@ -138,7 +137,7 @@ class ExpertKnowledge extends React.Component {
       <g id={"expert-knowledge"} transform={`translate(${this.state.width/2},${this.state.height/2 })`} >
         {
           this.props.circleRadii.map((radius, index) =>
-            <circle r={radius} fill={this.state.colorFunction(index)} stroke={"black"} stroke-width={2}/>
+            <circle r={radius} fill={this.props.colorFunction(index)} stroke={"black"} stroke-width={2}/>
           )
         }
         {

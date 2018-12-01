@@ -32,6 +32,7 @@ getData()
             features={data.featureData}
             classNames={data.classNames}
             description={data.description}
+            targetName={data.targetName}
         />,
       document.getElementById('root')
     );

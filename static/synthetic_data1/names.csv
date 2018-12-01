@@ -1,0 +1,11 @@
+motherhasjob: no, yes.
+extracurriculars: no, yes.
+job: no, yes.
+studytime: less_than_2hr, 2_to_5hr, 5_to_10hr, greater_than_10.
+age: 14, 15, 16, 17, 18.
+fatherhasjob: no, yes.
+familyincome: below_avg, above_avg.
+extraclasses: no, yes.
+familysupport: no, yes.
+college: no, yes.
+scholarship: no, yes.

@@ -11,11 +11,12 @@ class FeatureData:
     CLASSIFICATIONS = [FP_KEY, FN_KEY, TP_KEY, TN_KEY]
     DEFAULT_NUM_BINS = 10
 
-    def __init__(self, target, features, numeric_data, feature_info, class_names):
+    def __init__(self, target, features, numeric_data, feature_info, class_names, target_name):
         #self.predicted = predicted
         self.target = target
         self.features = features
         self.num_examples = len(self.features)
+        self.target_name = target_name
         #self.proba = proba
         #self.class_markov_blanket = markov_blanket
         self.class_names = class_names
@@ -158,10 +159,10 @@ class FeatureData:
         self.feature_data['inputData'] = []
         for i in range(0, self.num_examples):
             #print type(self.target['CLASS'][i])
-            if type(self.target['CLASS'][i]) is str:
-                class_name = self.target['CLASS'][i]
+            if type(self.target[self.target_name][i]) is str:
+                class_name = self.target[self.target_name][i]
             else:
-                class_name = self.class_names[self.target['CLASS'][i]]
+                class_name = self.class_names[self.target[self.target_name][i]]
             if self.should_display(class_name, FeatureData.TP_KEY):
                 example = dict()
                 example['features'] = list(self.features.iloc[i].values)
@@ -175,6 +176,7 @@ class FeatureData:
                 feature_name = feature['name']
                 self.feature_mapping[feature_name] = dict()
                 values_sorted = sorted(feature['values'])
+                print feature
                 value_num = []
                 for i, value in enumerate(values_sorted):
                     self.feature_mapping[feature_name][value] = float(i)
@@ -424,10 +426,10 @@ class FeatureData:
 
     def calculate_proba_y(self):
         #Y = np.asarray(self.target)
-        all_y_values = self.target['CLASS'].unique()
+        all_y_values = self.target[self.target_name].unique()
         self.class_proba = dict()
         for yvalue in all_y_values:
-            self.class_proba[yvalue] = (self.target['CLASS'] == yvalue).sum() / float(self.num_examples)
+            self.class_proba[yvalue] = (self.target[self.target_name] == yvalue).sum() / float(self.num_examples)
         print self.class_proba
 
     def calculate_joint_probabily(self, X):
@@ -476,8 +478,8 @@ class FeatureData:
     #### RANKING
     def calculate_rank_loss(self, feature_name_to_rank_map, selected_features_names):
         # create map of feature rank to feature name
-        print 'feature name to rank'
-        print feature_name_to_rank_map
+        # print 'feature name to rank'
+        # print feature_name_to_rank_map
         loss = 0.0
         feature_rank_to_feature_name = dict()
         for feature_name in feature_name_to_rank_map.keys():
@@ -485,8 +487,8 @@ class FeatureData:
             if rank not in feature_rank_to_feature_name:
                 feature_rank_to_feature_name[rank] = []
             feature_rank_to_feature_name[rank].append(feature_name)
-        print 'feature rank to feature name'
-        print feature_rank_to_feature_name
+        # print 'feature rank to feature name'
+        # print feature_rank_to_feature_name
         rank_keys = feature_rank_to_feature_name.keys()
         for key in rank_keys:
             for feature_s in feature_rank_to_feature_name[key]:
@@ -519,7 +521,7 @@ class FeatureData:
                         current_loss += math.exp(feature_j_value)
                         #print feature_j, feature_j_value, current_loss
                 feature_s_value += current_loss
-            loss += feature_s_value
+                loss += feature_s_value
         print ('list wise loss: ' + str(loss))
         return loss
         # for rank in all features

@@ -1,0 +1,7 @@
+HistoricAvgTemp: 70 year average temperature for the day (nominal: 50s, 60s, 70s, 80s).
+LowTemp: lowest temperature measured for the day (nominal: 50s, 60s, 70s, 80s).
+HistoricAvgRainfall: 70 year average rainfall for the day (nominal: 0-1in, 1-2in, >2in).
+AirPressure: average air pressure measured for the day (nominal: 29-29.5in, 29.5-30in, >30in).
+Humidity: humidity for the day (nominal: low, medium, high).
+Precipitation: level of precipitation measured for the day (nominal: 0-1in, 1-2in, >2in).
+WeatherCondition: observed weather condition (nominal: sunny, foggy, rainy).

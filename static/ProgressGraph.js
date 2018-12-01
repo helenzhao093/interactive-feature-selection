@@ -121,7 +121,7 @@ class BarGraph extends React.Component {
 class ProgressGraph extends React.Component {
   constructor(props) {
     super(props);
-    var margin = {left: 30, right: 30, top: 20, bottom: 30};
+    var margin = {left: 50, right: 30, top: 20, bottom: 30};
     var width = props.size[0] - margin.left - margin.right;
     var height = props.size[1] - margin.top - margin.bottom;
     this.state = {
@@ -267,7 +267,8 @@ class ProgressGraph extends React.Component {
               {displayPoints}
               {displayText}
           </g>
-
+            <text x={this.state.width/2} y={this.state.height + this.state.margin.top + 10} textAnchor={"middle"} style={{fontSize: 12}}>{"Trial"}</text>
+            <text x={0 - (this.state.height/2)} y={-35} transform={"rotate(-90)"} textAnchor={"middle"} style={{fontSize: 12}}>{this.props.yAxisLabel}</text>
         </g>
       </svg>
     )

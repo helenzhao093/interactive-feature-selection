@@ -1,7 +1,7 @@
 class ConfusionMatrix extends React.Component {
     constructor(props){
         super(props)
-        console.log(this.props)
+        //console.log(this.props)
     }
 
     componentDidMount() {
@@ -16,7 +16,7 @@ class ConfusionMatrix extends React.Component {
         let cellSize = 40;
         var colorScale = d3.scaleSequential(d3.interpolateOranges).domain([0, 1]);
 
-        var topOffSet=40;
+        var topOffSet=70;
         var leftOffSet=40;
         var offSetScale = 10;
         var totalWidth = cellSize * (this.props.classNames.length + 2) + leftOffSet + offSetScale;
@@ -70,7 +70,4 @@ class ConfusionMatrix extends React.Component {
             </svg>
         )
     }
-}/*
-<g transform={'rotate(-45)'}>
-                        <text>{"Accuracy"}</text>
-                    </g>*/
+}

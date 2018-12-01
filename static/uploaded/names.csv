@@ -6,9 +6,9 @@ famsize: greater_than_3, less_than_3.
 parentstatus: Apart, Together.
 motheredu: none, primary, intermediate, secondary, higher.
 fatheredu: none, primary, intermediate, secondary, higher.
-motherjob: teacher, health_care, civil_services, at_home, other.
-fatherjob: teacher, health_care, civil_services, at_home, other.
-reason: close, reputation, course, other.
+motherjob: teacher, health, services, at_home, other.
+fatherjob: teacher, health, services, at_home, other.
+reason: home, reputation, course, other.
 guardian: mother, father, other.
 traveltime: less_than_15min, 15_to_30min, 30min_to_1hr, greater_than_1hr.
 studytime: less_than_2hr, 2_to_5hr, 5_to_10hr, greater_than_10.

@@ -1,0 +1,4 @@
+extracurriculars: participates in extracurricular activities (binary: no, yes).
+extraclasses: extra paid classes within the course subject (binary: no, yes).
+college: admitted into college (binary: no, yes).
+scholarship: has scholarship for college (binary: no, yes).

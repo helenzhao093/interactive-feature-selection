@@ -14,7 +14,8 @@ class SunburstChart extends React.Component {
         this.state = {
             radii: radii,
             colorFunction: colorFunction,
-            colorMB: colorMB
+            colorMB: colorMB,
+            stroke: "gray"
         }
     }
 
@@ -80,8 +81,8 @@ class SunburstChart extends React.Component {
                 <g transform={`translate(${this.props.size[0]/2},${this.state.radii[3]})`}>
                     {arcs1.map((slice, index) =>
                         <g className={"slice"}>
-                            <path fill={this.state.colorFunction(this.props.data[index].rank)} stroke={"white"} strokeWidth={2} d={arc1(slice)}></path>
-                            <text transform={`translate(${arc1.centroid(slice)})`} textAnchor={"middle"}>{this.props.data[index].rank}</text>
+                            <path fill={(this.props.data[index].rank == this.props.numImportance) ? 'white' : this.props.colorFunction(this.props.numImportance - 1 - this.props.data[index].rank)} stroke={this.state.stroke} strokeWidth={2} d={arc1(slice)}></path>
+
                         </g>
                     )
                     }
@@ -89,7 +90,7 @@ class SunburstChart extends React.Component {
                 <g transform={`translate(${this.props.size[0]/2},${this.state.radii[3]})`}>
                     {arcs2.map((slice, index) =>
                         <g className={"slice"}>
-                            <path fill={this.state.colorMB(pie2DataLabel[index])} stroke={"white"} strokeWidth={2} d={arc2(slice)}></path>
+                            <path fill={this.state.colorMB(pie2DataLabel[index])} stroke={this.state.stroke} strokeWidth={2} d={arc2(slice)}></path>
                         </g>
                     )
                     }
@@ -97,7 +98,7 @@ class SunburstChart extends React.Component {
                 <g transform={`translate(${this.props.size[0]/2},${this.state.radii[3]})`}>
                     {arcs3.map((slice, index) =>
                         <g className={"slice"}>
-                            <path fill={this.props.selection.includes(pie3Data[index])? "#b9d9ff" : "#a9a9a9"} stroke={"white"} strokeWidth={2} d={arc3(slice)}></path>
+                            <path fill={this.props.selection.includes(pie3Data[index])? "#b9d9ff" : "#a9a9a9"} stroke={this.state.stroke} strokeWidth={2} d={arc3(slice)}></path>
                         </g>
                     )}
                     {arcs3.map((slice, index) =>
@@ -113,6 +114,7 @@ class SunburstChart extends React.Component {
 }
 
 /*
-                            <!--<text transform={`translate(${arc2.centroid(slice)})`} textAnchor={"middle"}>{pie2DataLabel[index]}</text> -->
-
+<text transform={`translate(${arc1.centroid(slice)})`} textAnchor={"middle"}>
+                                {(this.props.data[index].MB.length == 0 && this.props.data[index].NotMB.length == 0) ? "" : this.props.data[index].rank}
+                            </text>
  */
