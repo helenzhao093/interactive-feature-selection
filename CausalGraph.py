@@ -7,7 +7,8 @@ import pandas as pd
 import copy
 
 class CausalGraph:
-    def __init__(self, df, dot_src, edges, nodes, class_node_str):
+    #def __init__(self, df, dot_src, edges, nodes, class_node_str):
+    def __init__(self, df, forbidden_edges, required_edges, class_node_str):
         self.class_node_str = class_node_str
         self.edge_to_dot_src_line_offset = 1
         self.markov_blanket_selected = True
@@ -15,11 +16,11 @@ class CausalGraph:
         self.selected_edge = None
         self.df = df
         self.removed_nodes = []
-        #self.init_dataframe(df)
-        self.init_causal_graph_dot_src(dot_src, edges, nodes)
+        self.init_dataframe(df)
+        self.init_causal_graph_dot_src(self.df, forbidden_edges, required_edges)
 
-        #self.forbidden_edges = forbidden_edges
-        #self.required_edges = required_edges
+        self.forbidden_edges = forbidden_edges
+        self.required_edges = required_edges
         # METHOD TO CONVERT DOT SRC TO MARKOV BLANKET
         #self.edges_to_graph_dict()
         #self.init_spouse_graph()
@@ -39,13 +40,14 @@ class CausalGraph:
         #df = pd.read_csv(datapath)
         self.df = df
 
-    def recalculate_causal_graph(self, dot_src, edges, nodes, removed_edges):
-        #for feature_name in feature_name_array:
-        #    self.removed_nodes.append(feature_name)
-        #df = self.df.drop(self.removed_nodes, axis=1)
-        self.init_causal_graph_dot_src(dot_src, edges, nodes)
+    def recalculate_causal_graph(self, feature_name_array, removed_edges):
+        for feature_name in feature_name_array:
+            self.removed_nodes.append(feature_name)
+        df = self.df.drop(self.removed_nodes, axis=1)
+        #self.init_causal_graph_dot_src(dot_src, edges, nodes)
         #self.edges_to_graph_dict()
         #self.init_spouse_graph()
+        self.init_causal_graph_dot_src(df, self.forbidden_edges, self.required_edges)
         self.get_markov_blanket_nodes_from_edges()
         self.generate_subgraph_dot_src_and_graph()
         self.find_paths_to_class_node()
@@ -126,22 +128,23 @@ class CausalGraph:
             self.dot_src_lines.insert(len(self.dot_src_lines) - 1, feature_name)
         print self
 
-    def init_causal_graph_dot_src(self, dot_src, edges, nodes):
-        #p = pc()
-        #p.start_vm()
-        #tetrad = s.tetradrunner()
+    #def init_causal_graph_dot_src(self, dot_src, edges, nodes):
+    def init_causal_graph_dot_src(self, df, forbidden_edges, required_edges):
+        p = pc()
+        p.start_vm()
+        tetrad = s.tetradrunner()
         #print("forbidden_edges:" + str(forbidden_edges))
         #print("required_edges:" + str(required_edges))
-        #prior = pr.knowledge(forbiddirect = forbidden_edges, requiredirect = required_edges)
-        #tetrad.run(algoId = 'fges', dfs = df, priorKnowledge = prior, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
-        #dot_src = p.tetradGraphToDot(tetrad.getTetradGraph())
-        #p.stop_vm()
-        #self.edges = tetrad.getEdges()
-        #self.nodes = tetrad.getNodes()
+        prior = pr.knowledge(forbiddirect = forbidden_edges, requiredirect = required_edges)
+        tetrad.run(algoId = 'fges', dfs = df, priorKnowledge = prior, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
+        dot_src = p.tetradGraphToDot(tetrad.getTetradGraph())
+        p.stop_vm()
+        self.edges = tetrad.getEdges()
+        self.nodes = tetrad.getNodes()
         dot_src = self.trim_init_src_string(dot_src)
         self.dot_src_lines = self.dot_src_to_lines(dot_src)
-        self.edges = edges
-        self.nodes = nodes
+        #self.edges = edges
+        #self.nodes = nodes
         #self.insert_node_attr_dot_src()
         #self.insert_class_node_color()
         self.dot_src = self.lines_to_dot_src(self.dot_src_lines)

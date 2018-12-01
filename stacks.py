@@ -85,7 +85,7 @@ def get_histogram_data():
     numeric_data = classifier.df
     FEATURE_DATA = FeatureData(target, features, numeric_data, feature_names, class_values, class_name)
 
-    init_pc()
+    #init_pc()
     interface_data = dict()
     interface_data['featureData'] = FEATURE_DATA.feature_data
     interface_data['classNames'] = list(FEATURE_DATA.class_names)
@@ -111,11 +111,12 @@ def make_causal_graph(df, prior):
 def initialize_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
-        global prior
-        prior = pr.knowledge(forbiddirect = data['forbiddenEdges'], requiredirect = data['requiredEdges'])
-        dot_src, edges, nodes = make_causal_graph(classifier.df, prior)
+        #global prior
+        #prior = pr.knowledge(forbiddirect = data['forbiddenEdges'], requiredirect = data['requiredEdges'])
+        #dot_src, edges, nodes = make_causal_graph(classifier.df, prior)
         global causalGraph
-        causalGraph = CausalGraph(classifier.df, dot_src, edges, nodes, class_name)
+        #causalGraph = CausalGraph(classifier.df, dot_src, edges, nodes, class_name)
+        causalGraph = CausalGraph(classifier.df, data['forbiddenEdges'], data['requiredEdges'], class_name)
         interface_data = dict()
         get_graph_information(interface_data)
         interface_data['graph'] = causalGraph.graph
@@ -146,11 +147,11 @@ def add_edge_to_causal_graph():
 def remove_nodes_from_causal_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
-        for feature_name in data['features']:
-            causalGraph.removed_nodes.append(feature_name)
-        removed_feature_df = classifier.df.drop(causalGraph.removed_nodes, axis=1)
-        dot_src, edges, nodes = make_causal_graph(removed_feature_df, prior)
-        causalGraph.recalculate_causal_graph(dot_src, edges, nodes, data['removedEdges'])
+        #for feature_name in data['features']:
+        #    causalGraph.removed_nodes.append(feature_name)
+        #removed_feature_df = classifier.df.drop(causalGraph.removed_nodes, axis=1)
+        #dot_src, edges, nodes = make_causal_graph(removed_feature_df, prior)
+        causalGraph.recalculate_causal_graph(data['features'], data['removedEdges'])
         interface_data = dict()
         get_graph_information(interface_data)
         interface_data['graph'] = causalGraph.graph
