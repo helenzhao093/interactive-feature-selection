@@ -14,6 +14,12 @@ class AppInterface extends React.Component {
     var circleRadii = [250];
     var radius = 16;
     var rankedFeatures = {};
+
+    var nameToIndexMap = {};
+      this.props.features.features.map(feature => {
+          nameToIndexMap[feature.name] = feature.index
+      });
+
     this.props.features.features.map(feature => {
         feature.rank = 0;
         feature.circleIndex = 0;
@@ -47,6 +53,7 @@ class AppInterface extends React.Component {
     ];
 
     this.state = {
+        nameToIndexMap: nameToIndexMap,
         helptext: helptext,
         activeTabIndex: 0,
         featureSelectionMargin : {left: 10, right: 30, top: 20, bottom:10 },
@@ -74,6 +81,9 @@ class AppInterface extends React.Component {
             xScale: null,
             features: {}
         },
+        isNewTrial: false,
+        selectedFeatureSelection: -1,
+        featureSelectionHistory: [],
         showAnalysis: false,
         featureSelectionAxisWidthSelected: 75,
         featureSelectionAxisWidthNotSelected: 50,
@@ -88,8 +98,8 @@ class AppInterface extends React.Component {
             accuracy: [],
             precision: []
         },
-        confusionMatrix: [[]],
-        confusionMatrixNormalized: [[]],
+        confusionMatrix: [],
+        confusionMatrixNormalized: [],
         consistencyGraphLegend: [
             { value: "MB Consistency", color: '#e31a1c', helptext: "Percentage of the markov blanket feature that is covered" },
             { value: "Mutual Information", color: "#feb24c", helptext: "Amount of information explained by selected features" }
@@ -122,7 +132,10 @@ class AppInterface extends React.Component {
         coveredFeatures: new Set(),
         xAxisLength: 2,
         selectedIndex: 0,
-        showInfo: false
+        showInfo: false,
+        selectedTrial1: -1,
+        selectedTrial2: -1,
+        trials: []
     };
     //console.log(this.state)
     /* FEATURE IMPORTANCE METHODS */
@@ -143,6 +156,7 @@ class AppInterface extends React.Component {
       this.goFromSelectionToGraph = this.goFromSelectionToGraph.bind(this);
       this.calculateCoverage = this.calculateCoverage.bind(this);
       this.isTherePathToClass = this.isTherePathToClass.bind(this);
+      this.changeDisplaySelection = this.changeDisplaySelection.bind(this);
 
       /* PROGRESS GRAPH METHODS */
 
@@ -161,7 +175,6 @@ class AppInterface extends React.Component {
     this.sendImportanceToGraph = this.sendImportanceToGraph.bind(this);
     this.classify = this.classify.bind(this);
     this.updateIndex = this.updateIndex.bind(this);
-    this.goToStep = this.goToStep.bind(this);
     this.getInitialConsistencyScores = this.getInitialConsistencyScores.bind(this);
     this.initializeRankData = this.initializeRankData.bind(this);
     this.updateNumRanks = this.updateNumRanks.bind(this);
@@ -171,6 +184,8 @@ class AppInterface extends React.Component {
     this.initializeForbiddenEdges = this.initializeForbiddenEdges.bind(this);
     this.initializeRequiredEdges = this.initializeRequiredEdges.bind(this);
     this.initializeFeatureNameToRankMap = this.initializeFeatureNameToRankMap.bind(this);
+
+    this.changeDisplayTrial = this.changeDisplayTrial.bind(this);
 
   }
 
@@ -466,22 +481,16 @@ class AppInterface extends React.Component {
     })
   }
 
-  removeLastGraph(node) {
+  removeLastGraph(edit) {
       const currentIndex = this.state.graphIndex;
-      /*fetch('/addRemovedNode', {
+
+      fetch('/undoGraphEdit', {
           method: 'POST',
-          body: JSON.stringify({ node: node })
+          body: JSON.stringify(edit)
       }).then(function(response) {
           return response.json();
       });
-      var inputGraph = this.state.causalGraph.graphHistory[currentIndex - 1];
-      var graph = this.getGraphDataToLog(inputGraph);
-      client.recordEvent('graph_history', {
-         user: userID,
-         type: "undo",
-         info: [],
-         graph: graph
-      }); */
+
       if (currentIndex > 0) {
           this.setState({
               graphIndex: currentIndex - 1
@@ -598,17 +607,16 @@ class AppInterface extends React.Component {
 
           var allFeatureNames = this.getInitialConsistencyScores(featuresWithBoundary);
 
-          /*client.recordEvent('feature_selections', {
-
-          }); */
 
           this.setState({
               rankData: rankData,
-              featureSelection: {
+              isNewTrial: false,
+              featureSelectionHistory: [{
                   xScaleDomain: xScaleInfo.xScaleDomain,
                   xScale: xScaleInfo.xScale,
                   features: featuresWithBoundary
-              },
+              }],
+              selectedFeatureSelection: 0,
               MBCurrent: 1,
               selectedFeatureNames: allFeatureNames,
               activeTabIndex: 2,
@@ -627,12 +635,14 @@ class AppInterface extends React.Component {
         var that = this;
         var attrId = element.id;
         var stringId = '#' + attrId;
-        d3.selectAll('.feature-parallels').select(stringId).attr('transform', function(d) { return 'translate(' + that.state.featureSelection.xScale(attrId) + ")" });
+        var xScale = that.state.featureSelectionHistory[that.state.featureSelectionHistory.length - 1].xScale;
+        d3.selectAll('.feature-parallels').select(stringId).attr('transform', function(d) { return 'translate(' + xScale(attrId) + ")" });
         this.state.dragging[attrId] = d3.event.x;
-        var oldFeatureNames = this.state.featureSelection.features.map((feature) =>
+        var currentFeatures = this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1].features;
+        var oldFeatureNames = currentFeatures.map((feature) =>
             feature.name
         );
-        var features = this.state.featureSelection.features;
+        var features = currentFeatures;
         features.sort(function(a, b) { return that.position(a.name) - that.position(b.name)});
         var allFeatureIndexes = features.map((feature) =>
             feature.index
@@ -657,13 +667,27 @@ class AppInterface extends React.Component {
 
             this.calculateScores({ features: allFeatureIndexes, names: allFeatureNames, featureOrder: features, featureRank: this.state.featureRank });
             let coveredFeatures = this.calculateCoverage(allFeatureNames);
-            let MBScore = coveredFeatures.size/ this.state.markovBlanketFeatureNames.size;
-            this.setState({
-                featureSelection: {
+            let MBScore = coveredFeatures.size/this.state.markovBlanketFeatureNames.size;
+
+            if (this.state.isNewTrial) {
+
+                this.state.featureSelectionHistory.push({
                     xScale: xScaleInfo.xScale,
                     xScaleDomain: xScaleInfo.xScaleDomain,
                     features: features
-                },
+                });
+            } else {
+                this.state.featureSelectionHistory.splice(this.state.featureSelectionHistory.length-1, 1,
+                    {
+                        xScale: xScaleInfo.xScale,
+                        xScaleDomain: xScaleInfo.xScaleDomain,
+                        features: features
+                    }
+                )
+            }
+            this.setState({
+                isNewTrial: false,
+                selectedFeatureSelection: this.state.featureSelectionHistory.length - 1,
                 MBCurrent: MBScore,
                 selectedFeatureNames: allFeatureNames,
                 featureCoordinatesSize: [xScaleInfo.featureSelectionTotalWidth, 500],
@@ -680,34 +704,36 @@ class AppInterface extends React.Component {
 
   classify() {
     if (this.state.MICurrent >= 0) {
-
       // names of features in feature set
-      const allFeatureNames = this.state.featureSelection.features.map((feature) =>
+        var currentFeatures = this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1].features;
+      const allFeatureNames = currentFeatures.map((feature) =>
         feature.name
       );
       const stopIndex = allFeatureNames.indexOf("BOUNDARY");
       allFeatureNames.splice(stopIndex);
 
       // feature set ranking
-      var featureRank = {};
+      /*var featureRank = {};
       Object.keys(this.state.featureImportance.features).map(key =>
         featureRank[this.state.featureImportance.features[key].name] = this.state.featureImportance.features[key].rank
-      );
+      ); */
 
-      const features = { "features": allFeatureNames , "featureRank" : featureRank};
-      console.log(features)
+      const features = { "features": allFeatureNames , "featureRank" : this.state.featureRank};
       fetch('/classify', {
         method: 'POST',
         body: JSON.stringify(features)
       }).then(function(response) {
         return response.json();
       }).then(data => {
-          console.log(this.state.rankLossCurrent)
+          console.log(this.state.rankLossCurrent);
         this.state.MI.push(this.state.MICurrent);
         this.state.MB.push(this.state.MBCurrent);
         this.state.rankLoss.push(this.state.rankLossCurrent);
         this.state.metrics.precision.push(parseFloat(data.precision.toFixed(3)));
         this.state.metrics.accuracy.push(parseFloat(data.accuracy.toFixed(3)));
+        this.state.confusionMatrixNormalized.push(data.confusionMatrixNormalized);
+        this.state.confusionMatrix.push(data.confusionMatrix);
+        this.state.trials.push("trial " + String(this.state.metrics.accuracy.length));
 
         client.recordEvent('classify_results', {
            user: userID,
@@ -718,9 +744,10 @@ class AppInterface extends React.Component {
            precision: +data.precision.toFixed(3),
            features: features.features
         });
+
         this.setState({
-          confusionMatrixNormalized: data.confusionMatrixNormalized,
-          confusionMatrix: data.confusionMatrix,
+          isNewTrial: true,
+          selectedFeatureSelection: this.state.featureSelectionHistory.length - 1,
           MI: this.state.MI,
           MB: this.state.MB,
           MICurrent: -1,
@@ -731,7 +758,9 @@ class AppInterface extends React.Component {
           },
           rankLoss: this.state.rankLoss,
           rankLossCurrent: -1,
-          activeTabIndex: 3
+          activeTabIndex: 3,
+          selectedTrial1: (this.state.metrics.accuracy.length == 1) ? 0 : this.state.metrics.accuracy.length - 2,
+          selectedTrial2: (this.state.metrics.accuracy.length == 1) ? -1 : this.state.metrics.accuracy.length - 1
         })
       }).catch(function(error) {
         console.log(error)
@@ -743,6 +772,14 @@ class AppInterface extends React.Component {
     }
   }
 
+  changeDisplaySelection(event) {
+      console.log(event);
+      let selectedSelection = event.target.value;
+      this.setState({
+          selectedFeatureSelection: selectedSelection
+      })
+  }
+
   updateIndex(index) {
     this.setState({
       selectedIndex: index
@@ -751,9 +788,10 @@ class AppInterface extends React.Component {
 
   position(d) {
     var value = this.state.dragging[d];
-    var a = value == null ? this.state.featureSelection.xScale(d) : value;
+      var currentXScale = this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1].xScale;
+    var a = value == null ? currentXScale(d) : value;
     //console.log(a)
-    return value == null ? this.state.featureSelection.xScale(d) : value;
+    return value == null ? currentXScale(d) : value;
   }
 
   calculateScores(dataToSend) {
@@ -798,6 +836,7 @@ class AppInterface extends React.Component {
       selectedFeatures.map(feature => {
           console.log(feature)
           selectedFeatureIndexes.push(graph[feature].nodeIndex);
+
       });
 
       var visited = [];
@@ -869,7 +908,7 @@ class AppInterface extends React.Component {
       return visited;
   }
 
-  goToStep(step) {
+  /*goToStep(step) {
     //var featureHistory = this.state.featureHistory
     //this.state.featureHistory.splice(step + 1)
     //console.log(step)
@@ -891,7 +930,7 @@ class AppInterface extends React.Component {
         //currentHistogramHistory: [{data: currentHistogramHistory.data }],
         //currentHistogramStep: 0
     });
-  }
+  } */
 
   handleClassSelection(className, currentDisplay){
       var classDisplay = this.state.classDisplay;
@@ -955,10 +994,6 @@ class AppInterface extends React.Component {
               rankData[featureNameToRankMap[name]].NotMB.push(name);
           }
       });
-
-      /*this.setState({
-          rankData:rankData
-      }); */
       return rankData;
   }
 
@@ -973,6 +1008,23 @@ class AppInterface extends React.Component {
         this.setState({
             activeTabIndex: 2
         })
+    }
+
+    changeDisplayTrial(event) {
+        var trialStr = event.target.value;
+        var classifierNum = parseInt(trialStr.substring(0,1));
+        var trialNum = parseInt(trialStr.substring(1));
+        console.log(classifierNum);
+        console.log(trialNum);
+        if (classifierNum == 0) {
+            this.setState({
+                selectedTrial1: trialNum
+            })
+        } else {
+            this.setState({
+                selectedTrial2: trialNum
+            })
+        }
     }
 
   render() {
@@ -1006,6 +1058,13 @@ class AppInterface extends React.Component {
     }
 
     SBLegend.push({ value: "No Importance", color: "white", helptext: ""});
+
+    var selectedFeatureSelection;
+    if (this.state.selectedFeatureSelection >= 0) {
+      selectedFeatureSelection = this.state.featureSelectionHistory[this.state.selectedFeatureSelection];
+    } else {
+        selectedFeatureSelection = { features: null, xScale: null, xScaleDomain: null };
+    }
 
       return (
         <div className={'root-div'}>
@@ -1045,7 +1104,6 @@ class AppInterface extends React.Component {
                       markovBlanketSelected={this.state.causalGraph.markovBlanketSelected}
                       isEdgeSelected={this.state.causalGraph.isEdgeSelected}
                       isNodeSelected={this.state.causalGraph.isNodeSelected}
-                      undoNodeRemoval={(n) => this.removeLastGraph(n)}
                       undo={(n) => this.removeLastGraph(n)}
                       clearGraph={this.clearGraph}
                       nextStep={this.sendGraphToSelection}
@@ -1069,18 +1127,27 @@ class AppInterface extends React.Component {
                       </div>
 
                       <div style={{display: this.state.showAnalysis? "none" : "block"}}>
+                          <div>
+                              <span>Feature Selection for: </span>
+                              <select onChange={ this.changeDisplaySelection } >
+                                  {this.state.featureSelectionHistory.map((history, index) =>
+                                    <option selected={(index == this.state.selectedFeatureSelection) ? "selected": "" } value={index}>{`trial ${index+1}`}</option>
+                                  )}
+                              </select>
+                          </div>
                       <FeatureParallelCoordinates
                           data={this.state.featureData.inputData}
                           convertedData={this.state.featureData.convertedData}
-                          features={this.state.featureSelection.features}
-                          xScaleDomain={this.state.featureSelection.xScaleDomain}
-                          xScale={this.state.featureSelection.xScale}
+                          features={selectedFeatureSelection.features}
+                          xScaleDomain={selectedFeatureSelection.xScaleDomain}
+                          xScale={selectedFeatureSelection.xScale}
                           dragging={this.state.dragging}
                           featureAxisOnEnd={this.featureAxisOnEnd}
                           size={this.state.featureCoordinatesSize}
                           sendData={this.sendData}
                           colorFunction={this.state.colorFunction}
                           classDisplay={this.state.classDisplay}
+                          nameToIndexMap={this.state.nameToIndexMap}
                       />
                           <div className={"className-legend-title"}>{`Displayed ${this.props.targetName}`}</div>
                           <Legend className={"legend legend-left class-legend"}
@@ -1111,7 +1178,6 @@ class AppInterface extends React.Component {
                                                  selectedIndex={this.state.selectedIndex}
                                                  updateIndex={this.updateIndex}
                                                  xAxisLength={this.state.xAxisLength}
-                                                 goToStep={(s) => this.goToStep(s)}
                                   />
                               </div>
 
@@ -1149,7 +1215,6 @@ class AppInterface extends React.Component {
                                              selectedIndex={this.state.selectedIndex}
                                              updateIndex={this.updateIndex}
                                              xAxisLength={this.state.xAxisLength}
-                                             goToStep={(s) => this.goToStep(s)}
                               />
                           </div>
 
@@ -1174,24 +1239,18 @@ class AppInterface extends React.Component {
                   </div>
                   <div className={"confusion-matrix-container"}>
                       <div className={"confusion-matrix-title"}>Confusion Matrix
-                            <svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                          <span className={"tools-bar-help-text"} style={{float: "none"}}>
-                            {"CM"}
-                        </span>
-                    </div>
-                      <div id={"matrix"}>
-                        <ConfusionMatrix
-                            matrix={this.state.confusionMatrix}
-                            normalizedMatrix={this.state.confusionMatrixNormalized}
-                            classNames={this.props.classNames}
-                        />
+
                       </div>
+                      <CompareClassifiers changeTrial={ this.changeDisplayTrial }
+                                          trials={ this.state.trials }
+                                          selectedTrial1={ this.state.selectedTrial1 }
+                                          selectedTrial2={ this.state.selectedTrial2 }
+                                          confusionMatrices={ this.state.confusionMatrix }
+                                          confusionMatricesNormalized={ this.state.confusionMatrixNormalized }
+                                          classNames={this.props.classNames}/>
                   </div>
                   <div className={"confusion-matrix-title"} style={{marginLeft: "445px", marginBottom: "10px", marginTop: "20px"}}> Statistical Metrics
-                      <svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                      <span className={"tools-bar-help-text"} style={{float: "none"}}>
-                                {""}
-                                </span>
+
                   </div>
                   <div style={{textAlign: "center"}} >
                       <BarGraph size={[500,300]} metrics={this.state.metrics} colors={this.state.metricsGraphLegend.map((item) => item.color)} xAxisLength={this.state.xAxisLength}/>
@@ -1207,6 +1266,24 @@ class AppInterface extends React.Component {
 }
 
 /*
+ <!-- <svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                      <span className={"tools-bar-help-text"} style={{float: "none"}}>
+                                {""}
+                                </span> -->
+
+                                <!--<svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                          <span className={"tools-bar-help-text"} style={{float: "none"}}>
+                            {"CM"}
+                        </span> -->
+
+
+                     <div id={"matrix"}>
+                        <ConfusionMatrix
+                            matrix={this.state.confusionMatrix}
+                            normalizedMatrix={this.state.confusionMatrixNormalized}
+                            classNames={this.props.classNames}
+                        />
+                      </div>
                       <ProgressGraph size={[500, 300]}
                                      max={1}
                                      min={0}

@@ -17,7 +17,7 @@ from flask import Flask, render_template, flash, request, redirect, jsonify, url
 from werkzeug.utils import secure_filename
 from scipy.stats import rankdata
 
-DATA_FOLDER = 'static/demo/'
+DATA_FOLDER = 'static/synthetic_data2/'
 #DATA_FOLDER = 'static/cardiotocography3/'
 #DATA_FOLDER = 'static/student_performance/'
 #DATA_FOLDER = 'static/iris/'
@@ -59,14 +59,34 @@ def upload_file():
 
 @app.route("/index")
 def uploaded_file():
-    # call method that will calculate histogram data)
-    #global DATA_FOLDER
-    #DATA_FOLDER = UPLOAD_FOLDER
+    global DATA_FOLDER
+    DATA_FOLDER = UPLOAD_FOLDER
     return render_template('index.html')
 
-# first call to get all features!
+@app.route("/demo")
+def demo():
+    global DATA_FOLDER
+    DATA_FOLDER = 'static/demo/'
+    return render_template('index.html')
+
+@app.route("/dataset1")
+def dataset_1():
+    global DATA_FOLDER
+    DATA_FOLDER = 'static/synthetic_data2/'
+    return render_template('index.html')
+
+@app.route("/dataset2")
+def dataset_2():
+    global DATA_FOLDER
+    DATA_FOLDER = 'static/synthetic_data1/'
+    return render_template('index.html')
+
 @app.route("/getFeatures")
-def get_histogram_data():
+def get_features_data_folder():
+    return initialize_data()
+
+def initialize_data():
+    print DATA_FOLDER
     des = dict()
     if os.path.exists(DATA_FOLDER + 'description.csv'):
         des = parse_description(DATA_FOLDER + 'description.csv')
@@ -84,7 +104,6 @@ def get_histogram_data():
     global FEATURE_DATA
     numeric_data = classifier.df
     FEATURE_DATA = FeatureData(target, features, numeric_data, feature_names, class_values, class_name)
-
     #init_pc()
     interface_data = dict()
     interface_data['featureData'] = FEATURE_DATA.feature_data
@@ -155,13 +174,16 @@ def remove_nodes_from_causal_graph():
         interface_data = dict()
         get_graph_information(interface_data)
         interface_data['graph'] = causalGraph.graph
+        print interface_data
         return jsonify(interface_data)
 
-@app.route('/addRemovedNode', methods=["POST"])
-def add_removed_node():
+@app.route('/undoGraphEdit', methods=["POST"])
+def undo_graph_edit():
     if request.method == 'POST':
         data = json.loads(request.data)
-        causalGraph.remove_node_from_removed_nodes(data['node'])
+        print data
+        causalGraph.undo_last_edit(data)
+        #causalGraph.remove_node_from_removed_nodes(data['node'])
         interface_data = dict()
         return jsonify(interface_data)
 

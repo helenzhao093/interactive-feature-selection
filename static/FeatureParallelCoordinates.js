@@ -202,13 +202,12 @@ class FeatureParallelCoordinates extends React.Component {
       });
 
     var drawData = [];
+    for (var i = 0; i < this.props.xScaleDomain.length; i++) {
 
-    for (var i = 0; i < this.props.features.length; i++) {
-
-      if (this.props.features[i].name == "BOUNDARY") {
+      if (this.props.xScaleDomain[i] == "BOUNDARY") {
         break;
       } else {
-        drawData.push([this.props.features[i].name, data[this.props.features[i].index]])
+        drawData.push([this.props.xScaleDomain[i], data[this.props.nameToIndexMap[this.props.xScaleDomain[i]]]])
       }
     }
     return draw(drawData)
@@ -250,6 +249,7 @@ class FeatureParallelCoordinates extends React.Component {
 
   render(){
     console.log('render feature parallels');
+    console.log(this.props);
     this.highlightSelected();
     var displayExamples = this.props.convertedData.filter(data => data.display == true);
     var unDisplayExamples = this.props.convertedData.filter(data => data.display == false);

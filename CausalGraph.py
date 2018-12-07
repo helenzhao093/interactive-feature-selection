@@ -21,6 +21,7 @@ class CausalGraph:
 
         self.forbidden_edges = forbidden_edges
         self.required_edges = required_edges
+        self.graph_history = []
         # METHOD TO CONVERT DOT SRC TO MARKOV BLANKET
         #self.edges_to_graph_dict()
         #self.init_spouse_graph()
@@ -41,21 +42,49 @@ class CausalGraph:
         self.df = df
 
     def recalculate_causal_graph(self, feature_name_array, removed_edges):
+        print removed_edges
         for feature_name in feature_name_array:
             self.removed_nodes.append(feature_name)
         df = self.df.drop(self.removed_nodes, axis=1)
+        required_edges = []
+        for node in self.removed_nodes:
+            for i, edge in enumerate(self.required_edges):
+                if node == edge[0] or node == edge[1]:
+                    pass
+                else:
+                    required_edges.append(edge)
+
         #self.init_causal_graph_dot_src(dot_src, edges, nodes)
         #self.edges_to_graph_dict()
         #self.init_spouse_graph()
-        self.init_causal_graph_dot_src(df, self.forbidden_edges, self.required_edges)
+
+        self.init_causal_graph_dot_src(df, self.forbidden_edges, required_edges)
+        for node in self.removed_nodes:
+            self.nodes.append(node)
+        self.remove_all_edges_from_edge_array(removed_edges)
         self.get_markov_blanket_nodes_from_edges()
         self.generate_subgraph_dot_src_and_graph()
+        #self.add_removed_node_to_dotlines(self.removed_nodes)
+        #self.add_nodes_to_graph_dict(self.removed_nodes)
         self.find_paths_to_class_node()
+        self.find_paths_from_class_node()
         self.get_markov_blanket_nodes_indexes()
-        self.add_removed_node_to_dotlines(self.removed_nodes)
-        self.remove_edges_from_dot_lines_and_graph(removed_edges)
+        #self.remove_edges_from_dot_lines_and_graph(removed_edges)
         self.dot_src = self.lines_to_dot_src(self.dot_src_lines)
-        self.add_nodes_to_graph_dict(self.removed_nodes)
+        self.graph_history.append({'edges': copy.copy(self.edges), 'dot_src': copy.copy(self.dot_src)})
+
+    def undo_last_edit(self, editInfo):
+        if editInfo['type'] == 'addEdge': # undo add edge
+            self.remove_edge_from_edge_array(editInfo['data'][0], editInfo['data'][1]) # remove edge from self.edges
+        elif editInfo['type'] == 'removeEdge':# undo edge removal
+            new_edge = editInfo['data'][0] + ' -> ' + editInfo['data'][1]
+            self.edges.append(new_edge)
+        else: # undo node removal
+            self.remove_node_from_removed_nodes(editInfo['data'][0])
+            last_graph = self.graph_history.pop()
+            self.edges = last_graph['edges']
+            print self.edges
+            self.dot_src = last_graph['dot_src']
 
     def remove_node_from_removed_nodes(self, node):
         for i, removed_node in enumerate(self.removed_nodes):
@@ -86,15 +115,21 @@ class CausalGraph:
 
     def remove_edge_from_graph(self, edgeFrom, edgeTo):
         self.remove_edge_from_edge_array(edgeFrom, edgeTo)
+        self.get_markov_blanket_nodes_from_edges()
         self.generate_subgraph_dot_src_and_graph()
         self.find_paths_to_class_node()
         self.find_paths_from_class_node()
         self.get_markov_blanket_nodes_indexes()
 
+    def remove_all_edges_from_edge_array(self, edges_to_remove):
+        for edge in edges_to_remove:
+            edgeFrom = edge[0]
+            edgeTo = edge[1]
+            self.remove_edge_from_edge_array(edgeFrom, edgeTo)
+
     def remove_edge_from_edge_array(self, edgeFrom, edgeTo):
         for edge in self.edges:
             edgeInfo = edge.split(" ")
-            print edgeFrom, edgeTo
             #print str(edgeInfo[0]) == edgeFrom and str(edgeInfo[1]) == edgeTo
             if edgeInfo[0] == edgeFrom and edgeInfo[2] == edgeTo:
                 self.edges.remove(edge)
@@ -103,18 +138,11 @@ class CausalGraph:
     def add_edge(self, node_from, node_to):
         new_edge = node_from + ' -> ' + node_to
         self.edges.append(new_edge)
+        self.get_markov_blanket_nodes_from_edges()
         self.generate_subgraph_dot_src_and_graph()
         self.find_paths_to_class_node()
         self.find_paths_from_class_node()
         self.get_markov_blanket_nodes_indexes()
-        #print node_from, node_to
-        #self.edge_index += 1
-        #self.dot_src_lines.insert(len(self.dot_src_lines) - 1, new_edge)
-        #self.graph[node_from]['nodeTo'].append(self.graph[node_to]['nodeIndex'])
-        #self.graph[node_to]['nodeFrom'].append(self.graph[node_from]['nodeIndex'])
-        #self.graph[node_from]['edgeTo'][node_to] = self.edge_index
-        #self.graph[node_to]['edgeFrom'].append(self.edge_index)
-        #self.dot_src = self.lines_to_dot_src(self.dot_src_lines)
 
     def add_nodes_to_graph_dict(self, feature_name_array):
         for feature_name in feature_name_array:
@@ -122,11 +150,12 @@ class CausalGraph:
             self.node_index += 1
             self.graph[feature_name]['paths'] = []
             self.graph[feature_name]['pathNodes'] = []
+            self.graph[feature_name]['pathsFrom'] = []
+            self.graph[feature_name]['pathNodesFrom'] = []
 
     def add_removed_node_to_dotlines(self, feature_name_array):
         for feature_name in feature_name_array:
             self.dot_src_lines.insert(len(self.dot_src_lines) - 1, feature_name)
-        print self
 
     #def init_causal_graph_dot_src(self, dot_src, edges, nodes):
     def init_causal_graph_dot_src(self, df, forbidden_edges, required_edges):
@@ -170,6 +199,7 @@ class CausalGraph:
             to_node = str(edgeInfo[2])
             if (to_node in children):
                 self.markov_blanket_node_names.add(from_node)
+        #print self.markov_blanket_node_names
         #self.markov_blanket_node_names = list
 
     #def insert_class_node_color(self):
@@ -244,13 +274,11 @@ class CausalGraph:
 
     def generate_subgraph_dot_src_and_graph(self):
         graphs = self.get_subgraph_edges()
-
         nodes_with_edges = graphs[2]
         node_wo_edges = []
         for node in self.nodes:
             if node not in nodes_with_edges:
                 node_wo_edges.append(node)
-
         self.generate_graph_from_subgraph(graphs[0], graphs[1], node_wo_edges)
         self.generate_subgraph_dot_src(graphs[0], graphs[1], node_wo_edges)
 
@@ -266,6 +294,7 @@ class CausalGraph:
             to_node_str = str(edgeInfo[2])
             nodes_with_edges.append(from_node_str)
             nodes_with_edges.append(to_node_str)
+
             if ((from_node_str in self.markov_blanket_node_names or from_node_str == self.class_node_str) and (to_node_str in self.markov_blanket_node_names or to_node_str == self.class_node_str)):
                 markov_blanket_subgraph.append(from_node_str + " -> " + to_node_str + " ;")
                 #markov_blanket_subgraph_edge_index.append(index)
@@ -357,7 +386,7 @@ class CausalGraph:
             self.calculate_steps_to_node_indexes(name, node_indexes, found_indexes, 1, MB_nodes)
             if len(found_indexes) == len(node_indexes):
                 break
-        print MB_nodes
+        #print MB_nodes
         node_value = 1.0/(len(node_indexes))
         self.score = len(found_indexes) * node_value
         #print score
@@ -540,11 +569,11 @@ class CausalGraph:
         if start_node_str == self.class_node_str:
             return True
         if self.graph[start_node_str]['visited']:
-            return self.graph[start_node_str]['paths']
+            return self.graph[start_node_str]['pathsFrom']
         for i, node_index in enumerate(self.graph[start_node_str]['nodeFrom']):
             node_str = self.node_index_to_name_map[node_index]
             paths = self.find_paths_from_class_node_helper(node_str)
-            #print node_str, paths
+            print node_str, paths
             if paths == True:
                 self.graph[start_node_str]['pathsFrom'].add(self.graph[start_node_str]['edgeFrom'][i])
                 self.graph[start_node_str]['pathNodesFrom'].add(node_index)

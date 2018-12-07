@@ -1,3 +1,23 @@
+class TrialSelection extends React.Component {
+    constructor(props) {
+        super(props)
+        console.log(props)
+    }
+
+    render() {
+        return (
+            <div>
+                <select onChange={ this.props.changeTrial }>
+                    {this.props.trials.map((trial, index) =>
+                        <option selected={(index == this.props.selected) ? "selected": "" }
+                                key={trial} value={String(this.props.classifierNum) + String(index)}>{trial}</option>
+                    )}
+                </select>
+            </div>
+        )
+    }
+}
+
 class ConfusionMatrix extends React.Component {
     constructor(props){
         super(props)
@@ -68,6 +88,49 @@ class ConfusionMatrix extends React.Component {
                     )}
                 </g>
             </svg>
+        )
+    }
+}
+
+class CompareClassifiers extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        console.log(this.props);
+        let selectedTrial1 = this.props.selectedTrial1;
+        let confusionMatrix = this.props.confusionMatrices[selectedTrial1];
+        let confusionMatrixNormalized = this.props.confusionMatricesNormalized[selectedTrial1];
+        var secondClassifier;
+        if (this.props.selectedTrial2 >= 0) {
+            secondClassifier = <div className={"grid-item second"}>
+                <TrialSelection classifierNum={2} changeTrial={this.props.changeTrial} trials={this.props.trials}
+                                selected={this.props.selectedTrial2}/>
+                <ConfusionMatrix
+                    matrix={this.props.confusionMatrices[this.props.selectedTrial2]}
+                    normalizedMatrix={this.props.confusionMatricesNormalized[this.props.selectedTrial2]}
+                    classNames={this.props.classNames}
+                />
+            </div>
+        } else {
+            secondClassifier = <div className={"grid-item-comparison"}> </div>
+        }
+
+        return (
+            <div className={"grid-container-comparison"}>
+                <div className={"grid-item first"}>
+                    <TrialSelection classifierNum={1} changeTrial={this.props.changeTrial} trials={this.props.trials}
+                        selected={this.props.selectedTrial1}/>
+                    <ConfusionMatrix
+                        matrix={ confusionMatrix }
+                        normalizedMatrix={ confusionMatrixNormalized }
+                        classNames={ this.props.classNames }
+                    />
+                </div>
+                {secondClassifier}
+            </div>
+
         )
     }
 }
