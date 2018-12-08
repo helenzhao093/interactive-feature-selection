@@ -88,6 +88,11 @@
     grid-template-columns: 500px 150px 350px;
 }
 
+.grid-container-comparison {
+    display: grid;
+    grid-template-columns: 500px 500px;
+}
+
 .grid-item {
     text-align: center;
 }
