@@ -1,4 +1,4 @@
-motherhasjob,extracurriculars,job,studytime,age,fatherhasjob,familyincome,extraclasses,familysupport,college,scholarship,CLASS
+motherhasjob,extracurriculars,job,studytime,age,fatherhasjob,familyincome,extraclasses,familysupport,college,scholarship,GRADE
 no,yes,no,5_to_10hr,14,yes,below_avg,no,no,yes,yes,B
 no,yes,no,less_than_2hr,15,yes,above_avg,yes,yes,no,no,C
 yes,yes,no,less_than_2hr,15,yes,below_avg,no,no,no,no,F
