@@ -241,11 +241,11 @@
 
 .causal-graph-container {
     display: grid;
-    grid-template-columns: 800px 100px;
+    grid-template-columns: 800px 200px;
     position: absolute;
 }
 .causal-graph-container #graph{
-    margin-left: 150px;
+    margin-left: 200px;
 }
 
 .graph .node, .graph .edge {
@@ -334,7 +334,6 @@ path.link.hidden {
     clear: both;
 }
 
-
 .selected-edgeto path{
   stroke: yellowgreen;
     stroke-width: 0.2rem;
@@ -404,6 +403,16 @@ path.link.hidden {
 .selected-pathto polygon{
   fill: orange;
   stroke: orange;
+}
+
+.selected-edge path, .selected-edge polygon{
+    fill: darkorange;
+    stroke:darkorange;
+    sroke-width:0.2rem;
+}
+
+.selected-edgenode ellipse{
+    fill: darkorange;
 }
 
 .removed {

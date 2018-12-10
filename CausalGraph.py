@@ -304,8 +304,11 @@ class CausalGraph:
         return [markov_blanket_subgraph, other_subgraph, nodes_with_edges]
 
     def generate_subgraph_dot_src(self, markov_blanket_subgraph, other_subgraph, nodes_wo_edges):
+        label = "\"Markov blanket of " + self.class_node_str + "\""
         markov_blanket_subgraph.insert(0, "subgraph cluster_0 {")
-        markov_blanket_subgraph.append("label = \"Markov Blanket\" ")
+        markov_blanket_subgraph.append("label =" + label)
+        markov_blanket_subgraph.append("node [style=filled];")
+        markov_blanket_subgraph.append(self.class_node_str + " [color=red];")
         markov_blanket_subgraph.append("}")
 
         other_subgraph = other_subgraph + nodes_wo_edges
@@ -328,7 +331,7 @@ class CausalGraph:
         self.node_index = 1
         self.map_edge_index_to_line_index = dict()
         line_index = self.edges_to_graph_dict_subgraph(markov_blanket_subgraph, 4)
-        self.edges_to_graph_dict_subgraph(other_subgraph, line_index + 3)
+        self.edges_to_graph_dict_subgraph(other_subgraph, line_index + 4)
         self.add_nodes_to_graph_dict(node_wo_edges)
         start_index = 1
         start_index = self.init_spouse_graph(markov_blanket_subgraph, start_index)

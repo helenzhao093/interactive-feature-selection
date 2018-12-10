@@ -4,7 +4,7 @@ class CausalGraph extends React.Component {
     this.state = {
         graphviz: null,
       addEdge: false,
-      markovBlanket: "Markov Blanket",
+      markovBlanket: "Markov Blanket of Selected",
       pathToFromTarget: "Path to/from Target",
       isEdgeSelected: false,
       isNodeSelected: false,
@@ -15,12 +15,19 @@ class CausalGraph extends React.Component {
       removeStep: 0,
       removedEdges: [],
       edits: [],
-      legend: [
-          { value: "Selected", color: "yellow", helptext: "selected edge or feature that the other highlighted nodes relate to" },
+      legendMB: [
+          { value: "Selected Node", color: "yellow", helptext: "selected feature that the other highlighted nodes are relate to" },
           { value: "Parent", color:'#ffae42', helptext: "features that are direct causes of the selected feature"},
           { value: "Child", color:'yellowgreen', helptext: "features that are direct effects of the selected feature" },
-          { value: "Spouse", color: "#0d98ba", helptext: "features that are also direct causes of the selected feature's children/direct effects" }
+          { value: "Spouse", color: "#0d98ba", helptext: "features that are also direct causes of the selected feature's children/direct effects" },
+          { value: "Selected Edge", color: "darkorange", helptext: "selected edge"}
       ],
+      legendPath: [
+          { value: "Selected Node", color: "yellow", helptext: "selected feature that the other highlighted nodes are relate to" },
+          { value: "Path From", color: "#ffae42", helptext: "Path from selected node to the target" },
+          { value: "Path To", color: "yellowgreen", helptext: "Path to the target from the selected node"},
+          { value: "Selected Edge", color: "darkorange", helptext: "selected edge"}
+      ]
     };
     this.renderGraph = this.renderGraph.bind(this);
     this.updateGraphSelection = this.updateGraphSelection.bind(this);
@@ -42,32 +49,35 @@ class CausalGraph extends React.Component {
           this.state.graphviz.renderDot(this.props.dotSrc);
           var element = document.getElementById('graph-overlay');
           element.style.visibility = "hidden";
+
+
+          var nodes = d3.selectAll('.node');
+          var that = this;
+          nodes
+              .on("click", that.nodeClicked);
+
+          var edges = d3.selectAll('.edge');
+          edges.on("click", that.edgeClicked);
+
+          var svg = d3.select('#graph').select('svg');
+
+          nodes
+              .selectAll("ellipse")
+              .attr("rx", 24)
+              .attr("ry", 24)
+              .attr("stroke", "")
+              .attr("fill", "#b9d9ff");
+
+          nodes
+              .selectAll("text")
+              .attr("font-size", 24);
+
+          d3.select('#graph').select('svg').select("#graph0").select("polygon");
+          let targetId = "#node" + String(this.props.graph[this.props.targetName].nodeIndex);
+          d3.select(targetId).select('ellipse').attr("stroke", "royalblue").attr("stroke-width", 2);
+
+          svg.attr("width", 800).attr("height", 500);
       }
-      var nodes = d3.selectAll('.node');
-      var that = this;
-      nodes
-          .on("click", that.nodeClicked);
-
-      var edges = d3.selectAll('.edge');
-      edges.
-        on("click", that.edgeClicked);
-
-      var svg = d3.select('#graph').select('svg');
-
-      nodes
-          .selectAll("ellipse")
-          .attr("rx", 24)
-          .attr("ry", 24)
-          .attr("stroke", "")
-          .attr("fill", "#b9d9ff");
-
-      nodes
-          .selectAll("text")
-          .attr("font-size", 24);
-
-      d3.select('#graph').select('svg').select("#graph0").select("polygon");
-      svg.attr("width", 850).attr("height", 500);
-      var step = this.state.removeStep;
   }
 
   componentDidMount() {
@@ -104,14 +114,14 @@ class CausalGraph extends React.Component {
   }
 
   removeNodeClass() {
-    const nodeClasses = ["selected-node", "selected-nodefrom", "selected-nodeto", "selected-spousenode", "selected-pathnode"];
+    const nodeClasses = ["selected-node", "selected-nodefrom", "selected-nodeto", "selected-spousenode", "selected-pathnode", "selected-edgenode"];
     for (var i = 0; i < nodeClasses.length; i++) {
       d3.selectAll('.node').classed(nodeClasses[i], false);
     }
   }
 
   removeEdgeClass() {
-    const edgeClasses = ["selected-edgeto", "selected-edgefrom", "selected-spouseedge", "selected-pathto", "selected-pathedge"];
+    const edgeClasses = ["selected-edgeto", "selected-edgefrom", "selected-spouseedge", "selected-pathto", "selected-pathedge", "selected-edge"];
     for (var i = 0; i < edgeClasses.length; i++) {
       d3.selectAll('.edge').classed(edgeClasses[i], false);
     }
@@ -187,9 +197,9 @@ class CausalGraph extends React.Component {
         info: [nodeFrom, nodeTo]
     });
 
-    d3.select('#node' + nodeFromIndex.toString()).raise().classed("selected-nodeto", true)
-    d3.select('#node' + nodeToIndex.toString()).raise().classed("selected-nodeto", true)
-    d3.select('#edge' + (edge).toString()).raise().classed("selected-edgeto", true)
+    d3.select('#node' + nodeFromIndex.toString()).raise().classed("selected-edgenode", true)
+    d3.select('#node' + nodeToIndex.toString()).raise().classed("selected-edgenode", true)
+    d3.select('#edge' + (edge).toString()).raise().classed("selected-edge", true)
     this.state.selectedEdge = '#edge' + (edge);
     this.state.selectedEdgeFromTo = [nodeFrom, nodeTo];
     this.state.isEdgeSelected = true;
@@ -312,7 +322,7 @@ class CausalGraph extends React.Component {
     console.log('graph');
     console.log(this.props);
     var colorMB = this.state.markovBlanketSelected ? "yellowgreen" : "darkgray";
-    console.log(colorMB);
+    var legend = (this.state.markovBlanketSelected) ? this.state.legendMB : this.state.legendPath;
     return (
       <div width={700} height={500}>
           <div className={"tools-bar"}>
@@ -371,8 +381,8 @@ class CausalGraph extends React.Component {
             <div className={"grid-item"} id={"graph"} style={{textAlign: "center"}}/>
             <div className={"grid-item"}>
                 <div className={"legend legend-left cg-legend"}>
-                    {this.state.legend.map((item) =>
-                        <div style={{width: "100px"}}>
+                    {legend.map((item) =>
+                        <div style={{width: "150px"}}>
                             <div className={"series-marker"} style={{background: item.color}}></div>
                             <p>{item.value}</p>
                             <div className={"tools-bar-help legend-help"}>

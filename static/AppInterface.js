@@ -1016,7 +1016,7 @@ class AppInterface extends React.Component {
         var trialNum = parseInt(trialStr.substring(1));
         console.log(classifierNum);
         console.log(trialNum);
-        if (classifierNum == 0) {
+        if (classifierNum == 1) {
             this.setState({
                 selectedTrial1: trialNum
             })
@@ -1101,6 +1101,7 @@ class AppInterface extends React.Component {
                       dotSrc={currentGraphHistory.dotSrc}
                       sendData={this.sendData}
                       graph={currentGraphHistory.graph}
+                      targetName={this.props.targetName}
                       markovBlanketSelected={this.state.causalGraph.markovBlanketSelected}
                       isEdgeSelected={this.state.causalGraph.isEdgeSelected}
                       isNodeSelected={this.state.causalGraph.isNodeSelected}
