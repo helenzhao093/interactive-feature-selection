@@ -6,8 +6,12 @@ const client = new KeenTracking({
 });
 
 var IDFun = function () {
-    return '_' + Math.random().toString(36).substr(2, 9);
+    var userId = prompt('Please enter your ID.');
+    return userId;
+    //return '_' + Math.random().toString(36).substr(2, 9);
 };
+
+
 
 const userID = IDFun();
 console.log(userID);
@@ -37,37 +41,3 @@ getData()
       document.getElementById('root')
     );
   })
-
-
-
-/*
-<AppInterface
-            dotSrc={data.dotSrc}
-            markovBlanketSelected={data.markovBlanketSelected}
-            graph={data.graph}
-            features={data.featureData}
-            isEdgeSelected={data.isEdgeSelected}
-            isNodeSelected={data.isNodeSelected}
-            classNames={data.classNames}
-        />,
-
-
-data={data.histogramData}
-featureData={data.featureData}
-summaryData={data.summaryData}
-featureDistribution={data.featureDistribution}
-
-<AppInterface
-            dotSrc={data.dotSrc}
-            markovBlanketSelected={data.markovBlanketSelected}
-            graph={data.graph}
-            isEdgeSelected={data.isEdgeSelected}
-            isNodeSelected={data.isNodeSelected}
-            featureData={data.featureData}
-            featureSchema={data.featureSchema}
-            classNames={data.classNames}
-            markovBlanket={data.markovBlanket}
-            MI={data.MI}
-            consistencyMB={data.consistencyMB}
-        />,
-*/

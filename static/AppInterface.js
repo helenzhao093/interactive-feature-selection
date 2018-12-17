@@ -8,7 +8,6 @@ class AppInterface extends React.Component {
         .domain(props.classNames);
       var FIcolorFunction = d3.scaleOrdinal().range(d3.schemeBlues[5]).domain([0, 1, 2, 3, 4]);
 
-      var featureCoordinatesSize = [1200,500];
 
     /* FEATURE IMPORTANCE */
     var circleRadii = [250];
@@ -58,15 +57,10 @@ class AppInterface extends React.Component {
         activeTabIndex: 0,
         featureSelectionMargin : {left: 10, right: 30, top: 20, bottom:10 },
         causalGraph: {
-            showComponent: false,
-            markovBlanketSelected: false,//this.props.markovBlanketSelected,
-            isEdgeSelected: false,//this.props.isEdgeSelected,
-            isNodeSelected: false,//this.props.isNodeSelected,
-            graphHistory: []//[{ graph: this.props.graph, dotSrc: this.props.dotSrc }],
+            graphHistory: []
         },
         shouldInitializeGraph: true,
         graphIndex: -1,
-        featureImportanceSize: [1000, 500],
         featureImportance: {
             circleRadii: [250],
             features: rankedFeatures, // initialized to null object
@@ -106,8 +100,8 @@ class AppInterface extends React.Component {
         ],
         consistencyGraphLegendMax: 1,
         metricsGraphLegend: [
-            { value: "accuracy", color: '#3690c0', helptext: "% of correct predictions " },
-            { value: "precision", color: "#d0d1e6", helptext: "correct predictions/number of examples" }
+            { value: "accuracy", color: '#3690c0', helptext: "% of correct predictions " } //,
+           // { value: "precision", color: "#d0d1e6", helptext: "correct predictions/number of examples" }
         ],
         rankLoss: [],
         rankLossCurrent: -1,
@@ -117,7 +111,6 @@ class AppInterface extends React.Component {
             inputData: this.props.features.inputData,
             convertedData: this.props.features.convertedData
         },
-        selectedFeatureNames: [],
         featureRank: {},
         rankData: [],
         indexToFeatureMap: {},
@@ -127,17 +120,13 @@ class AppInterface extends React.Component {
         dragging: {},
         colorRange: colorRange,
         colorFunction: color,
-        featureCoordinatesSize: featureCoordinatesSize,
         markovBlanketFeatureNames: new Set(),
-        coveredFeatures: new Set(),
         xAxisLength: 2,
-        selectedIndex: 0,
         showInfo: false,
         selectedTrial1: -1,
         selectedTrial2: -1,
         trials: []
     };
-    //console.log(this.state)
     /* FEATURE IMPORTANCE METHODS */
       this.calculateNewCircleRadius = this.calculateNewCircleRadius.bind(this);
       this.addCircle = this.addCircle.bind(this);
@@ -174,7 +163,6 @@ class AppInterface extends React.Component {
     this.position = this.position.bind(this);
     this.sendImportanceToGraph = this.sendImportanceToGraph.bind(this);
     this.classify = this.classify.bind(this);
-    this.updateIndex = this.updateIndex.bind(this);
     this.getInitialConsistencyScores = this.getInitialConsistencyScores.bind(this);
     this.initializeRankData = this.initializeRankData.bind(this);
     this.updateNumRanks = this.updateNumRanks.bind(this);
@@ -186,6 +174,7 @@ class AppInterface extends React.Component {
     this.initializeFeatureNameToRankMap = this.initializeFeatureNameToRankMap.bind(this);
 
     this.changeDisplayTrial = this.changeDisplayTrial.bind(this);
+    this.download = this.download.bind(this);
 
   }
 
@@ -355,7 +344,7 @@ class AppInterface extends React.Component {
             var requiredEdgesInfo = this.initializeRequiredEdges();
 
             /* capture feature importance */
-            client.recordEvent('feature_importance_snap_shot', {
+            client.recordEvent('feature_importance_snapshot', {
                 user: userID,
                 lowestRankFeatures: forbiddenEdgesInfo.lowestRankFeatures,
                 highestRankFeatures: requiredEdgesInfo.highestRankFeatures,
@@ -405,9 +394,9 @@ class AppInterface extends React.Component {
   }
 
   handleTabClick(tabIndex) {
-      this.setState({
+      /*this.setState({
           activeTabIndex: tabIndex === this.state.activeTabIndex ? this.props.defaultActiveTabIndex : tabIndex
-      });
+      });*/
     }
 
   getGraphDataToLog(inputGraph) {
@@ -467,10 +456,6 @@ class AppInterface extends React.Component {
         const currentGraphHistory = this.state.causalGraph.graphHistory.splice(0, this.state.graphIndex + 1);
         this.setState({
             causalGraph: {
-                showComponent: true,
-                markovBlanketSelected: data.markovBlanketSelected,
-                isEdgeSelected: data.isEdgeSelected,
-                isNodeSelected: data.isNodeSelected,
                 graphHistory: currentGraphHistory.concat([ { graph: data.graph, dotSrc: data.dotSrc } ]),
             },
             graphIndex: currentGraphHistory.length,
@@ -544,7 +529,6 @@ class AppInterface extends React.Component {
   /* FEATURE SELECTION METHODS */
   calculateFeatureSelectionXScale(features) {
       var foundBoundary = false;
-      //var featureSelectionWidth = this.state.featureCoordinatesSize[0] - this.state.featureSelectionMargin.left - this.state.featureSelectionMargin.right;
       var xScaleRange = [];
       var nextPosition = 0;
       var numSelectedFeatures = 0;
@@ -604,9 +588,17 @@ class AppInterface extends React.Component {
               });
 
           var xScaleInfo = this.calculateFeatureSelectionXScale(featuresWithBoundary);
-
           var allFeatureNames = this.getInitialConsistencyScores(featuresWithBoundary);
 
+          client.recordEvent('feature_selection_exploration', {
+              user: userID,
+              selectedFeatures: allFeatureNames,
+              coveredFeatures: this.state.markovBlanketFeatureNames,
+              MI: this.state.MICurrent,
+              MB: 1,
+              rankLoss: this.state.rankLossCurrent,
+
+          });
 
           this.setState({
               rankData: rankData,
@@ -614,15 +606,15 @@ class AppInterface extends React.Component {
               featureSelectionHistory: [{
                   xScaleDomain: xScaleInfo.xScaleDomain,
                   xScale: xScaleInfo.xScale,
-                  features: featuresWithBoundary
+                  features: featuresWithBoundary,
+                  coveredFeatures: this.state.markovBlanketFeatureNames,
+                  selectedFeatureNames: allFeatureNames,
+                  featureCoordinatesSize: [xScaleInfo.featureSelectionTotalWidth, 500]
               }],
               selectedFeatureSelection: 0,
               MBCurrent: 1,
-              selectedFeatureNames: allFeatureNames,
               activeTabIndex: 2,
-              featureCoordinatesSize: [xScaleInfo.featureSelectionTotalWidth, 500],
-              shouldInitializeSelection: false,
-              coveredFeatures: this.state.markovBlanketFeatureNames
+              shouldInitializeSelection: false
           });
       } else {
           this.setState({
@@ -670,28 +662,40 @@ class AppInterface extends React.Component {
             let MBScore = coveredFeatures.size/this.state.markovBlanketFeatureNames.size;
 
             if (this.state.isNewTrial) {
-
                 this.state.featureSelectionHistory.push({
                     xScale: xScaleInfo.xScale,
                     xScaleDomain: xScaleInfo.xScaleDomain,
-                    features: features
+                    features: features,
+                    coveredFeatures: coveredFeatures,
+                    selectedFeatureNames: allFeatureNames,
+                    featureCoordinatesSize: [xScaleInfo.featureSelectionTotalWidth, 500],
                 });
             } else {
                 this.state.featureSelectionHistory.splice(this.state.featureSelectionHistory.length-1, 1,
                     {
                         xScale: xScaleInfo.xScale,
                         xScaleDomain: xScaleInfo.xScaleDomain,
-                        features: features
+                        features: features,
+                        coveredFeatures: coveredFeatures,
+                        selectedFeatureNames: allFeatureNames,
+                        featureCoordinatesSize: [xScaleInfo.featureSelectionTotalWidth, 500],
                     }
-                )
+                );
             }
+
+            client.recordEvent('feature_selection_exploration', {
+                user: userID,
+                selectedFeatures: allFeatureNames,
+                coveredFeatures: coveredFeatures,
+                MI: this.state.MICurrent,
+                MB: MBScore,
+                rankLoss: this.state.rankLossCurrent,
+            });
+
             this.setState({
                 isNewTrial: false,
                 selectedFeatureSelection: this.state.featureSelectionHistory.length - 1,
                 MBCurrent: MBScore,
-                selectedFeatureNames: allFeatureNames,
-                featureCoordinatesSize: [xScaleInfo.featureSelectionTotalWidth, 500],
-                coveredFeatures: coveredFeatures
             });
         }
     }
@@ -725,7 +729,6 @@ class AppInterface extends React.Component {
       }).then(function(response) {
         return response.json();
       }).then(data => {
-          console.log(this.state.rankLossCurrent);
         this.state.MI.push(this.state.MICurrent);
         this.state.MB.push(this.state.MBCurrent);
         this.state.rankLoss.push(this.state.rankLossCurrent);
@@ -742,7 +745,7 @@ class AppInterface extends React.Component {
            rankLoss: this.state.rankLossCurrent,
            accuracy: +data.accuracy.toFixed(3),
            precision: +data.precision.toFixed(3),
-           features: features.features
+           features: allFeatureNames
         });
 
         this.setState({
@@ -780,11 +783,7 @@ class AppInterface extends React.Component {
       })
   }
 
-  updateIndex(index) {
-    this.setState({
-      selectedIndex: index
-    })
-  }
+
 
   position(d) {
     var value = this.state.dragging[d];
@@ -803,24 +802,13 @@ class AppInterface extends React.Component {
       }).then(data => {
           console.log(data);
           var axisLength = this.state.xAxisLength;
-          var selectedIndex = this.state.selectedIndex;
           if (this.state.MB.length >= 2 && this.state.MBCurrent == -1) {
               axisLength = axisLength + 1;
-              selectedIndex = selectedIndex + 1;
           }
-          client.recordEvent('feature_selection' ,{
-              MI: parseFloat(data.MI.toFixed(3)),
-              //MB: parseFloat(data.consistencyMB.toFixed(3)),
-              rankLoss: parseFloat(data.rankLoss.toFixed(3)),
-              features: dataToSend.names
-          });
 
-          this.setState({
-              MICurrent: parseFloat(data.MI.toFixed(3)),
-              rankLossCurrent: parseFloat(data.rankLoss.toFixed(3)),
-              xAxisLength: axisLength,
-              selectedIndex: selectedIndex
-          });
+          this.state.MICurrent = parseFloat(data.MI.toFixed(3));
+          this.state.rankLossCurrent = parseFloat(data.rankLoss.toFixed(3));
+          this.state.xAxisLength = axisLength;
       }).catch(function(error) {
           console.log(error)
       });
@@ -908,55 +896,12 @@ class AppInterface extends React.Component {
       return visited;
   }
 
-  /*goToStep(step) {
-    //var featureHistory = this.state.featureHistory
-    //this.state.featureHistory.splice(step + 1)
-    //console.log(step)
-    //var currentHistogramHistory = this.state.histogramHistory[step]
-    //console.log(currentHistogramHistory)
-    //console.log(this.state.featureHistory);
-    var previousFeatures = this.state.featureHistory[step];
-    //console.log(features)
-    var xScaleDomain = previousFeatures.map((feature) =>
-      feature.name
-    );
-    var xScale = this.state.xScale.domain(xScaleDomain);
-    this.setState({
-        featureSelection: {
-            features: previousFeatures,
-            xScale: xScale,
-            xScaleDomain: xScaleDomain
-        }
-        //currentHistogramHistory: [{data: currentHistogramHistory.data }],
-        //currentHistogramStep: 0
-    });
-  } */
-
   handleClassSelection(className, currentDisplay){
       var classDisplay = this.state.classDisplay;
       classDisplay[className].TP.display = !currentDisplay;
       this.setState({
           classDisplay: classDisplay
       })
-    /*console.log(className, currentDisplay);
-    fetch("/classSelected", {
-        method: 'POST',
-        body: JSON.stringify({"className": className, "currentDisplay": currentDisplay })
-    }).then(function(response) {
-        return response.json();
-    }).then(data => {
-        console.log(data);
-        client.recordEvent('class_display_settings', {
-            user: userID,
-            class: className,
-            display: currentDisplay
-        });
-        this.setState({
-            featureData: data.featureData
-        })
-    }).catch(function(error) {
-        console.log(error)
-    }); */
   }
 
   getInitialConsistencyScores(features) {
@@ -1027,6 +972,17 @@ class AppInterface extends React.Component {
         }
     }
 
+    download() {
+        console.log("download");
+        let fileName = 'featureSelection.txt';
+        let content = this.state.metrics.accuracy;
+        var a = document.getElementById("a");
+        let file = new Blob([content], {type: 'text/plain'});
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        //a.click();
+    }
+
   render() {
     // set graph max for consistency graph
     var metricsGraphMax = Math.max(this.state.consistencyGraphLegendMax, this.state.MICurrent);
@@ -1043,29 +999,32 @@ class AppInterface extends React.Component {
     }
 
     var SBLegend = [
+        { value: "Selected", color: "#64ab23", helptext: "feature in selected feature set" },
+        { value: 'Not Selected', color: '#a9a9a9', helptext: "feature not in selected feature set" },
         { value: "In MB", color: "#7e6699", helptext: "in the markov blanket of the target node in the causal graph" },
         { value: 'Not in MB', color: '#f08036', helptext: "not in the markov blanket of the target node in the causal graph" }
-    ]
+    ];
 
     for (var i = this.state.featureImportance.circleRadii.length - 1; i >= 0 ; i--) {
         if (i == this.state.featureImportance.circleRadii.length - 1) {
-            SBLegend.push({value: "Most Important", color: this.state.FIcolorFunction(i), helptext: ""})
+            SBLegend.push({value: "Most Important", color: this.state.FIcolorFunction(i), helptext: "feature indicted as most important to predict target"})
         } else if (i == 0) {
-            SBLegend.push({ value: "Least Important", color: this.state.FIcolorFunction(i), helptext: "" })
+            SBLegend.push({ value: "Least Important", color: this.state.FIcolorFunction(i), helptext: "feature indicted as least important to predict target" })
         } else {
             SBLegend.push({ value: "", color: this.state.FIcolorFunction(i), helptext: "" })
         }
     }
 
-    SBLegend.push({ value: "No Importance", color: "white", helptext: ""});
+    SBLegend.push({ value: "No Importance", color: "white", helptext: "feature indicted as not important to predict target"});
 
     var selectedFeatureSelection;
     if (this.state.selectedFeatureSelection >= 0) {
       selectedFeatureSelection = this.state.featureSelectionHistory[this.state.selectedFeatureSelection];
     } else {
-        selectedFeatureSelection = { features: null, xScale: null, xScaleDomain: null };
+        selectedFeatureSelection = { features: null, xScale: null, xScaleDomain: null, coveredFeatures: new Set(), selectedFeatureNames: [], featureCoordinatesSize:[1200,500] };
     }
 
+    //console.log(selectedFeatureSelection)
       return (
         <div className={'root-div'}>
             <SideBar featureInfo={this.props.description} show={this.state.showInfo} close={() => this.showInfoFalse()}/>
@@ -1102,9 +1061,6 @@ class AppInterface extends React.Component {
                       sendData={this.sendData}
                       graph={currentGraphHistory.graph}
                       targetName={this.props.targetName}
-                      markovBlanketSelected={this.state.causalGraph.markovBlanketSelected}
-                      isEdgeSelected={this.state.causalGraph.isEdgeSelected}
-                      isNodeSelected={this.state.causalGraph.isNodeSelected}
                       undo={(n) => this.removeLastGraph(n)}
                       clearGraph={this.clearGraph}
                       nextStep={this.sendGraphToSelection}
@@ -1116,7 +1072,9 @@ class AppInterface extends React.Component {
               <Tab linkClassName={"Feature Selection"}>
                   <div>
                       <div className={"tools-bar"}>
-                          <button className={"tools-bar action-button"} style={{background: this.state.showAnalysis? "#0071e0" : "darkgray"}} onClick={this.toggleAnalysis}>{"Analysis of Feature Set"}</button>
+                          <button className={"tools-bar action-button"} style={{background: "royalblue"}} onClick={this.toggleAnalysis}>
+                              { this.state.showAnalysis ? "Display Features" : " Show Analysis of Feature Set" }
+                          </button>
                           <div className={"tools-bar-help"}>
                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
                               <span className={"tools-bar-help-text"}>
@@ -1126,16 +1084,15 @@ class AppInterface extends React.Component {
                           <button className={"tools-bar right-button next-button"} onClick={this.classify}>{"CREATE CLASSIFER »"}</button>
                           <button className={"tools-bar right-button previous-button"} onClick={this.goFromSelectionToGraph}>{"« PREVIOUS"}</button>
                       </div>
-
+                      <div>
+                          <span>Feature Selection for: </span>
+                          <select onChange={ this.changeDisplaySelection } >
+                              {this.state.featureSelectionHistory.map((history, index) =>
+                                  <option selected={(index == this.state.selectedFeatureSelection) ? "selected": "" } value={index}>{`trial ${index+1}`}</option>
+                              )}
+                          </select>
+                      </div>
                       <div style={{display: this.state.showAnalysis? "none" : "block"}}>
-                          <div>
-                              <span>Feature Selection for: </span>
-                              <select onChange={ this.changeDisplaySelection } >
-                                  {this.state.featureSelectionHistory.map((history, index) =>
-                                    <option selected={(index == this.state.selectedFeatureSelection) ? "selected": "" } value={index}>{`trial ${index+1}`}</option>
-                                  )}
-                              </select>
-                          </div>
                       <FeatureParallelCoordinates
                           data={this.state.featureData.inputData}
                           convertedData={this.state.featureData.convertedData}
@@ -1144,7 +1101,7 @@ class AppInterface extends React.Component {
                           xScale={selectedFeatureSelection.xScale}
                           dragging={this.state.dragging}
                           featureAxisOnEnd={this.featureAxisOnEnd}
-                          size={this.state.featureCoordinatesSize}
+                          size={selectedFeatureSelection.featureCoordinatesSize}
                           sendData={this.sendData}
                           colorFunction={this.state.colorFunction}
                           classDisplay={this.state.classDisplay}
@@ -1158,15 +1115,10 @@ class AppInterface extends React.Component {
                                            handleChange={(c, d) => this.handleClassSelection(c, d)}/>
                       </div>
                       <div className={""} style={{display: this.state.showAnalysis? "grid" : "none"}}>
-                          <div className={"confusion-matrix-title"} style={{marginLeft: "350px", marginBottom: "20px"}}>Consistency with Causal Graph
-                              <svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                              <span className={"tools-bar-help-text"} style={{float: "none"}}>
-                                {""}
-                              </span>
-                          </div>
+                          <div className={"confusion-matrix-title"} style={{marginLeft: "350px", marginBottom: "20px"}}>Consistency with Causal Graph</div>
                           <div className={"grid-container"}>
                               <div className={"grid-item"}>
-                                  <VerticalLegend legend={this.state.consistencyGraphLegend} width={170}/>
+                                  <VerticalLegend style={{marginLeft : "20px"}} legend={this.state.consistencyGraphLegend} width={170}/>
                                   <ProgressGraph size={[500, 300]}
                                                  yAxisLabel={"MB Consistency/Mutual Information"}
                                                  max={this.state.consistencyGraphLegendMax}
@@ -1176,14 +1128,13 @@ class AppInterface extends React.Component {
                                                      MB: (this.state.MBCurrent >= 0) ? this.state.MB.concat([this.state.MBCurrent]) : this.state.MB ,
                                                      MI: (this.state.MICurrent >= 0) ? this.state.MI.concat([this.state.MICurrent]) : this.state.MI }}
                                                  colors={this.state.consistencyGraphLegend.map((item) => item.color)}
-                                                 selectedIndex={this.state.selectedIndex}
-                                                 updateIndex={this.updateIndex}
                                                  xAxisLength={this.state.xAxisLength}
                                   />
                               </div>
 
                               <div className={"grid-item"}>
-                                  <VerticalLegend legend={[
+                                  <VerticalLegend marginLeft={"0px"}
+                                      legend={[
                                       { value: "Covered", color: "#b9d9ff", helptext: "Either a selected feature or there is a subset of selected features that make up a path to/from this feature" },
                                       { value: 'Not Covered', color: '#a9a9a9', helptext: "Not a selected feature and no subset of selected features make up a path to/from this feature" }
                                   ]} width={120}/>
@@ -1191,21 +1142,18 @@ class AppInterface extends React.Component {
                               <div className={"grid-item"}>
                                   <PieChart size={[400,300]}
                                             data={Array.from(this.state.markovBlanketFeatureNames)}
-                                            selection={Array.from(this.state.coveredFeatures)}
+                                            selection={Array.from(selectedFeatureSelection.coveredFeatures)}
                                   />
                               </div>
                         </div>
 
                           <div className={"confusion-matrix-title"} style={{marginLeft: "350px", marginBottom: "20px"}}>Consistency with Feature Importance
-                              <svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                              <span className={"tools-bar-help-text"} style={{float: "none"}}>
-                                {""}
-                              </span>
+
                           </div>
 
                           <div className={"grid-container"}>
                           <div className={"grid-item"}>
-                              <VerticalLegend legend={this.state.rankLossGraphLegend} width={100}/>
+                              <VerticalLegend style={{marginLeft : "20"}} legend={this.state.rankLossGraphLegend} width={100}/>
                               <ProgressGraph size={[500, 300]}
                                              yAxisLabel={"rank loss"}
                                              max={rankLossMax}
@@ -1213,19 +1161,17 @@ class AppInterface extends React.Component {
                                              name={"rankLoss"}
                                              scores={{ rankloss: this.state.rankLossCurrent >= 0 ? this.state.rankLoss.concat([this.state.rankLossCurrent]) : this.state.rankLoss}}
                                              colors={this.state.rankLossGraphLegend.map((item) => item.color)}
-                                             selectedIndex={this.state.selectedIndex}
-                                             updateIndex={this.updateIndex}
                                              xAxisLength={this.state.xAxisLength}
                               />
                           </div>
 
                           <div className={"grid-item"}>
-                              <VerticalLegend legend={SBLegend} width={150}/>
+                              <VerticalLegend marginLeft={"0px"} legend={SBLegend} width={150}/>
                           </div>
                           <div className={"grid-item"}>
                               <SunburstChart size={[400,300]}
                                              data={this.state.rankData}
-                                             selection={this.state.selectedFeatureNames}
+                                             selection={selectedFeatureSelection.selectedFeatureNames}
                                              numImportance={this.state.featureImportance.circleRadii.length}
                                              colorFunction={this.state.FIcolorFunction}
                               />
@@ -1236,12 +1182,13 @@ class AppInterface extends React.Component {
               </Tab>
               <Tab linkClassName={"Performance Analysis"}>
                   <div className={"tools-bar"}>
+                      <a className={"tools-bar right-button"} href="" id="a">
+                          <button style={{background: "royalblue"}} className={"tools-bar right-button"} onClick={this.download}>{"SAVE SELECTIONS"}</button>
+                      </a>
                       <button className={"tools-bar right-button previous-button"} onClick={this.goFromAnalysisToSelection}>{"« PREVIOUS"}</button>
                   </div>
                   <div className={"confusion-matrix-container"}>
-                      <div className={"confusion-matrix-title"}>Confusion Matrix
-
-                      </div>
+                      <div className={"confusion-matrix-title"}>Confusion Matrix</div>
                       <CompareClassifiers changeTrial={ this.changeDisplayTrial }
                                           trials={ this.state.trials }
                                           selectedTrial1={ this.state.selectedTrial1 }
@@ -1250,11 +1197,16 @@ class AppInterface extends React.Component {
                                           confusionMatricesNormalized={ this.state.confusionMatrixNormalized }
                                           classNames={this.props.classNames}/>
                   </div>
-                  <div className={"confusion-matrix-title"} style={{marginLeft: "445px", marginBottom: "10px", marginTop: "20px"}}> Statistical Metrics
-
-                  </div>
+                  <div className={"confusion-matrix-title"} style={{marginLeft: "445px", marginBottom: "10px", marginTop: "20px"}}> Statistical Metrics</div>
                   <div style={{textAlign: "center"}} >
-                      <BarGraph size={[500,300]} metrics={this.state.metrics} colors={this.state.metricsGraphLegend.map((item) => item.color)} xAxisLength={this.state.xAxisLength}/>
+                      <ProgressGraph size={[500, 300]}
+                                     yAxisLabel={"Accuracy"}
+                                     max={1}
+                                     min={0}
+                                     name={"accuracy-graph"}
+                                     scores={{ accuracy: this.state.metrics.accuracy }}
+                                     colors={[this.state.metricsGraphLegend[0].color]}
+                                     xAxisLength={this.state.xAxisLength} />
                       <VerticalLegend legend={this.state.metricsGraphLegend} width={100}  marginLeft={"450px"}/>
                       <div>
                   </div>
@@ -1267,38 +1219,15 @@ class AppInterface extends React.Component {
 }
 
 /*
- <!-- <svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                      <span className={"tools-bar-help-text"} style={{float: "none"}}>
+<svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                              <span className={"tools-bar-help-text"} style={{float: "none"}}>
                                 {""}
-                                </span> -->
+                              </span>
 
-                                <!--<svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                          <span className={"tools-bar-help-text"} style={{float: "none"}}>
-                            {"CM"}
-                        </span> -->
+ <svg className={'matrix-icon'} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                              <span className={"tools-bar-help-text"} style={{float: "none"}}>
+                                {""}
+                              </span>
+                       <BarGraph size={[500,300]} metrics={this.state.metrics} colors={this.state.metricsGraphLegend.map((item) => item.color)} xAxisLength={this.state.xAxisLength}/>
 
-
-                     <div id={"matrix"}>
-                        <ConfusionMatrix
-                            matrix={this.state.confusionMatrix}
-                            normalizedMatrix={this.state.confusionMatrixNormalized}
-                            classNames={this.props.classNames}
-                        />
-                      </div>
-                      <ProgressGraph size={[500, 300]}
-                                     max={1}
-                                     min={0}
-                                     name={"consistency"}
-                                     consistencyScores={this.state.metrics}
-                                     metrics={{accuracy: [], precision: []}}
-                                     metricsColors={this.state.metricsGraphLegend.colors}
-                                     currentScores={{accuracy: -1, precision: -1}}
-                                     colors={this.state.metricsGraphLegend.colors}
-                                     selectedIndex={this.state.selectedIndex}
-                                     updateIndex={this.updateIndex}
-                                     xAxisLength={this.state.xAxisLength}
-                                     goToStep={(s) => this.goToStep(s)}/>
-                                     <Legend className={"legend"}
-                              keys={this.state.metricsGraphLegend.keys}
-                              colors={this.state.metricsGraphLegend.colors}/>
  */

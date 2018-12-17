@@ -102,9 +102,9 @@ class FeatureParallelCoordinates extends React.Component {
   constructor(props) {
     console.log(props)
     super(props)
-    var margin = {left: 10, right: 30, top: 60, bottom:10};
+    var margin = {left: 10, right: 30, top: 100, bottom:10};
     var width = props.size[0] - margin.left - margin.right;
-    var height = props.size[1] - margin.top - margin.bottom;
+    var height = 570 - margin.top - margin.bottom;
     var axisWidth = 30;
       var yScalesDisplay = {};
       var yScalesAxesDisplay = {};
@@ -255,7 +255,7 @@ class FeatureParallelCoordinates extends React.Component {
     var unDisplayExamples = this.props.convertedData.filter(data => data.display == false);
     return (
         <div width={1000} style={{overflow: 'scroll'}}>
-          <svg className={'feature-parallels-svg'} width={this.props.size[0]} height={this.props.size[1]}>
+          <svg className={'feature-parallels-svg'} width={this.props.size[0]} height={570}>
             <g className={'feature-parallels'} transform={`translate(${this.state.margin.left},${this.state.margin.top})`} >
             <g className={'data-paths'}>
               {unDisplayExamples.map((ex) =>

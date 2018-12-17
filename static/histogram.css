@@ -107,7 +107,7 @@
   padding-right: 5px;
   padding-left: 5px;
   padding: 16px 30px;
-  cursor: pointer;
+  cursor: default;
     background: #20232a;
     color: white;
     font-size: 1em;
@@ -197,8 +197,9 @@
 
 .action-button {
     float:left;
-    background: #BEBEBE;
-    border-color: darkgray;
+    background: #3367d6;
+    border-color: #3367d6;
+    cursor: pointer;
 }
 
 .add-edge {
@@ -212,11 +213,13 @@
 .next-button {
     background: #0071e0;
     border-color: #0071e0;
+    cursor: pointer;
 }
 
 .previous-button {
-    background: lightgray;
+    background: gray;
     border-color: lightgrey;
+    cursor: pointer;
 }
 
 /* FEATURE IMPORTANCE */
@@ -240,12 +243,38 @@
 }
 
 .causal-graph-container {
-    display: grid;
+    /*display: grid;
     grid-template-columns: 800px 200px;
-    position: absolute;
+    position: absolute; */
 }
 .causal-graph-container #graph{
-    margin-left: 200px;
+    /*margin-left: 200px;*/
+}
+
+.causal-graph-select-div {
+    float: left;
+    background: royalblue;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
+.causal-graph-select{
+    background: transparent;
+    color:white;
+    border: none;
+    font-size: 12px;
+    padding: 5px;
+    width: 140px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.causal-graph-toolbar-span {
+
+    color: black;
+    float: left;
+    line-height: 30px;
+    vertical-align: middle;
 }
 
 .graph .node, .graph .edge {
@@ -308,6 +337,12 @@ path.link.hidden {
 }
 
 .cg-legend {
+    position: absolute;
+    margin-left: 20px;
+    margin-top: 500px;
+}
+
+.analysis-legend {
     margin-left: 20px;
 }
 

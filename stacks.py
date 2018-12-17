@@ -104,7 +104,6 @@ def initialize_data():
     global FEATURE_DATA
     numeric_data = classifier.df
     FEATURE_DATA = FeatureData(target, features, numeric_data, feature_names, class_values, class_name)
-    #init_pc()
     interface_data = dict()
     interface_data['featureData'] = FEATURE_DATA.feature_data
     interface_data['classNames'] = list(FEATURE_DATA.class_names)
@@ -112,33 +111,14 @@ def initialize_data():
     interface_data['targetName'] = class_name
     return jsonify(interface_data)
 
-def init_pc():
-    global p
-    global tetrad
-    p = pc()
-    p.start_vm()
-    tetrad = s.tetradrunner()
-
-def make_causal_graph(df, prior):
-    tetrad.run(algoId = 'fges', dfs = df, priorKnowledge=prior, scoreId = 'sem-bic', dataType = 'continuous', penaltyDiscount = 2, maxDegree = -1, faithfulnessAssumed = True, verbose = True)
-    dot_src = p.tetradGraphToDot(tetrad.getTetradGraph())
-    edges = tetrad.getEdges()
-    nodes = tetrad.getNodes()
-    return dot_src, edges, nodes
-
 @app.route("/initializeGraph", methods=['POST'])
 def initialize_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
-        #global prior
-        #prior = pr.knowledge(forbiddirect = data['forbiddenEdges'], requiredirect = data['requiredEdges'])
-        #dot_src, edges, nodes = make_causal_graph(classifier.df, prior)
         global causalGraph
-        #causalGraph = CausalGraph(classifier.df, dot_src, edges, nodes, class_name)
         causalGraph = CausalGraph(classifier.df, data['forbiddenEdges'], data['requiredEdges'], class_name)
         interface_data = dict()
         get_graph_information(interface_data)
-        interface_data['graph'] = causalGraph.graph
         return jsonify(interface_data)
 
 @app.route("/removeEdge", methods=['POST'])
@@ -148,8 +128,6 @@ def remove_edge_from_dot_src():
         causalGraph.remove_edge_from_graph(data['nodeFrom'], data['nodeTo'])
         interface_data = dict()
         get_graph_information(interface_data)
-        interface_data['graph'] = causalGraph.graph
-        print causalGraph.graph
         return jsonify(interface_data)
 
 @app.route("/addEdge", methods=['POST'])
@@ -159,22 +137,15 @@ def add_edge_to_causal_graph():
         causalGraph.add_edge(data['nodeFrom'], data['nodeTo'])
         interface_data = dict()
         get_graph_information(interface_data)
-        interface_data['graph'] = causalGraph.graph
         return jsonify(interface_data)
 
 @app.route("/redrawGraph", methods=["POST"])
 def remove_nodes_from_causal_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
-        #for feature_name in data['features']:
-        #    causalGraph.removed_nodes.append(feature_name)
-        #removed_feature_df = classifier.df.drop(causalGraph.removed_nodes, axis=1)
-        #dot_src, edges, nodes = make_causal_graph(removed_feature_df, prior)
         causalGraph.recalculate_causal_graph(data['features'], data['removedEdges'])
         interface_data = dict()
         get_graph_information(interface_data)
-        interface_data['graph'] = causalGraph.graph
-        print interface_data
         return jsonify(interface_data)
 
 @app.route('/undoGraphEdit', methods=["POST"])
@@ -183,7 +154,6 @@ def undo_graph_edit():
         data = json.loads(request.data)
         print data
         causalGraph.undo_last_edit(data)
-        #causalGraph.remove_node_from_removed_nodes(data['node'])
         interface_data = dict()
         return jsonify(interface_data)
 
@@ -204,33 +174,24 @@ def create_names(names_array):
 
 def get_graph_information(data_dict):
     data_dict['dotSrc'] = causalGraph.dot_src
-    data_dict['markovBlanketSelected'] = causalGraph.markov_blanket_selected
-    data_dict['isEdgeSelected'] = causalGraph.is_edge_selected()
-    data_dict['isNodeSelected'] = causalGraph.is_node_selected()
+    data_dict['graph'] = causalGraph.graph
 
 @app.route("/calculateScores", methods=["POST"])
 def send_new_calculated_MI():
     if request.method == 'POST':
         data = json.loads(request.data)
-        #print (data['features'])
-        #data['names']
         rank_loss = FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['names'])
         rank_loss_listwise = FEATURE_DATA.calculate_rank_loss_listwise(data['featureRank'], data['names'])
         FEATURE_DATA.calculate_mutual_information(data['features'], data['names'])#calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
-        #FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['features'])
-        #causalGraph.calculate_MB_consistency_score2(data['names'])
         interface_data = dict()
         interface_data['MI'] = FEATURE_DATA.MI
-        #interface_data['consistencyMB'] = causalGraph.score
         interface_data['rankLoss'] = rank_loss
-        #interface_data['featureData'] = FEATURE_DATA.feature_data
         return jsonify(interface_data)
 
 @app.route("/classify", methods=['POST'])
 def classify():
     if request.method == 'POST':
         features = json.loads(request.data)
-
         classifier.classify(features['features'])
         data = dict()
         data['accuracy'] = classifier.accuracy
@@ -238,45 +199,7 @@ def classify():
         data['recall'] = classifier.recall
         data['confusionMatrix'] = classifier.cm.tolist()
         data['confusionMatrixNormalized'] = classifier.cm_normalized.tolist()
-        #target = FEATURE_DATA.target
-        #class_names = FEATURE_DATA.class_names
-        #global HISTOGRAM
-        #HISTOGRAM = Histogram(classifier.predicted, target, classifier.proba, class_names)
-        #data['histogramData'] = HISTOGRAM.Histogram_info
     return jsonify(data)
-
-@app.route("/nodeSelected", methods=['POST'])
-def get_markov_blanket():
-    if request.method == 'POST':
-        node_json = json.loads(request.data)
-        causalGraph.color_graph_select_node(node_json['nodeStr'])
-        interface_data = dict()
-        get_graph_information(interface_data)
-        #interface_data['dotSrc'] = causalGraph.dot_src
-        #interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
-    return jsonify(interface_data)
-
-@app.route("/edgeSelected", methods=['POST'])
-def get_edge_selection():
-    if request.method == 'POST':
-        node_json = json.loads(request.data)
-        print node_json
-        causalGraph.color_edge(node_json['edgeStr'])
-        interface_data = dict()
-        get_graph_information(interface_data)
-        #interface_data['dotSrc'] = causalGraph.dot_src
-        #interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
-    return jsonify(interface_data)
-
-@app.route("/toggleGraphSelection", methods=['POST'])
-def toggle_graph_selection():
-    if request.method == 'POST':
-        causalGraph.toggle_markov_blanket_selected()
-        interface_data = dict()
-        get_graph_information(interface_data)
-        #interface_data['dotSrc'] = causalGraph.dot_src
-        #interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
-    return jsonify(interface_data)
 
 @app.route("/removeSelected", methods=['POST'])
 def remove_selection():
@@ -284,8 +207,6 @@ def remove_selection():
         causalGraph.remove_selection()
         interface_data = dict()
         get_graph_information(interface_data)
-        #interface_data['dotSrc'] = causalGraph.dot_src
-        #interface_data['markovBlanketSelected'] = causalGraph.markov_blanket_selected
     return jsonify(interface_data)
 
 @app.route("/postHistogramZoom", methods=['POST'])
@@ -326,20 +247,19 @@ def update_display():
         HISTOGRAM.set_display(display)
     return jsonify(display)
 
-def convert_csv_to_array(csv_filename, convert_to_int, quoting):
-    arr = []
-    try:
-        with open(csv_filename) as csvfile:
-            reader = csv.reader(csvfile, quoting = quoting)
-            for row in reader:
-                if convert_to_int:
-                    for i, num in enumerate(row):
-                        row[i] = int(row[i])
-                arr.append(row)
-    except IOError:
-        pass
-    return arr
-
+#def convert_csv_to_array(csv_filename, convert_to_int, quoting):
+#    arr = []
+#    try:
+#        with open(csv_filename) as csvfile:
+#            reader = csv.reader(csvfile, quoting = quoting)
+#            for row in reader:
+#                if convert_to_int:
+#                    for i, num in enumerate(row):
+#                        row[i] = int(row[i])
+#                arr.append(row)
+#    except IOError:
+#        pass
+#    return arr
 @app.route('/static/<path:path>')
 def send_js(path):
     return send_from_directory('static', path)

@@ -1,15 +1,15 @@
 function VerticalLegend(props) {
     return(
-        <div className={"legend legend-left cg-legend"}>
+        <div className={"legend legend-left"} style={(props.style) ? props.style : {}}>
             {props.legend.map((item) =>
-                <div style={{width: props.width ? props.width : 100, marginLeft: (props.marginLeft) ? props.marginLeft : "20px"}}>
+                <div style={{padding: "1px", width: props.width ? props.width : 100, marginLeft: (props.marginLeft) ? props.marginLeft : "20px"}}>
                     <div className={"series-marker"} style={{background: item.color}}></div>
                     <p>{item.value}</p>
                     <div className={"tools-bar-help legend-help"}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
                         <span className={"tools-bar-help-text legend-helptext"}>
                                     {item.helptext}
-                                </span>
+                        </span>
                     </div>
                 </div>
             )}
@@ -141,26 +141,7 @@ class ProgressGraph extends React.Component {
   }
 
   componentDidMount() {
-   /* var that = this;
-    var id = '#progress-graph-' + this.props.name;
-    d3.select(id)
-      .on("mousemove", function(d) {
-        var xPosition = d3.mouse(this)[0] - that.state.margin.left;
-        var keys = that.state.keys; //Object.keys(that.props.consistencyScores);
-        var numDataPoints = that.state.scores.length;
 
-        var range = (that.props.size[0] - that.state.margin.left - that.state.margin.right) / (that.props.xAxisLength - 1)
-        //console.log(xPosition)
-        //console.log(range)
-        var mouseIndex = ((Math.ceil(xPosition/range) - xPosition/range) < 0.5) ? Math.ceil(xPosition/range) : Math.floor(xPosition/range)
-
-        if (mouseIndex != that.props.selectedIndex && numDataPoints > 1) {
-          that.props.updateIndex(mouseIndex)
-        }
-      })
-      .on("mousedown", function(d) {
-        that.props.goToStep(that.props.selectedIndex)
-      })*/
   }
 
   componentDidUpdate() {

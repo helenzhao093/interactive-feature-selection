@@ -98,7 +98,7 @@ class SunburstChart extends React.Component {
                 <g transform={`translate(${this.props.size[0]/2},${this.state.radii[3]})`}>
                     {arcs3.map((slice, index) =>
                         <g className={"slice"}>
-                            <path fill={this.props.selection.includes(pie3Data[index])? "#b9d9ff" : "#a9a9a9"} stroke={this.state.stroke} strokeWidth={2} d={arc3(slice)}></path>
+                            <path fill={this.props.selection.includes(pie3Data[index])? "#64ab23" : "#a9a9a9"} stroke={this.state.stroke} strokeWidth={2} d={arc3(slice)}></path>
                         </g>
                     )}
                     {arcs3.map((slice, index) =>
