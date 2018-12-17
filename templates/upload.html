@@ -7,16 +7,21 @@
       <form method = "POST" enctype = "multipart/form-data">
         <div class="upload-form">
           <h3>Upload Datafile</h3>
-          <p>Upload datafile in csv form. Upload description of features (optional).</p>
+          <p>Upload datafile csv - features as columns, feature names in header row;<br> names file - name_of_feature: value1, value2;<br> description file - name_of_feature: description (optional).</p>
           <hr>
           <div>
             <label for="file"> Datafile </label>
             <input type = "file" name = "file" class="inputfile"/>
           </div>
           <div>
+            <label for="file"> Names </label>
+            <input type = "file" name = "file" class="inputfile"/>
+          </div>
+          <div>
             <label for="file"> Description </label>
             <input type = "file" name = "file" class="inputfile"/>
           </div>
+
          <input type = "submit"/>
          </div>
       </form>
