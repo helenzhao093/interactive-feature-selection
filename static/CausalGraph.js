@@ -348,7 +348,7 @@ class CausalGraph extends React.Component {
               selectedInteraction: this.state.selectInteraction[1],
               removeEdge: false,
               removeNode: false,
-              addEdge: false
+              addEdge: true
           });
       }
   }
