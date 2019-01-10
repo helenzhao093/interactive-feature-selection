@@ -52,6 +52,7 @@ class AppInterface extends React.Component {
     ];
 
     this.state = {
+        datasetName: this.props.datasetName,
         nameToIndexMap: nameToIndexMap,
         helptext: helptext,
         activeTabIndex: 0,
@@ -201,6 +202,7 @@ class AppInterface extends React.Component {
 
         client.recordEvent('feature_importance_moves', {
             user: userID,
+            datasetName: this.state.datasetName,
             type: "add_circle",
             numCircles: this.state.featureImportance.circleRadii.length
         });
@@ -221,6 +223,7 @@ class AppInterface extends React.Component {
     addMove(move) {
         client.recordEvent('feature_importance_moves', {
            user: userID,
+           datasetName: this.state.datasetName,
            type: "move_feature",
            feature: {
                name: this.state.featureImportance.features[move.id].name,
@@ -346,6 +349,7 @@ class AppInterface extends React.Component {
             /* capture feature importance */
             client.recordEvent('feature_importance_snapshot', {
                 user: userID,
+                datasetName: this.state.datasetName,
                 lowestRankFeatures: forbiddenEdgesInfo.lowestRankFeatures,
                 highestRankFeatures: requiredEdgesInfo.highestRankFeatures,
                 featureNameToRank: featureRanks.featureNameToRankMap,
@@ -427,6 +431,7 @@ class AppInterface extends React.Component {
         if (url == '/addEdge') {
             client.recordEvent('graph_history', {
                 user: userID,
+                datasetName: this.state.datasetName,
                 type: "add_edge",
                 info: [dataToSend.nodeFrom, dataToSend.nodeTo],
                 graph: graph
@@ -493,6 +498,7 @@ class AppInterface extends React.Component {
       var graph = this.getGraphDataToLog(inputGraph);
       client.recordEvent('graph_history', {
           user: userID,
+          datasetName: this.state.datasetName,
           type: "clear",
           info: [],
           graph: graph
@@ -592,8 +598,9 @@ class AppInterface extends React.Component {
 
           client.recordEvent('feature_selection_exploration', {
               user: userID,
+              datasetName: this.state.datasetName,
               selectedFeatures: allFeatureNames,
-              coveredFeatures: this.state.markovBlanketFeatureNames,
+              coveredFeatures: Array.from(this.state.markovBlanketFeatureNames),
               MI: this.state.MICurrent,
               MB: 1,
               rankLoss: this.state.rankLossCurrent,
@@ -685,8 +692,9 @@ class AppInterface extends React.Component {
 
             client.recordEvent('feature_selection_exploration', {
                 user: userID,
+                datasetName: this.state.datasetName,
                 selectedFeatures: allFeatureNames,
-                coveredFeatures: coveredFeatures,
+                coveredFeatures: Array.from(coveredFeatures),
                 MI: this.state.MICurrent,
                 MB: MBScore,
                 rankLoss: this.state.rankLossCurrent,
@@ -710,7 +718,7 @@ class AppInterface extends React.Component {
     if (this.state.MICurrent >= 0) {
       // names of features in feature set
         var currentFeatures = this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1].features;
-      const allFeatureNames = currentFeatures.map((feature) =>
+      var allFeatureNames = currentFeatures.map((feature) =>
         feature.name
       );
       const stopIndex = allFeatureNames.indexOf("BOUNDARY");
@@ -738,14 +746,18 @@ class AppInterface extends React.Component {
         this.state.confusionMatrix.push(data.confusionMatrix);
         this.state.trials.push("trial " + String(this.state.metrics.accuracy.length));
 
+        let lastFeatureSelection = this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1];
+
         client.recordEvent('classify_results', {
            user: userID,
+           datasetName: this.state.datasetName,
            MI: this.state.MICurrent,
            MB: this.state.MBCurrent,
            rankLoss: this.state.rankLossCurrent,
            accuracy: +data.accuracy.toFixed(3),
            precision: +data.precision.toFixed(3),
-           features: allFeatureNames
+           selectedFeatures: allFeatureNames,
+           coveredFeatures: Array.from(lastFeatureSelection.coveredFeatures)
         });
 
         this.setState({
@@ -817,12 +829,10 @@ class AppInterface extends React.Component {
   calculateCoverage(selectedFeatures) {
     // start with the nodes directly linked to class node
       var graph = this.state.causalGraph.graphHistory[this.state.graphIndex].graph;
-      console.log(graph)
       var selectedFeatureIndexes = [];
       var coveredNodeIndexes = new Set();
       //console.log(selectedFeatures);
       selectedFeatures.map(feature => {
-          console.log(feature)
           selectedFeatureIndexes.push(graph[feature].nodeIndex);
 
       });
@@ -1057,6 +1067,7 @@ class AppInterface extends React.Component {
               </Tab>
                 <Tab linkClassName={"Causal Graph"}>
                   <CausalGraph
+                      datasetName={this.state.datasetName}
                       dotSrc={currentGraphHistory.dotSrc}
                       sendData={this.sendData}
                       graph={currentGraphHistory.graph}

@@ -55,7 +55,7 @@ class CausalGraph:
         self.add_features_to_removed_feature_array(feature_name_array)
         df = self.df.drop(self.removed_nodes, axis=1)
 
-        self.init_causal_graph_dot_src(df, self.forbidden_edges, required_edges)
+        self.init_causal_graph_dot_src(df, self.forbidden_edges, self.required_edges)
         self.add_removed_nodes_to_node_list()
         self.remove_all_edges_from_edge_array(removed_edges)
         self.graph_calculations()
@@ -120,10 +120,32 @@ class CausalGraph:
                 self.edges.remove(edge)
                 break
 
+    def edge_introduced_cycle(self, node_from, node_to, new_edge):
+        self.edges.append(new_edge)
+        self.graph[node_from]['nodeTo'].append(self.graph[node_to]['nodeIndex'])
+        traversed_nodes = set()
+        #traversed_nodes.add(self.graph[node_from]['nodeIndex'])
+        has_cycle = self.found_cycle(node_from, node_from, traversed_nodes)
+        self.edges.remove(new_edge)
+        self.graph[node_from]['nodeTo'].remove(self.graph[node_to]['nodeIndex'])
+        return has_cycle
+
+    def found_cycle(self, start_node_str, current_node_str, set_of_visited):
+        if start_node_str in set_of_visited:
+            return True
+        for next_node_index in self.graph[current_node_str]['nodeTo']:
+            next_node_str = self.node_index_to_name_map[next_node_index]
+            set_of_visited.add(next_node_str)
+            if self.found_cycle(start_node_str, next_node_str, set_of_visited):
+                return True
+        return False
+
     def add_edge(self, node_from, node_to):
         new_edge = node_from + ' -> ' + node_to
-        self.edges.append(new_edge)
-        self.graph_calculations()
+        #self.edge_introduced_cycle(node_from, node_to, new_edge)
+        if self.edge_introduced_cycle(node_from, node_to, new_edge) == False:
+            self.edges.append(new_edge)
+            self.graph_calculations()
 
     def add_nodes_to_graph_dict(self, feature_name_array):
         for feature_name in feature_name_array:

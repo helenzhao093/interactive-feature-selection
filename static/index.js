@@ -37,6 +37,7 @@ getData()
             classNames={data.classNames}
             description={data.description}
             targetName={data.targetName}
+            datasetName={data.datasetName}
         />,
       document.getElementById('root')
     );

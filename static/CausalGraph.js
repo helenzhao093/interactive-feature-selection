@@ -155,6 +155,7 @@ class CausalGraph extends React.Component {
     var graph = this.props.getGraphDataToLog(this.props.graph);
     client.recordEvent('graph_history', {
         user: userID,
+        datasetName: this.props.datasetName,
         edit: "remove_edge",
         info: [nodeFrom, nodeTo],
         graph: graph
@@ -205,6 +206,7 @@ class CausalGraph extends React.Component {
 
     client.recordEvent('causal_graph_clicks', {
         user: userID,
+        datasetName: this.state.datasetName,
         type: "edge",
         info: [nodeFrom, nodeTo]
     });
@@ -263,9 +265,9 @@ class CausalGraph extends React.Component {
               const secondNode = element.key;
               this.state.selectedNode = "";
               this.state.selectedEdge = "";
-              //this.state.addEdge = false;
               this.state.edits.push({ "type": "addEdge", "data": [firstNode, secondNode] });
               this.props.sendData("/addEdge", {"nodeFrom": firstNode, "nodeTo": secondNode });
+              d3.selectAll('.node').classed("selected-node", false); // remove highlight
           } else {
               this.state.selectedNode = element.key;
           }
@@ -275,6 +277,7 @@ class CausalGraph extends React.Component {
 
           client.recordEvent('causal_graph_clicks', {
               user: userID,
+              datasetName: this.state.datasetName,
               type: "node",
               info: element.key,
               markovBlanket: this.state.markovBlanketSelected

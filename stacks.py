@@ -17,6 +17,7 @@ from flask import Flask, render_template, flash, request, redirect, jsonify, url
 from werkzeug.utils import secure_filename
 from scipy.stats import rankdata
 
+DATASET_NAME = ''
 DATA_FOLDER = 'static/synthetic_data2/'
 #DATA_FOLDER = 'static/cardiotocography3/'
 #DATA_FOLDER = 'static/student_performance/'
@@ -60,25 +61,32 @@ def upload_file():
 @app.route("/index")
 def uploaded_file():
     global DATA_FOLDER
+    global DATASET_NAME
     DATA_FOLDER = UPLOAD_FOLDER
+    DATASET_NAME = 'uploaded'
     return render_template('index.html')
 
 @app.route("/demo")
 def demo():
     global DATA_FOLDER
+    global DATASET_NAME
     DATA_FOLDER = 'static/demo/'
+    DATASET_NAME = 'demo'
     return render_template('index.html')
 
 @app.route("/dataset1")
 def dataset_1():
     global DATA_FOLDER
+    global DATASET_NAME
     DATA_FOLDER = 'static/synthetic_data2/'
+    DATASET_NAME = 'dataset1'
     return render_template('index.html')
 
 @app.route("/dataset2")
 def dataset_2():
     global DATA_FOLDER
     DATA_FOLDER = 'static/synthetic_data1/'
+    DATASET_NAME = 'dataset2'
     return render_template('index.html')
 
 @app.route("/getFeatures")
@@ -86,7 +94,7 @@ def get_features_data_folder():
     return initialize_data()
 
 def initialize_data():
-    print DATA_FOLDER
+    print DATASET_NAME
     des = dict()
     if os.path.exists(DATA_FOLDER + 'description.csv'):
         des = parse_description(DATA_FOLDER + 'description.csv')
@@ -109,6 +117,7 @@ def initialize_data():
     interface_data['classNames'] = list(FEATURE_DATA.class_names)
     interface_data['description'] = des
     interface_data['targetName'] = class_name
+    interface_data['datasetName'] = DATASET_NAME
     return jsonify(interface_data)
 
 @app.route("/initializeGraph", methods=['POST'])
