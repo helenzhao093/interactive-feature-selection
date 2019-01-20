@@ -20,7 +20,7 @@ class CausalGraph extends React.Component {
       selectInteraction: ["Highlight Selected", "Edit Graph"],
       selectedInteraction: "Highlight Selected",
       selectOptions: ["Markov Blanket", "Path to/from Target"],
-      editOptions: ["Select Graph Edit", "Add Relation", "Remove Relation", "Remove Feature"],
+      editOptions: ["Add Relation", "Remove Relation", "Remove Feature"],
       markovBlanketSelected: true,
       selectedNode: "",
       selectedEdge: "",
@@ -237,7 +237,6 @@ class CausalGraph extends React.Component {
       var element = document.getElementById('graph-overlay');
       element.style.visibility = "visible";
       this.state.edits.push({ "type": "removeNode", "data": this.state.selectedNode });
-      //const removedNode = this.state.selectedNode;
       this.state.selectedNode = "";
       console.log(this.state.removedEdges);
       this.props.sendData("/redrawGraph", {features: [nodeName], removedEdges: this.state.removedEdges });
@@ -335,7 +334,7 @@ class CausalGraph extends React.Component {
   changeInteraction(event) {
 
       let interaction = event.target.value;
-      if (interaction == this.state.selectInteraction[0] && this.state.selectedInteraction != this.state.selectInteraction[0]) {
+      if (interaction == this.state.selectInteraction[0] && this.state.selectedInteraction != this.state.selectInteraction[0]) { // select Highlight Selected
           this.setState({
               selectedInteraction: this.state.selectInteraction[0],
               markovBlanketSelected: true,
@@ -346,7 +345,7 @@ class CausalGraph extends React.Component {
               selectedEdge: ""
           });
       }
-      if (interaction == this.state.selectInteraction[1] && this.state.selectedInteraction != this.state.selectInteraction[1]) {
+      if (interaction == this.state.selectInteraction[1] && this.state.selectedInteraction != this.state.selectInteraction[1]) { // select Edit Graph
           this.setState({
               selectedInteraction: this.state.selectInteraction[1],
               removeEdge: false,
@@ -398,6 +397,7 @@ class CausalGraph extends React.Component {
     var colorMB = this.state.markovBlanketSelected ? "yellowgreen" : "darkgray";
     var legend = (this.state.markovBlanketSelected) ? this.state.legendMB : this.state.legendPath;
     var secondSelect =  (this.state.selectedInteraction == this.state.selectInteraction[0]) ? this.state.selectOptions : this.state.editOptions;
+    let defaultSelect = (this.state.selectedInteraction == this.state.selectInteraction[0]) ? this.state.selectOptions[0] : this.state.editOptions[0];
     var secondSelectOnChange = (this.state.selectedInteraction == this.state.selectInteraction[0]) ? this.changeDisplay : this.changeEdit;
     return (
       <div width={700} height={500}>
@@ -413,7 +413,7 @@ class CausalGraph extends React.Component {
               <div className={"causal-graph-select-div"}>
                   <select className={"causal-graph-select"} onChange={ secondSelectOnChange }>
                       {secondSelect.map((edit) =>
-                          <option value={edit}>{edit}</option>
+                          <option selected={(edit == defaultSelect) ? "selected" : ""} value={edit}>{edit}</option>
                       )}
                   </select>
               </div>
