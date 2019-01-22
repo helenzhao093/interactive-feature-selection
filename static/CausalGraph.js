@@ -277,7 +277,6 @@ class CausalGraph extends React.Component {
           client.recordEvent('causal_graph_clicks', {
               user: userID,
               datasetName: this.state.datasetName,
-              type: "node",
               info: element.key,
               markovBlanket: this.state.markovBlanketSelected
           });
@@ -285,6 +284,13 @@ class CausalGraph extends React.Component {
           this.state.selectedNode = element.key;
       } else {
           this.highlightPath(nodeInfo);
+          client.recordEvent('causal_graph_clicks', {
+              user: userID,
+              datasetName: this.state.datasetName,
+              info: element.key,
+              type: "node",
+              markovBlanket: this.state.markovBlanketSelected
+          });
           this.state.selectedNode = element.key;
       }
   }
@@ -350,12 +356,15 @@ class CausalGraph extends React.Component {
               selectedInteraction: this.state.selectInteraction[1],
               removeEdge: false,
               removeNode: false,
-              addEdge: true
+              addEdge: true,
+              selectedNode: "",
+              selectedEdge: ""
           });
       }
   }
 
   changeDisplay(event) {
+    console.log( event.target.value );
     let display = event.target.value;
     if (display == this.state.selectOptions[0] && this.state.markovBlanketSelected == false) {
         this.setState({
@@ -378,15 +387,16 @@ class CausalGraph extends React.Component {
   }
 
   changeEdit(event) {
+    console.log( event.target.value );
       let editName = event.target.value;
       if (editName == this.state.editOptions[0]) {
-        this.setEditStatus(false, false, false);
-      } else if (editName == this.state.editOptions[1]) {
         this.setEditStatus(true, false, false);
-      } else if (editName == this.state.editOptions[2]) {
+      } else if (editName == this.state.editOptions[1]) {
         this.setEditStatus(false, true, false);
-      } else {
+      } else if (editName == this.state.editOptions[2]) {
         this.setEditStatus(false, false, true);
+      } else {
+        //this.setEditStatus(false, false, true);
       }
   }
 

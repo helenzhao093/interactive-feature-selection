@@ -213,9 +213,26 @@ class FeatureParallelCoordinates extends React.Component {
     return draw(drawData)
   }
 
-  setFeatureDisplayRange(featureArrayIndex, featureName, extent, range) {
+  setFeatureDisplayRange(featureArrayIndex, featureName, featureValues, featureType, extent, range) {
       this.state.extent[featureName] = extent;
+      console.log(this.state.displayRanges[featureArrayIndex])
       this.state.displayRanges[featureArrayIndex] = range;
+      var logRange = []
+      console.log(this.props.features[featureArrayIndex])
+
+      if (featureType == 'continuous'){
+        logRange = range;
+      } else {
+        for (var i = range[0]; i < range[1]; i++) {
+          logRange.push(featureValues[i]);
+        }
+      }
+      client.recordEvent('filter_feature_range', {
+          user: userID,
+          feature: featureName,
+          range: logRange
+      });
+
       this.setState({
           displayRanges: this.state.displayRanges,
           extent: this.state.extent
@@ -271,7 +288,7 @@ class FeatureParallelCoordinates extends React.Component {
                 </g>
             {this.props.features.map((feature, index) =>
                 <Axis name={feature.name} textname={feature.name} axis={this.state.yScalesDisplay[feature.name]}
-                      setFeatureDisplayRange={(e, r) => this.setFeatureDisplayRange(feature.index, feature.name, e, r)}
+                      setFeatureDisplayRange={(e, r) => this.setFeatureDisplayRange(feature.index, feature.name, feature.values, feature.type, e, r)}
                       axisDisplay={this.state.yScalesAxesDisplay[feature.name]}
                       isNominal={feature.type == 'nominal'}
                       extent={this.state.extent[feature.name]}

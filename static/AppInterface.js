@@ -202,9 +202,8 @@ class AppInterface extends React.Component {
 
         client.recordEvent('feature_importance_moves', {
             user: userID,
-            datasetName: this.state.datasetName,
             type: "add_circle",
-            numCircles: this.state.featureImportance.circleRadii.length
+            numCircles: newCircleRadii.length
         });
 
         this.state.featureImportanceStep = this.state.featureImportanceStep + 1;
@@ -223,7 +222,6 @@ class AppInterface extends React.Component {
     addMove(move) {
         client.recordEvent('feature_importance_moves', {
            user: userID,
-           datasetName: this.state.datasetName,
            type: "move_feature",
            feature: {
                name: this.state.featureImportance.features[move.id].name,
@@ -349,7 +347,6 @@ class AppInterface extends React.Component {
             /* capture feature importance */
             client.recordEvent('feature_importance_snapshot', {
                 user: userID,
-                datasetName: this.state.datasetName,
                 lowestRankFeatures: forbiddenEdgesInfo.lowestRankFeatures,
                 highestRankFeatures: requiredEdgesInfo.highestRankFeatures,
                 featureNameToRank: featureRanks.featureNameToRankMap,
@@ -379,6 +376,9 @@ class AppInterface extends React.Component {
 
     /* CAUSAL GRAPH METHODS */
     goFromGraphToImportance() {
+      client.recordEvent('back_to_importance', {
+          user: userID
+      });
         this.setState({
             activeTabIndex: 0
         });
@@ -431,7 +431,6 @@ class AppInterface extends React.Component {
         if (url == '/addEdge') {
             client.recordEvent('graph_history', {
                 user: userID,
-                datasetName: this.state.datasetName,
                 type: "add_edge",
                 info: [dataToSend.nodeFrom, dataToSend.nodeTo],
                 graph: graph
@@ -596,16 +595,15 @@ class AppInterface extends React.Component {
           var xScaleInfo = this.calculateFeatureSelectionXScale(featuresWithBoundary);
           var allFeatureNames = this.getInitialConsistencyScores(featuresWithBoundary);
 
-          client.recordEvent('feature_selection_exploration', {
+          /*client.recordEvent('feature_selection_exploration', {
               user: userID,
-              datasetName: this.state.datasetName,
               selectedFeatures: allFeatureNames,
               coveredFeatures: Array.from(this.state.markovBlanketFeatureNames),
               MI: this.state.MICurrent,
               MB: 1,
               rankLoss: this.state.rankLossCurrent,
 
-          });
+          });*/
 
           this.setState({
               rankData: rankData,
@@ -690,7 +688,7 @@ class AppInterface extends React.Component {
                 );
             }
 
-            client.recordEvent('feature_selection_exploration', {
+            /*client.recordEvent('feature_selection_exploration', {
                 user: userID,
                 datasetName: this.state.datasetName,
                 selectedFeatures: allFeatureNames,
@@ -698,7 +696,7 @@ class AppInterface extends React.Component {
                 MI: this.state.MICurrent,
                 MB: MBScore,
                 rankLoss: this.state.rankLossCurrent,
-            });
+            }); */
 
             this.setState({
                 isNewTrial: false,
@@ -709,6 +707,10 @@ class AppInterface extends React.Component {
     }
 
     goFromSelectionToGraph() {
+      client.recordEvent('back_to_graph', {
+         user: userID,
+      });
+
       this.setState({
           activeTabIndex: 1
       })
@@ -817,10 +819,23 @@ class AppInterface extends React.Component {
           if (this.state.MB.length >= 2 && this.state.MBCurrent == -1) {
               axisLength = axisLength + 1;
           }
+          console.log(this.state.featureSelectionHistory)
+          client.recordEvent('feature_selection_exploration', {
+              user: userID,
+              datasetName: this.state.datasetName,
+              selectedFeatures: this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1].selectedFeatureNames,
+              coveredFeatures: Array.from(this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1].coveredFeatures),
+              MI: parseFloat(data.MI.toFixed(3)),
+              MB: this.state.MBCurrent,
+              rankLoss: parseFloat(data.rankLoss.toFixed(3)),
+          });
 
-          this.state.MICurrent = parseFloat(data.MI.toFixed(3));
-          this.state.rankLossCurrent = parseFloat(data.rankLoss.toFixed(3));
-          this.state.xAxisLength = axisLength;
+          this.setState({
+            MICurrent: parseFloat(data.MI.toFixed(3)),
+            rankLossCurrent: parseFloat(data.rankLoss.toFixed(3)),
+            xAxisLength: axisLength
+          })
+
       }).catch(function(error) {
           console.log(error)
       });
@@ -909,6 +924,14 @@ class AppInterface extends React.Component {
   handleClassSelection(className, currentDisplay){
       var classDisplay = this.state.classDisplay;
       classDisplay[className].TP.display = !currentDisplay;
+      var recordClassDisplay = {};
+      Object.keys(classDisplay).map(key =>
+        recordClassDisplay[key] = classDisplay[key].TP.display
+      );
+      client.recordEvent('filter_class_display', {
+          user: userID,
+          classDisplay: recordClassDisplay
+      });
       this.setState({
           classDisplay: classDisplay
       })
@@ -1193,9 +1216,6 @@ class AppInterface extends React.Component {
               </Tab>
               <Tab linkClassName={"Performance Analysis"}>
                   <div className={"tools-bar"}>
-                      <a className={"tools-bar right-button"} href="" id="a">
-                          <button style={{background: "royalblue"}} className={"tools-bar right-button"} onClick={this.download}>{"SAVE SELECTIONS"}</button>
-                      </a>
                       <button className={"tools-bar right-button previous-button"} onClick={this.goFromAnalysisToSelection}>{"« PREVIOUS"}</button>
                   </div>
                   <div className={"confusion-matrix-container"}>

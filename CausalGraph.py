@@ -300,7 +300,7 @@ class CausalGraph:
 
         subgraphs_dot_src_lines = markov_blanket_subgraph + other_subgraph
         subgraphs_dot_src_lines.insert(0, "digraph G {")
-        subgraphs_dot_src_lines.insert(1, "rankdir=LR;")
+        subgraphs_dot_src_lines.insert(1, "rankdir=TB;")
         subgraphs_dot_src_lines.insert(2, "splines=\"line\"");
         subgraphs_dot_src_lines.append("}")
         self.dot_src_lines = subgraphs_dot_src_lines
