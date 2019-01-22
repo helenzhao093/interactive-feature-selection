@@ -278,6 +278,7 @@ class CausalGraph extends React.Component {
               user: userID,
               datasetName: this.state.datasetName,
               info: element.key,
+              type: "node",
               markovBlanket: this.state.markovBlanketSelected
           });
 
