@@ -65,14 +65,17 @@ class CausalGraph:
     def undo_last_edit(self, editInfo):
         if editInfo['type'] == 'addEdge': # undo add edge
             self.remove_edge_from_edge_array(editInfo['data'][0], editInfo['data'][1]) # remove edge from self.edges
+            print self.edges
+            self.graph_calculations()
         elif editInfo['type'] == 'removeEdge':# undo edge removal
             new_edge = editInfo['data'][0] + ' -> ' + editInfo['data'][1]
             self.edges.append(new_edge)
+            self.graph_calculations()
         else: # undo node removal
             self.remove_node_from_removed_nodes(editInfo['data'][0])
             last_graph = self.graph_history.pop()
             self.edges = last_graph['edges']
-            print self.edges
+            #print self.edges
             self.dot_src = last_graph['dot_src']
 
     def remove_node_from_removed_nodes(self, node):
@@ -143,8 +146,10 @@ class CausalGraph:
     def add_edge(self, node_from, node_to):
         new_edge = node_from + ' -> ' + node_to
         #self.edge_introduced_cycle(node_from, node_to, new_edge)
+        print self.edges
         if self.edge_introduced_cycle(node_from, node_to, new_edge) == False:
             self.edges.append(new_edge)
+            print self.edges
             self.graph_calculations()
 
     def add_nodes_to_graph_dict(self, feature_name_array):

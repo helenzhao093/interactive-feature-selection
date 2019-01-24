@@ -156,7 +156,7 @@ class CausalGraph extends React.Component {
     client.recordEvent('graph_history', {
         user: userID,
         datasetName: this.props.datasetName,
-        edit: "remove_edge",
+        type: "remove_edge",
         info: [nodeFrom, nodeTo],
         graph: graph
     });
@@ -321,8 +321,10 @@ class CausalGraph extends React.Component {
   }
 
   undo() {
+      console.log(this.state.removedEdges);
       var lastEdit = this.state.edits.pop();
-      if (lastEdit.type == 'removedEdges') {
+      console.log(lastEdit)
+      if (lastEdit.type == 'removeEdge') {
           this.state.removedEdges.splice(this.state.removedEdges.indexOf(lastEdit.data), 1)
       }
       this.props.undo(lastEdit);

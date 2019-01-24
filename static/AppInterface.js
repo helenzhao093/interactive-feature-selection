@@ -595,16 +595,6 @@ class AppInterface extends React.Component {
           var xScaleInfo = this.calculateFeatureSelectionXScale(featuresWithBoundary);
           var allFeatureNames = this.getInitialConsistencyScores(featuresWithBoundary);
 
-          /*client.recordEvent('feature_selection_exploration', {
-              user: userID,
-              selectedFeatures: allFeatureNames,
-              coveredFeatures: Array.from(this.state.markovBlanketFeatureNames),
-              MI: this.state.MICurrent,
-              MB: 1,
-              rankLoss: this.state.rankLossCurrent,
-
-          });*/
-
           this.setState({
               rankData: rankData,
               isNewTrial: false,
@@ -992,13 +982,24 @@ class AppInterface extends React.Component {
         var trialStr = event.target.value;
         var classifierNum = parseInt(trialStr.substring(0,1));
         var trialNum = parseInt(trialStr.substring(1));
-        console.log(classifierNum);
-        console.log(trialNum);
+
         if (classifierNum == 1) {
+          client.recordEvent('compare_performance', {
+              user: userID,
+              trials: [trialNum, this.state.selectedTrial2],
+              matrix1: this.state.confusionMatrix[trialNum],
+              matrix2: this.state.confusionMatrix[this.state.selectedTrial2],
+          });
             this.setState({
                 selectedTrial1: trialNum
             })
         } else {
+          client.recordEvent('compare_performance', {
+              user: userID,
+              trials: [this.state.selectedTrial1, trialNum],
+              matrix2: this.state.confusionMatrix[trialNum],
+              matrix1: this.state.confusionMatrix[this.state.selectedTrial1],
+          });
             this.setState({
                 selectedTrial2: trialNum
             })

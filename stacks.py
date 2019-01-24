@@ -143,6 +143,7 @@ def remove_edge_from_dot_src():
 def add_edge_to_causal_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
+        print data
         causalGraph.add_edge(data['nodeFrom'], data['nodeTo'])
         interface_data = dict()
         get_graph_information(interface_data)
