@@ -89,6 +89,14 @@ def dataset_2():
     DATASET_NAME = 'dataset2'
     return render_template('index.html')
 
+@app.route("/dataset3")
+def dataset_3():
+    global DATA_FOLDER
+    global DATASET_NAME
+    DATA_FOLDER = 'static/MedicalDataset/'
+    DATASET_NAME = 'medicaldataset'
+    return render_template('index.html')
+
 @app.route("/getFeatures")
 def get_features_data_folder():
     return initialize_data()
