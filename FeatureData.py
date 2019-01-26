@@ -115,7 +115,6 @@ class FeatureData:
                 feature_range = []
                 name = self.feature_data['features'][i]['name']
                 column_data = self.features[name]
-                print column_data
                 feature_range.append(min(column_data))
                 feature_range.append(max(column_data))
                 self.feature_data['features'][i]['range'] = feature_range
@@ -176,7 +175,6 @@ class FeatureData:
                 feature_name = feature['name']
                 self.feature_mapping[feature_name] = dict()
                 values_sorted = sorted(feature['values'])
-                print feature
                 value_num = []
                 for i, value in enumerate(values_sorted):
                     self.feature_mapping[feature_name][value] = float(i)
@@ -190,6 +188,7 @@ class FeatureData:
                 #print feature['index']
                 #print self.feature_mapping[feature['name']]
                 #print example[feature['index']]
+                #print feature['name']
                 converted[feature['index']] = self.feature_mapping[feature['name']][example[feature['index']]]
                 self.feature_mapping[feature['name']][example[feature['index']]] += self.feature_mapping[feature['name']]['increment']
         return converted
@@ -394,7 +393,6 @@ class FeatureData:
     def update_class_selection(self, update_class_name, current_display):
         new_display = not current_display
         self.feature_data['classDisplay'][update_class_name][FeatureData.TP_KEY]['display'] = new_display
-        print self.feature_data['classDisplay'][update_class_name][FeatureData.TP_KEY]['display']
         self.init_data_no_predictions()
         #for name in self.class_names:
         #    for classification in FeatureData.CLASSIFICATIONS:
