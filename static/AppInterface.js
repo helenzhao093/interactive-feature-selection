@@ -984,21 +984,27 @@ class AppInterface extends React.Component {
         var trialNum = parseInt(trialStr.substring(1));
 
         if (classifierNum == 1) {
-          client.recordEvent('compare_performance', {
-              user: userID,
-              trials: [trialNum, this.state.selectedTrial2],
-              matrix1: this.state.confusionMatrix[trialNum],
-              matrix2: this.state.confusionMatrix[this.state.selectedTrial2],
+          client.recordEvent('compare_classifier', {
+            user: userID,
+            trial1: trialNum,
+            trial1Features: this.state.featureSelectionHistory[trialNum].selectedFeatureNames,
+            trial2: this.state.selectedTrial2,
+            accuracy1: this.state.metrics.accuracy[trialNum],
+            accuracy2: this.state.metrics.accuracy[this.state.selectedTrial2],
+            trial2Features: this.state.featureSelectionHistory[this.state.selectedTrial2].selectedFeatureNames
           });
             this.setState({
                 selectedTrial1: trialNum
             })
         } else {
-          client.recordEvent('compare_performance', {
-              user: userID,
-              trials: [this.state.selectedTrial1, trialNum],
-              matrix2: this.state.confusionMatrix[trialNum],
-              matrix1: this.state.confusionMatrix[this.state.selectedTrial1],
+          client.recordEvent('compare_classifier', {
+            user: userID,
+            trial1: trialNum,
+            trial1Features: this.state.featureSelectionHistory[trialNum].selectedFeatureNames,
+            trial2: this.state.selectedTrial2,
+            accuracy1: this.state.metrics.accuracy[trialNum],
+            accuracy2: this.state.metrics.accuracy[this.state.selectedTrial2],
+            trial2Features: this.state.featureSelectionHistory[this.state.selectedTrial2].selectedFeatureNames
           });
             this.setState({
                 selectedTrial2: trialNum
