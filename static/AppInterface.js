@@ -593,9 +593,12 @@ class AppInterface extends React.Component {
               });
 
           var xScaleInfo = this.calculateFeatureSelectionXScale(featuresWithBoundary);
-          var allFeatureNames = this.getInitialConsistencyScores(featuresWithBoundary);
+          this.getInitialConsistencyScores(featuresWithBoundary, xScaleInfo, rankData);
+          //var allFeatureNames = this.getInitialConsistencyScores(featuresWithBoundary);
 
-          this.setState({
+
+
+          /*this.setState({
               rankData: rankData,
               isNewTrial: false,
               featureSelectionHistory: [{
@@ -610,7 +613,9 @@ class AppInterface extends React.Component {
               MBCurrent: 1,
               activeTabIndex: 2,
               shouldInitializeSelection: false
-          });
+          }); */
+
+          //this.classify()
       } else {
           this.setState({
               activeTabIndex: 2,
@@ -678,16 +683,6 @@ class AppInterface extends React.Component {
                 );
             }
 
-            /*client.recordEvent('feature_selection_exploration', {
-                user: userID,
-                datasetName: this.state.datasetName,
-                selectedFeatures: allFeatureNames,
-                coveredFeatures: Array.from(coveredFeatures),
-                MI: this.state.MICurrent,
-                MB: MBScore,
-                rankLoss: this.state.rankLossCurrent,
-            }); */
-
             this.setState({
                 isNewTrial: false,
                 selectedFeatureSelection: this.state.featureSelectionHistory.length - 1,
@@ -708,20 +703,13 @@ class AppInterface extends React.Component {
 
   classify() {
     if (this.state.MICurrent >= 0) {
-      // names of features in feature set
-        var currentFeatures = this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1].features;
+      var currentFeatures = this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1].features;
+
       var allFeatureNames = currentFeatures.map((feature) =>
         feature.name
       );
       const stopIndex = allFeatureNames.indexOf("BOUNDARY");
       allFeatureNames.splice(stopIndex);
-
-      // feature set ranking
-      /*var featureRank = {};
-      Object.keys(this.state.featureImportance.features).map(key =>
-        featureRank[this.state.featureImportance.features[key].name] = this.state.featureImportance.features[key].rank
-      ); */
-
       const features = { "features": allFeatureNames , "featureRank" : this.state.featureRank};
       fetch('/classify', {
         method: 'POST',
@@ -736,7 +724,7 @@ class AppInterface extends React.Component {
         this.state.metrics.accuracy.push(parseFloat(data.accuracy.toFixed(3)));
         this.state.confusionMatrixNormalized.push(data.confusionMatrixNormalized);
         this.state.confusionMatrix.push(data.confusionMatrix);
-        this.state.trials.push("trial " + String(this.state.metrics.accuracy.length));
+        this.state.trials.push("trial " + String(this.state.metrics.accuracy.length - 1) );
 
         let lastFeatureSelection = this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1];
 
@@ -927,7 +915,7 @@ class AppInterface extends React.Component {
       })
   }
 
-  getInitialConsistencyScores(features) {
+  getInitialConsistencyScores(features, xScaleInfo, rankData) {
       var allFeatureIndexes = features.map((feature) =>
           feature.index
       );
@@ -938,9 +926,50 @@ class AppInterface extends React.Component {
       allFeatureIndexes.splice(stopIndex);
       allFeatureNames.splice(stopIndex);
 
-      this.calculateScores({ features: allFeatureIndexes, names: allFeatureNames, featureOrder: features, featureRank: this.state.featureRank });
-      return allFeatureNames;
+      fetch("/calculateScoresAndClassify", {
+          method: 'POST',
+          body: JSON.stringify( {features: allFeatureIndexes, names: allFeatureNames, featureRank: this.state.featureRank } )
+      }).then(function(response) {
+          return response.json();
+      }).then(data => {
+        console.log(data);
+        this.state.metrics.precision.push(parseFloat(data.precision.toFixed(3)));
+        this.state.metrics.accuracy.push(parseFloat(data.accuracy.toFixed(3)));
+        this.state.confusionMatrixNormalized.push(data.confusionMatrixNormalized);
+        this.state.confusionMatrix.push(data.confusionMatrix);
+        this.state.trials.push("trial " + String(this.state.metrics.accuracy.length - 1));
+
+        this.setState({
+            MI: [parseFloat(data.MI.toFixed(3))],
+            rankLoss: [parseFloat(data.rankLoss.toFixed(3))],
+            MB: [1.0],
+            MICurrent: -1,
+            MBCurrent: -1,
+            rankLossCurrent: -1,
+            rankData: rankData,
+            isNewTrial: true,
+            featureSelectionHistory: [{
+                xScaleDomain: xScaleInfo.xScaleDomain,
+                xScale: xScaleInfo.xScale,
+                features: features,
+                coveredFeatures: this.state.markovBlanketFeatureNames,
+                selectedFeatureNames: allFeatureNames,
+                featureCoordinatesSize: [xScaleInfo.featureSelectionTotalWidth, 500]
+            }],
+            selectedFeatureSelection: 0,
+            selectedTrial1: (this.state.metrics.accuracy.length == 1) ? 0 : this.state.metrics.accuracy.length - 2,
+            selectedTrial2: (this.state.metrics.accuracy.length == 1) ? -1 : this.state.metrics.accuracy.length - 1,
+            activeTabIndex: 2,
+            shouldInitializeSelection: false
+        });
+      }).catch(function(error) {
+        console.log(error)
+      })
+      //this.calculateScores({ features: allFeatureIndexes, names: allFeatureNames, featureOrder: features, featureRank: this.state.featureRank });
+      //return allFeatureNames;
   }
+
+
 
   updateNumRanks(numRanks) {
       this.state.numRanks = numRanks;
@@ -1129,7 +1158,7 @@ class AppInterface extends React.Component {
                           <span>Feature Selection for: </span>
                           <select onChange={ this.changeDisplaySelection } >
                               {this.state.featureSelectionHistory.map((history, index) =>
-                                  <option selected={(index == this.state.selectedFeatureSelection) ? "selected": "" } value={index}>{`trial ${index+1}`}</option>
+                                  <option selected={(index == this.state.selectedFeatureSelection) ? "selected": "" } value={index}>{`trial ${index}`}</option>
                               )}
                           </select>
                       </div>

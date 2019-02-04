@@ -175,26 +175,29 @@ class FeatureData:
                 feature_name = feature['name']
                 self.feature_mapping[feature_name] = dict()
                 values_sorted = sorted(feature['values'])
-                value_num = []
+                #value_num = []
+                #current_sum = 0.0
                 for i, value in enumerate(values_sorted):
-                    self.feature_mapping[feature_name][value] = float(i)
-                    value_num.append((self.features[feature_name] == value).sum())
-                self.feature_mapping[feature_name]['increment'] = 1.0/max(value_num)
+                    self.feature_mapping[feature_name][value] = dict()
+                    self.feature_mapping[feature_name][value]['current_value'] = float(i)
+                    #current_sum += float((self.features[feature_name] == value).sum())
+                        #self.feature_mapping[feature_name][value]['current_value'] = float((self.features[feature_name] == values_sorted[i-1]).sum()) /self.num_examples  #float(i)
+                    value_increment = 1.0/((self.features[feature_name] == value).sum() + 1)
+                    self.feature_mapping[feature_name][value]['increment'] = value_increment
+                    #value_num.append((self.features[feature_name] == value).sum())
+                #self.feature_mapping[feature_name]['increment'] = 1.0/max(value_num)
 
     def convert_example(self, example):
         converted = copy.copy(example)
         for feature in self.feature_data['features']:
             if feature['type'] == 'nominal':
-                #print feature['index']
-                #print self.feature_mapping[feature['name']]
-                #print example[feature['index']]
-                #print feature['name']
-                converted[feature['index']] = self.feature_mapping[feature['name']][example[feature['index']]]
-                self.feature_mapping[feature['name']][example[feature['index']]] += self.feature_mapping[feature['name']]['increment']
+                converted[feature['index']] = self.feature_mapping[feature['name']][example[feature['index']]]['current_value']
+                self.feature_mapping[feature['name']][example[feature['index']]]['current_value'] += self.feature_mapping[feature['name']][example[feature['index']]]['increment']
         return converted
 
     def convert_discrete_to_continous(self):
         self.init_feature_mapping()
+        print self.feature_mapping
         self.feature_data['convertedData'] = []
         #num_examples = len(self.feature_data['inputData'])
         for data in self.feature_data['inputData']:

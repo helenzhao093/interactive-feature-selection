@@ -194,6 +194,27 @@ def get_graph_information(data_dict):
     data_dict['dotSrc'] = causalGraph.dot_src
     data_dict['graph'] = causalGraph.graph
 
+@app.route("/calculateScoresAndClassify", methods=["POST"])
+def cal_scores_and_classify():
+    if request.method == 'POST':
+        data = json.loads(request.data)
+        rank_loss = FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['names'])
+        rank_loss_listwise = FEATURE_DATA.calculate_rank_loss_listwise(data['featureRank'], data['names'])
+        FEATURE_DATA.calculate_mutual_information(data['features'], data['names'])#calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
+
+        classifier.classify(data['names'])
+
+        interface_data = dict()
+        interface_data['accuracy'] = classifier.accuracy
+        interface_data['precision'] = classifier.precision
+        interface_data['recall'] = classifier.recall
+        interface_data['confusionMatrix'] = classifier.cm.tolist()
+        interface_data['confusionMatrixNormalized'] = classifier.cm_normalized.tolist()
+
+        interface_data['MI'] = FEATURE_DATA.MI
+        interface_data['rankLoss'] = rank_loss
+        return jsonify(interface_data)
+
 @app.route("/calculateScores", methods=["POST"])
 def send_new_calculated_MI():
     if request.method == 'POST':
