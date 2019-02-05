@@ -210,6 +210,8 @@ def cal_scores_and_classify():
         interface_data['recall'] = classifier.recall
         interface_data['confusionMatrix'] = classifier.cm.tolist()
         interface_data['confusionMatrixNormalized'] = classifier.cm_normalized.tolist()
+        interface_data['rocCurve'] = classifier.rocCurve
+        interface_data['auc'] = classifier.auc
 
         interface_data['MI'] = FEATURE_DATA.MI
         interface_data['rankLoss'] = rank_loss
@@ -238,6 +240,8 @@ def classify():
         data['recall'] = classifier.recall
         data['confusionMatrix'] = classifier.cm.tolist()
         data['confusionMatrixNormalized'] = classifier.cm_normalized.tolist()
+        data['rocCurve'] = classifier.rocCurve
+        data['auc'] = classifier.auc
     return jsonify(data)
 
 @app.route("/removeSelected", methods=['POST'])
