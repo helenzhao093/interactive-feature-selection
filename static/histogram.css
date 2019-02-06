@@ -323,6 +323,27 @@ path.link.hidden {
     margin-bottom: -0.16rem;
 }
 
+.roc-legend-marker {
+
+  height: 0.5em;
+  width: 2em;
+  display: inline-block;
+  margin-right: 4px;
+  margin-bottom: -0.25rem;
+}
+
+.first-marker {
+  border-top-style: solid;
+}
+
+.second-marker {
+  border-top-style: dashed;
+}
+
+.legendMargin{
+  margin-left: 200px
+}
+
 .legend  {
     min-width: 200px;
     display: inline-flex;
