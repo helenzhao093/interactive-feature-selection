@@ -229,7 +229,7 @@ class ProgressGraph extends React.Component {
 
     var displayText = keys.map((key, index1) =>
         this.props.scores[key].map((score, index2) =>
-            <text fontSize={12} x={xScale(index2 + 1) + xScale.bandwidth() * 0.5 - 3} y={yScale(score) - 5}>{score}</text>
+            <text fontSize={12} x={xScale(index2 + 1) + xScale.bandwidth() * 0.5 - 3} y={yScale(score) - 10 * (index1)}>{score}</text>
         )
     );
 

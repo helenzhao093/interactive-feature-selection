@@ -52,6 +52,7 @@ class Classifier:
         skf = StratifiedKFold(n_splits=5)
         skf.get_n_splits(X, y)
         accuracy = cross_val_score(self.clf, X, y, cv=skf)
+        accuracy_train = []
         precision = []
         recall = []
         for train_index, test_index in skf.split(X, y):
@@ -59,7 +60,7 @@ class Classifier:
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
             self.clf.fit(X_train, y_train)
-            #accuracy.append(self.clf.score(X_test, y_test))
+            accuracy_train.append(self.clf.score(X_train, y_train))
             y_pred = self.clf.predict(X_test)
             y_pred_train = self.clf.predict(X_train)
             precision.append(precision_score(y_test, y_pred, average='weighted'))
@@ -68,7 +69,7 @@ class Classifier:
         self.proba = cross_val_predict(self.clf, X, y, cv=skf, method='predict_proba')
         self.init_confusion_matrix(y, self.predicted)
         #print self.predictions
-        self.set_average_scores(accuracy, precision, recall)
+        self.set_average_scores(accuracy, accuracy_train, precision, recall)
         self.get_roc_curve(X, y)
 
     def get_roc_curve(self, X, y):
@@ -96,10 +97,11 @@ class Classifier:
         self.cm_normalized = self.cm.astype('float')/self.cm.sum(axis=1)[:, np.newaxis]
         #print self.cm_normalized
 
-    def set_average_scores(self, accuracy, precision, recall):
+    def set_average_scores(self, accuracy, accuracy_train, precision, recall):
         self.accuracy = self.get_average(accuracy)
         self.precision = self.get_average(precision)
         self.recall = self.get_average(recall)
+        self.accuracy_train = self.get_average(accuracy_train)
 
     def get_average(self, scores):
         return sum(scores)/len(scores)

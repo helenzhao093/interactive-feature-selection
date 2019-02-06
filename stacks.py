@@ -147,6 +147,15 @@ def remove_edge_from_dot_src():
         get_graph_information(interface_data)
         return jsonify(interface_data)
 
+@app.route("/reverseEdge", methods=['POST'])
+def reverse_edge():
+    if request.method == 'POST':
+        data = json.loads(request.data)
+        causalGraph.reverse_edge(data['nodeFrom'], data['nodeTo'])
+        interface_data = dict()
+        get_graph_information(interface_data)
+        return jsonify(interface_data)
+
 @app.route("/addEdge", methods=['POST'])
 def add_edge_to_causal_graph():
     if request.method == 'POST':
@@ -206,6 +215,7 @@ def cal_scores_and_classify():
 
         interface_data = dict()
         interface_data['accuracy'] = classifier.accuracy
+        interface_data['accuracyTrain'] = classifier.accuracy_train
         interface_data['precision'] = classifier.precision
         interface_data['recall'] = classifier.recall
         interface_data['confusionMatrix'] = classifier.cm.tolist()
@@ -236,6 +246,7 @@ def classify():
         classifier.classify(features['features'])
         data = dict()
         data['accuracy'] = classifier.accuracy
+        data['accuracyTrain'] = classifier.accuracy_train
         data['precision'] = classifier.precision
         data['recall'] = classifier.recall
         data['confusionMatrix'] = classifier.cm.tolist()

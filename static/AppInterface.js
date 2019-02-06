@@ -98,6 +98,7 @@ class AppInterface extends React.Component {
         MICurrent: -1,
         metrics: {
             accuracy: [],
+            accuracyTrain: [],
             precision: []
         },
         confusionMatrix: [],
@@ -108,7 +109,8 @@ class AppInterface extends React.Component {
         ],
         consistencyGraphLegendMax: 1,
         metricsGraphLegend: [
-            { value: "accuracy", color: '#3690c0', helptext: "% of correct predictions " } //,
+            { value: "test accuracy", color: '#3690c0', helptext: "% of correctly predicted test ex. " },
+            { value: "train accuracy", color: '#d0d1e6', helptext: "% of correctly predicted train ex. " }//,
            // { value: "precision", color: "#d0d1e6", helptext: "correct predictions/number of examples" }
         ],
         rankLoss: [],
@@ -734,6 +736,7 @@ class AppInterface extends React.Component {
         this.state.rankLoss.push(this.state.rankLossCurrent);
         this.state.metrics.precision.push(parseFloat(data.precision.toFixed(3)));
         this.state.metrics.accuracy.push(parseFloat(data.accuracy.toFixed(3)));
+        this.state.metrics.accuracyTrain.push(parseFloat(data.accuracyTrain.toFixed(3)));
         this.state.confusionMatrixNormalized.push(data.confusionMatrixNormalized);
         this.state.confusionMatrix.push(data.confusionMatrix);
         this.state.trials.push("trial " + String(this.state.metrics.accuracy.length - 1) );
@@ -761,7 +764,8 @@ class AppInterface extends React.Component {
           MBCurrent: -1,
           metrics: {
             precision: this.state.metrics.precision,
-            accuracy: this.state.metrics.accuracy
+            accuracy: this.state.metrics.accuracy,
+            accuracyTrain: this.state.metrics.accuracyTrain
           },
           rankLoss: this.state.rankLoss,
           rankLossCurrent: -1,
@@ -947,6 +951,7 @@ class AppInterface extends React.Component {
         console.log(data);
         this.state.metrics.precision.push(parseFloat(data.precision.toFixed(3)));
         this.state.metrics.accuracy.push(parseFloat(data.accuracy.toFixed(3)));
+        this.state.metrics.accuracyTrain.push(parseFloat(data.accuracyTrain.toFixed(3)));
         this.state.confusionMatrixNormalized.push(data.confusionMatrixNormalized);
         this.state.confusionMatrix.push(data.confusionMatrix);
         this.state.trials.push("trial " + String(this.state.metrics.accuracy.length - 1));
@@ -1319,10 +1324,10 @@ class AppInterface extends React.Component {
                                      max={1}
                                      min={0}
                                      name={"accuracy-graph"}
-                                     scores={{ accuracy: this.state.metrics.accuracy }}
-                                     colors={[this.state.metricsGraphLegend[0].color]}
+                                     scores={{ accuracy: this.state.metrics.accuracy, accuracyTrain: this.state.metrics.accuracyTrain }}
+                                     colors={[this.state.metricsGraphLegend[0].color, this.state.metricsGraphLegend[1].color]}
                                      xAxisLength={this.state.xAxisLength} />
-                      <VerticalLegend legend={this.state.metricsGraphLegend} width={100}  marginLeft={"450px"}/>
+                      <VerticalLegend legend={this.state.metricsGraphLegend} width={130}  marginLeft={"450px"}/>
                   </div>
 
               </Tab>
