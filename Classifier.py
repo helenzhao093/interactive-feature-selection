@@ -84,7 +84,7 @@ class Classifier:
         for i in range(n_classes):
             class_label = self.class_labels[i]
             fpr, tpr, threshold = roc_curve(y_test[:, i], y_score[:, i], drop_intermediate=False)
-            print threshold
+            # print threshold
             self.rocCurve[class_label] = []
             for i in range(len(fpr)):
                 self.rocCurve[class_label].append([fpr[i], tpr[i]])
