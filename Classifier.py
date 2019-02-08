@@ -78,14 +78,13 @@ class Classifier:
         n_classes = len(classes)
         y_bin = label_binarize(y, classes=classes)
         X_train, X_test, y_train, y_test = train_test_split(X, y_bin, test_size=0.33, random_state=0)
-        y_score = self.clf_roc.fit(X_train, y_train).predict(X_test)
-        #self.fpr = dict()
-        #self.tpr = dict()
+        y_score = self.clf_roc.fit(X_train, y_train).predict_proba(X_test)
         self.rocCurve = dict()
         self.auc = dict()
         for i in range(n_classes):
             class_label = self.class_labels[i]
-            fpr, tpr, threshold = roc_curve(y_test[:, i], y_score[:, i])
+            fpr, tpr, threshold = roc_curve(y_test[:, i], y_score[:, i], drop_intermediate=False)
+            print threshold
             self.rocCurve[class_label] = []
             for i in range(len(fpr)):
                 self.rocCurve[class_label].append([fpr[i], tpr[i]])
