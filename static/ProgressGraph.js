@@ -31,7 +31,6 @@ class Legend extends React.Component {
   }
 
   render() {
-    //console.log(this.props)
     return (
       <div className={this.props.className}>
       {this.props.keys.map((key, index) =>
@@ -197,8 +196,6 @@ class ProgressGraph extends React.Component {
     var keys = this.state.keys;
 
     var xScale = this.getXAxis();
-    //console.log(xScale.bandwidth);
-    //this.initializeMinMax(scores);
 
     var yScale = d3.scaleLinear().domain([this.props.max, this.props.min]).nice()
         .range([0, this.state.height]);
@@ -208,19 +205,6 @@ class ProgressGraph extends React.Component {
     var lineDataPoints = this.getDataPoints(this.props.scores);
     var xAxis = d3.axisBottom(xScale);
     var yAxis = d3.axisLeft(yScale);
-
-
-    /*var focus;
-    if (scores[keys[0]].length > 0) {
-      focus = keys.map((key, index) =>
-          <g transform={`translate(${xScale(this.props.selectedIndex) + xScale.bandwidth() * 0.5},${yScale(scores[key][this.props.selectedIndex])})`}>
-              <circle r={5} fill={this.props.colors[index]}/>
-              <text x={9}>{scores[key][this.props.selectedIndex]}</text>
-          </g>);
-    } else {
-      focus = <div></div>;
-    } */
-
     var displayPoints = keys.map((key, index1) =>
         this.props.scores[key].map((score, index2) =>
           <circle r={5} fill={this.props.colors[index1]} cx={xScale(index2 + 1) + xScale.bandwidth() * 0.5} cy={yScale(score)}/>

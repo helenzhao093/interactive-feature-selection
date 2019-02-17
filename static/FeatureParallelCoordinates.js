@@ -227,7 +227,7 @@ class FeatureParallelCoordinates extends React.Component {
           logRange.push(featureValues[i]);
         }
       }
-      client.recordEvent('filter_feature_range', {
+      this.props.client.recordEvent('filter_feature_range', {
           user: userID,
           feature: featureName,
           range: logRange
