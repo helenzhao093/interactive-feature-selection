@@ -37,7 +37,6 @@ class Classifier:
             #print self.df_og[feature].dtype
             if feature == self.class_name:
                 self.class_labels = np.sort(self.df_og[feature].unique())
-                print self.class_labels
             if self.df_og[feature].dtype != 'int64' or self.df_og[feature].dtype != 'float64':
                 le = preprocessing.LabelEncoder()
                 le.fit(np.sort(self.df_og[feature].unique()))
@@ -89,7 +88,7 @@ class Classifier:
             for i in range(len(fpr)):
                 self.rocCurve[class_label].append([fpr[i], tpr[i]])
             self.auc[class_label] = auc(fpr, tpr)
-        print self.rocCurve
+        #print self.rocCurve
 
     def init_confusion_matrix(self, y_true, y_pred):
         self.cm = confusion_matrix(y_true, y_pred)

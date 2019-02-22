@@ -82,7 +82,7 @@ class FeatureData:
         self.calculate_previous_sum_feature_distribution()
 
     def create_default_class_display(self):
-        print self.class_names
+        #print self.class_names
         self.feature_data['classDisplay'] = dict()
         for class_name in self.class_names:
             self.feature_data['classDisplay'][class_name] = dict()
@@ -197,7 +197,7 @@ class FeatureData:
 
     def convert_discrete_to_continous(self):
         self.init_feature_mapping()
-        print self.feature_mapping
+        #print self.feature_mapping
         self.feature_data['convertedData'] = []
         #num_examples = len(self.feature_data['inputData'])
         for data in self.feature_data['inputData']:
@@ -422,7 +422,7 @@ class FeatureData:
         #print X[0,:]
         #print X[1,:]
         self.MI = self.calculate_joint_probabily(X)
-        print self.MI
+        #print self.MI
         # map { yvalue: p(y)}
 
     def calculate_proba_y(self):
@@ -431,7 +431,7 @@ class FeatureData:
         self.class_proba = dict()
         for yvalue in all_y_values:
             self.class_proba[yvalue] = (self.target[self.target_name] == yvalue).sum() / float(self.num_examples)
-        print self.class_proba
+        #print self.class_proba
 
     def calculate_joint_probabily(self, X):
         MI = 0

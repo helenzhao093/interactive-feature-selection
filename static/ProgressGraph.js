@@ -150,7 +150,7 @@ class ProgressGraph extends React.Component {
   getDataPoints(scores) {
     var keys = this.state.keys;
     var lineDataPoints = keys.map((key) =>
-        scores[key].map((d, index) => [index+1, d])
+        scores[key].map((d, index) => [index, d])
     );
     return lineDataPoints;
   }
@@ -179,7 +179,7 @@ class ProgressGraph extends React.Component {
       var keys = this.state.keys;
       var xScaleDomain = [];
       var xScaleRange = [];
-      for (var i = 1; i <= this.props.scores[keys[0]].length; i++) {
+      for (var i = 0; i < this.props.scores[keys[0]].length; i++) {
           xScaleDomain.push(i);
       }
       var xScale = d3.scaleBand().domain(xScaleDomain).range([0, this.state.width]).padding(0.1);
@@ -207,13 +207,13 @@ class ProgressGraph extends React.Component {
     var yAxis = d3.axisLeft(yScale);
     var displayPoints = keys.map((key, index1) =>
         this.props.scores[key].map((score, index2) =>
-          <circle r={5} fill={this.props.colors[index1]} cx={xScale(index2 + 1) + xScale.bandwidth() * 0.5} cy={yScale(score)}/>
+          <circle r={5} fill={this.props.colors[index1]} cx={xScale(index2) + xScale.bandwidth() * 0.5} cy={yScale(score)}/>
       )
     );
 
     var displayText = keys.map((key, index1) =>
         this.props.scores[key].map((score, index2) =>
-            <text fontSize={12} x={xScale(index2 + 1) + xScale.bandwidth() * 0.5 - 3} y={yScale(score) - 10 * (index1)}>{score}</text>
+            <text fontSize={12} x={xScale(index2) + xScale.bandwidth() * 0.5 - 3} y={yScale(score) - 10 * (index1)}>{score}</text>
         )
     );
 

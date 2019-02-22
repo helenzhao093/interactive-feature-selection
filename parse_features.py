@@ -52,5 +52,5 @@ def parse_values(value_string):
         except ValueError:
             raw = raw
         values.append(raw)
-    print values
+    #print values
     return values
