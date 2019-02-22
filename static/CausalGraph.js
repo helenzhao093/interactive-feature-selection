@@ -154,7 +154,7 @@ class CausalGraph extends React.Component {
 
   removedEdgeFromGraph(nodeFrom, nodeTo) {
     var graph = this.props.getGraphDataToLog(this.props.graph);
-    this.props.client.recordEvent('graph_history', {
+    this.state.client.recordEvent('graph_history', {
         user: userID,
         datasetName: this.props.datasetName,
         type: "remove_edge",
@@ -165,7 +165,7 @@ class CausalGraph extends React.Component {
   }
 
   reverseEdgeFromGraph(nodeFrom, nodeTo) {
-    this.props.client.recordEvent('graph_history', {
+    this.state.client.recordEvent('graph_history', {
         user: userID,
         datasetName: this.props.datasetName,
         type: "reverse_edge",
@@ -212,7 +212,7 @@ class CausalGraph extends React.Component {
         nodeTo = nodes[0]
     }
 
-    this.props.client.recordEvent('causal_graph_clicks', {
+    this.state.client.recordEvent('causal_graph_clicks', {
         user: userID,
         datasetName: this.state.datasetName,
         type: "edge",
@@ -289,7 +289,7 @@ class CausalGraph extends React.Component {
       else if (this.state.markovBlanketSelected) {
           this.highlightMB(nodeInfo);
 
-          this.props.client.recordEvent('causal_graph_clicks', {
+          this.state.client.recordEvent('causal_graph_clicks', {
               user: userID,
               datasetName: this.state.datasetName,
               info: element.key,
@@ -300,7 +300,7 @@ class CausalGraph extends React.Component {
           this.state.selectedNode = element.key;
       } else {
           this.highlightPath(nodeInfo);
-          this.props.client.recordEvent('causal_graph_clicks', {
+          this.state.client.recordEvent('causal_graph_clicks', {
               user: userID,
               datasetName: this.state.datasetName,
               info: element.key,
