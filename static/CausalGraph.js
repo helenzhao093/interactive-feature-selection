@@ -165,6 +165,13 @@ class CausalGraph extends React.Component {
   }
 
   reverseEdgeFromGraph(nodeFrom, nodeTo) {
+    this.props.client.recordEvent('graph_history', {
+        user: userID,
+        datasetName: this.props.datasetName,
+        type: "reverse_edge",
+        info: [nodeFrom, nodeTo],
+        graph: graph
+    });
     this.props.sendData("/reverseEdge", { nodeFrom: nodeFrom, nodeTo: nodeTo });
   }
 
