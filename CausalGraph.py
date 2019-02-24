@@ -16,6 +16,8 @@ class CausalGraph:
         self.df = df
         self.removed_nodes = []
         self.init_causal_graph_dot_src(self.df, forbidden_edges, required_edges)
+        print "required_edges"
+        print required_edges
         self.forbidden_edges = forbidden_edges
         self.required_edges = required_edges
         self.graph_history = []
@@ -52,15 +54,15 @@ class CausalGraph:
         self.get_markov_blanket_nodes_indexes()
 
     def recalculate_causal_graph(self, feature_name_array, removed_edges):
+        self.graph_history.append({'edges': copy.copy(self.edges), 'dot_src': copy.copy(self.dot_src)})
         self.add_features_to_removed_feature_array(feature_name_array)
         df = self.df.drop(self.removed_nodes, axis=1)
-
         self.init_causal_graph_dot_src(df, self.forbidden_edges, self.required_edges)
         self.add_removed_nodes_to_node_list()
         self.remove_all_edges_from_edge_array(removed_edges)
         self.graph_calculations()
         self.dot_src = self.lines_to_dot_src(self.dot_src_lines)
-        self.graph_history.append({'edges': copy.copy(self.edges), 'dot_src': copy.copy(self.dot_src)})
+
 
     def undo_last_edit(self, editInfo):
         if editInfo['type'] == 'addEdge': # undo add edge
@@ -74,10 +76,10 @@ class CausalGraph:
             self.edges.append(new_edge)
             self.graph_calculations()
         else: # undo node removal
-            self.remove_node_from_removed_nodes(editInfo['data'][0])
+            self.remove_node_from_removed_nodes(editInfo['data'])
             last_graph = self.graph_history.pop()
             self.edges = last_graph['edges']
-            #print self.edges
+            print self.edges
             self.dot_src = last_graph['dot_src']
 
     def remove_node_from_removed_nodes(self, node):

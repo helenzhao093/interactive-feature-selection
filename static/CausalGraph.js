@@ -251,9 +251,9 @@ class CausalGraph extends React.Component {
       console.log(nodeName)
       var element = document.getElementById('graph-overlay');
       element.style.visibility = "visible";
-      this.state.edits.push({ "type": "removeNode", "data": this.state.selectedNode });
+      this.state.edits.push({ "type": "removeNode", "data": nodeName });
       this.state.selectedNode = "";
-      console.log(this.state.removedEdges);
+      //console.log(this.state.removedEdges);
       this.props.sendData("/redrawGraph", {features: [nodeName], removedEdges: this.state.removedEdges });
   }
 

@@ -102,7 +102,6 @@ def get_features_data_folder():
     return initialize_data()
 
 def initialize_data():
-    print DATASET_NAME
     des = dict()
     if os.path.exists(DATA_FOLDER + 'description.csv'):
         des = parse_description(DATA_FOLDER + 'description.csv')
@@ -142,6 +141,7 @@ def initialize_graph():
 def remove_edge_from_dot_src():
     if request.method == 'POST':
         data = json.loads(request.data)
+        print ("remove edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo']))
         causalGraph.remove_edge_from_graph(data['nodeFrom'], data['nodeTo'])
         interface_data = dict()
         get_graph_information(interface_data)
@@ -151,6 +151,7 @@ def remove_edge_from_dot_src():
 def reverse_edge():
     if request.method == 'POST':
         data = json.loads(request.data)
+        print ("reverse edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo']))
         causalGraph.reverse_edge(data['nodeFrom'], data['nodeTo'])
         interface_data = dict()
         get_graph_information(interface_data)
@@ -160,7 +161,7 @@ def reverse_edge():
 def add_edge_to_causal_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
-        print data
+        print ("add edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo']))
         causalGraph.add_edge(data['nodeFrom'], data['nodeTo'])
         interface_data = dict()
         get_graph_information(interface_data)
@@ -170,6 +171,7 @@ def add_edge_to_causal_graph():
 def remove_nodes_from_causal_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
+        print ("remove node : " + str(data['features']))
         causalGraph.recalculate_causal_graph(data['features'], data['removedEdges'])
         interface_data = dict()
         get_graph_information(interface_data)
@@ -179,6 +181,7 @@ def remove_nodes_from_causal_graph():
 def undo_graph_edit():
     if request.method == 'POST':
         data = json.loads(request.data)
+        print "undo"
         print data
         causalGraph.undo_last_edit(data)
         interface_data = dict()
@@ -207,6 +210,8 @@ def get_graph_information(data_dict):
 def cal_scores_and_classify():
     if request.method == 'POST':
         data = json.loads(request.data)
+        print "Markov Blanket"
+        print data['names']
         rank_loss = FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['names'])
         rank_loss_listwise = FEATURE_DATA.calculate_rank_loss_listwise(data['featureRank'], data['names'])
         FEATURE_DATA.calculate_mutual_information(data['features'], data['names'])#calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
@@ -235,6 +240,7 @@ def send_new_calculated_MI():
         rank_loss_listwise = FEATURE_DATA.calculate_rank_loss_listwise(data['featureRank'], data['names'])
         FEATURE_DATA.calculate_mutual_information(data['features'], data['names'])#calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
         interface_data = dict()
+        print data["names"]
         interface_data['MI'] = FEATURE_DATA.MI
         interface_data['rankLoss'] = rank_loss
         return jsonify(interface_data)
@@ -287,6 +293,8 @@ def update_class_selection():
         #class_selected = request.get_json(data)
         class_selected = json.loads(request.data)
         FEATURE_DATA.update_class_selection(class_selected['className'], class_selected['currentDisplay'])
+        print "class selected"
+        print (class_selected['className'], class_selected['currentDisplay'])
         interface_data = dict()
         #interface_data['histogramData'] = HISTOGRAM.Histogram_info
         interface_data['featureData'] = FEATURE_DATA.feature_data
