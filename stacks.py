@@ -230,6 +230,10 @@ def cal_scores_and_classify():
 
         interface_data['MI'] = FEATURE_DATA.MI
         interface_data['rankLoss'] = rank_loss
+        print ("accuracy: " + str(classifier.accuracy))
+        print ("accuracyTrain: " + str(classifier.accuracy_train))
+        print ("MI: " + str(FEATURE_DATA.MI))
+        print ("rankLoss: " + str(rank_loss))
         return jsonify(interface_data)
 
 @app.route("/calculateScores", methods=["POST"])
@@ -259,6 +263,9 @@ def classify():
         data['confusionMatrixNormalized'] = classifier.cm_normalized.tolist()
         data['rocCurve'] = classifier.rocCurve
         data['auc'] = classifier.auc
+        print ("features: " + str(features['features']))
+        print ("accuracy: " + str(classifier.accuracy))
+        print ("accuracyTrain: " + str(classifier.accuracy_train))
     return jsonify(data)
 
 @app.route("/removeSelected", methods=['POST'])
@@ -293,8 +300,6 @@ def update_class_selection():
         #class_selected = request.get_json(data)
         class_selected = json.loads(request.data)
         FEATURE_DATA.update_class_selection(class_selected['className'], class_selected['currentDisplay'])
-        print "class selected"
-        print (class_selected['className'], class_selected['currentDisplay'])
         interface_data = dict()
         #interface_data['histogramData'] = HISTOGRAM.Histogram_info
         interface_data['featureData'] = FEATURE_DATA.feature_data
