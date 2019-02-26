@@ -1020,6 +1020,17 @@ class AppInterface extends React.Component {
 
   /* OTHER */
     toggleAnalysis() {
+      var selectedFeatures = this.state.featureSelectionHistory[this.state.selectedFeatureSelection].selectedFeatureNames;
+      var MBCurrent = this.state.MBCurrent;
+      var MICurrent = this.state.MICurrent;
+      var rankLossCurrent = this.state.rankLossCurrent;
+      this.state.client.recordEvent('view_metrics', {
+        user: userID,
+        selectedFeatures: selectedFeatures,
+        MB: MBCurrent,
+        MI: MICurrent,
+        rankLoss: rankLossCurrent
+      })
         this.setState({
             showAnalysis: !this.state.showAnalysis
         })
