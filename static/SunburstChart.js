@@ -73,7 +73,9 @@ class SunburstChart extends React.Component {
             .value(function(d) {return 1})
             .sort(null);
 
-        var pie3Data = pie2Data.flat();
+        //var pie3Data = pie2Data.flat();
+        var pie3Data = pie2Data.reduce((acc, val) => acc.concat(val), [])
+
 
         var arcs3 = pie3(pie3Data);
         return (
