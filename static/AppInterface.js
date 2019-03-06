@@ -581,6 +581,7 @@ class AppInterface extends React.Component {
 
   sendGraphToSelection() {
       if (this.state.shouldInitializeSelection) {
+          this.state.shouldInitializeSelection = false;
           const currentIndex = this.state.graphIndex;
           const currentGraph = this.state.causalGraph.graphHistory[currentIndex].graph;
           var indexToFeatureMap = this.getNodeIndexToFeatureMap(currentGraph);
@@ -761,6 +762,7 @@ class AppInterface extends React.Component {
         });
 
         this.setState({
+          rocCurve: this.state.rocCurve,
           isNewTrial: true,
           selectedFeatureSelection: this.state.featureSelectionHistory.length - 1,
           MI: this.state.MI,
@@ -1046,7 +1048,7 @@ class AppInterface extends React.Component {
         var trialStr = event.target.value;
         var classifierNum = parseInt(trialStr.substring(0,1));
         var trialNum = parseInt(trialStr.substring(1));
-
+        //console.log(trialNum)
         if (classifierNum == 1) {
           this.state.client.recordEvent('compare_classifier', {
             user: userID,
@@ -1097,6 +1099,7 @@ class AppInterface extends React.Component {
 
   render() {
     // set graph max for consistency graph
+    console.log(this.state.selectedTrial2)
     var metricsGraphMax = Math.max(this.state.consistencyGraphLegendMax, this.state.MICurrent);
     this.state.consistencyGraphLegendMax = metricsGraphMax;
 
@@ -1137,7 +1140,26 @@ class AppInterface extends React.Component {
     }
 
     var trialLegend = (this.state.selectedTrial2 >= 0) ? [this.state.selectedTrial1, this.state.selectedTrial2] : [this.state.selectedTrial1];
-    //console.log(selectedFeatureSelection)
+    var rocCurveTwo = (this.state.selectedTrial2 >= 0) ? this.state.rocCurve[this.state.selectedTrial2] : {};
+    var featuregraph;
+    if (selectedFeatureSelection.features != null) {
+      featuregraph = <FeatureParallelCoordinates
+          data={this.state.featureData.inputData}
+          convertedData={this.state.featureData.convertedData}
+          features={selectedFeatureSelection.features}
+          xScaleDomain={selectedFeatureSelection.xScaleDomain}
+          xScale={selectedFeatureSelection.xScale}
+          dragging={this.state.dragging}
+          featureAxisOnEnd={this.featureAxisOnEnd}
+          size={selectedFeatureSelection.featureCoordinatesSize}
+          sendData={this.sendData}
+          colorFunction={this.state.colorFunction}
+          classDisplay={this.state.classDisplay}
+          nameToIndexMap={this.state.nameToIndexMap}
+      />
+    } else {
+      featuregraph = <div></div>
+    }
       return (
         <div className={'root-div'}>
             <SideBar featureInfo={this.props.description} show={this.state.showInfo} close={() => this.showInfoFalse()}/>
@@ -1207,21 +1229,9 @@ class AppInterface extends React.Component {
                               )}
                           </select>
                       </div>
+                      {featuregraph}
                       <div style={{display: this.state.showAnalysis? "none" : "block"}}>
-                      <FeatureParallelCoordinates
-                          data={this.state.featureData.inputData}
-                          convertedData={this.state.featureData.convertedData}
-                          features={selectedFeatureSelection.features}
-                          xScaleDomain={selectedFeatureSelection.xScaleDomain}
-                          xScale={selectedFeatureSelection.xScale}
-                          dragging={this.state.dragging}
-                          featureAxisOnEnd={this.featureAxisOnEnd}
-                          size={selectedFeatureSelection.featureCoordinatesSize}
-                          sendData={this.sendData}
-                          colorFunction={this.state.colorFunction}
-                          classDisplay={this.state.classDisplay}
-                          nameToIndexMap={this.state.nameToIndexMap}
-                      />
+
                           <div className={"className-legend-title"}>{`Displayed ${this.props.targetName}`}</div>
                           <Legend className={"legend legend-left class-legend"}
                                   keys={this.props.classNames}
@@ -1313,8 +1323,8 @@ class AppInterface extends React.Component {
                   <div className={"grid-ROC"}>
                       <RocCurve size={[400, 300]}
                                 name={"one"}
-                                rocCurve={this.state.rocCurve[this.state.selectedTrial1]}
-                                rocCurveTwo={(this.state.selectedTrial2 >= 0) ? this.state.rocCurve[this.state.selectedTrial2] : {} }
+                                rocCurve={(this.state.rocCurve.length > 0) ? this.state.rocCurve[this.state.selectedTrial1] : {}}
+                                rocCurveTwo={ (rocCurveTwo !== undefined) ? rocCurveTwo : {} }
                                 colors={this.state.colorFunction}
                                 displayClass={this.state.ROCDisplayClass}
                                 />

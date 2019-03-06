@@ -35,7 +35,6 @@ class RocCurve extends React.Component {
  }
 
  render() {
-   console.log(this.props.displayClass);
    var solidLines = Object.keys(this.props.rocCurve).filter((label) => this.props.displayClass[label].TP.display == true );
    var dashLines = Object.keys(this.props.rocCurveTwo).filter((label) => this.props.displayClass[label].TP.display == true );
 

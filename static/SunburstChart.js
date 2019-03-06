@@ -76,7 +76,6 @@ class SunburstChart extends React.Component {
         //var pie3Data = pie2Data.flat();
         var pie3Data = pie2Data.reduce((acc, val) => acc.concat(val), [])
 
-
         var arcs3 = pie3(pie3Data);
         return (
             <svg width={this.props.size[0]} height={this.props.size[1]}>
