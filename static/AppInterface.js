@@ -58,7 +58,7 @@ class AppInterface extends React.Component {
     ];
 
     this.state = {
-        client: client,
+        //client: client,
         datasetName: this.props.datasetName,
         nameToIndexMap: nameToIndexMap,
         helptext: helptext,
@@ -211,11 +211,18 @@ class AppInterface extends React.Component {
         const newCircleRadii = this.calculateNewCircleRadius(); //currentCircleRadii.concat(newRadius)
         this.state.featureImportanceMoves.push({type: "circle", circleRadii: this.state.featureImportance.circleRadii, features: this.state.featureImportance.features});
 
-        this.state.client.recordEvent('feature_importance_moves', {
+        // log add circle event
+        ga('send', {
+            hitType: 'event',
+            eventCategory: 'AddCircle',
+            eventLabel: 'newCircleRadii.length'
+          });
+
+        /*this.state.client.recordEvent('feature_importance_moves', {
             user: userID,
             type: "add_circle",
             numCircles: newCircleRadii.length
-        });
+        });*/
 
         this.state.featureImportanceStep = this.state.featureImportanceStep + 1;
         Object.keys(this.state.featureImportance.features).map((key) => {
