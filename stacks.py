@@ -18,7 +18,7 @@ from werkzeug.utils import secure_filename
 from scipy.stats import rankdata
 
 DATASET_NAME = ''
-DATA_FOLDER = 'static/synthetic_data2/'
+DATA_FOLDER = 'static/test_data/'
 #DATA_FOLDER = 'static/cardiotocography3/'
 #DATA_FOLDER = 'static/student_performance/'
 #DATA_FOLDER = 'static/iris/'

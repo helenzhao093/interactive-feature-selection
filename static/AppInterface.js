@@ -212,11 +212,11 @@ class AppInterface extends React.Component {
         this.state.featureImportanceMoves.push({type: "circle", circleRadii: this.state.featureImportance.circleRadii, features: this.state.featureImportance.features});
 
         // log add circle event
-        ga('send', {
+        /*ga('send', {
             hitType: 'event',
             eventCategory: 'AddCircle',
             eventLabel: 'newCircleRadii.length'
-          });
+          });*/
 
         /*this.state.client.recordEvent('feature_importance_moves', {
             user: userID,
