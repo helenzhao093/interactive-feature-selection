@@ -58,7 +58,6 @@ class AppInterface extends React.Component {
     ];
 
     this.state = {
-        //client: client,
         datasetName: this.props.datasetName,
         nameToIndexMap: nameToIndexMap,
         helptext: helptext,
@@ -211,19 +210,6 @@ class AppInterface extends React.Component {
         const newCircleRadii = this.calculateNewCircleRadius(); //currentCircleRadii.concat(newRadius)
         this.state.featureImportanceMoves.push({type: "circle", circleRadii: this.state.featureImportance.circleRadii, features: this.state.featureImportance.features});
 
-        // log add circle event
-        /*ga('send', {
-            hitType: 'event',
-            eventCategory: 'AddCircle',
-            eventLabel: 'newCircleRadii.length'
-          });*/
-
-        /*this.state.client.recordEvent('feature_importance_moves', {
-            user: userID,
-            type: "add_circle",
-            numCircles: newCircleRadii.length
-        });*/
-
         this.state.featureImportanceStep = this.state.featureImportanceStep + 1;
         Object.keys(this.state.featureImportance.features).map((key) => {
             this.updateFeatureRank(key, this.state.featureImportance.circleRadii.length - this.state.featureImportance.features[key].circleIndex)
@@ -238,20 +224,6 @@ class AppInterface extends React.Component {
     }
 
     addMove(move) {
-        this.state.client.recordEvent('feature_importance_moves', {
-           user: userID,
-           type: "move_feature",
-           feature: {
-               name: this.state.featureImportance.features[move.id].name,
-               id : move.id
-           },
-           circleIndex: {
-               old: move.circleIndex,
-               new: move.newCircleIndex
-           },
-           numCircles: this.state.featureImportance.circleRadii.length
-        });
-
         this.state.featureImportanceMoves.push(move);
         this.state.featureImportanceStep = this.state.featureImportanceStep + 1;
         if (move.type == 'feature') {
@@ -362,14 +334,14 @@ class AppInterface extends React.Component {
             var forbiddenEdgesInfo = this.initializeForbiddenEdges();
             var requiredEdgesInfo = this.initializeRequiredEdges();
 
-            /* capture feature importance */
-            this.state.client.recordEvent('feature_importance_snapshot', {
-                user: userID,
-                lowestRankFeatures: forbiddenEdgesInfo.lowestRankFeatures,
-                highestRankFeatures: requiredEdgesInfo.highestRankFeatures,
-                featureNameToRank: featureRanks.featureNameToRankMap,
-                featureRankToNames: featureRanks.featureRankToNamesMap
-            });
+            _LTracker.push({
+                'eventName': 'feature importance snapshot',
+                'userId': userID,
+                'lowestRankFeatures': forbiddenEdgesInfo.lowestRankFeatures,
+                'highestRankFeatures': requiredEdgesInfo.highestRankFeatures,
+                'featureNameToRank': featureRanks.featureNameToRankMap,
+                'featureRankToNames': featureRanks.featureRankToNamesMap
+            })
 
             // send prior to graph and initialize graph
             this.sendData("/initializeGraph", {
@@ -379,10 +351,10 @@ class AppInterface extends React.Component {
 
         } else {
 
-            /* record user viewing feature importance */
-            this.state.client.recordEvent('feature_importance_view_page_only', {
-                user: userID
-            });
+            _LTracker.push({
+                'eventName': 'feature importance view page',
+                'userId': userID,
+            })
         }
 
         // set tab index to graph index
@@ -394,9 +366,6 @@ class AppInterface extends React.Component {
 
     /* CAUSAL GRAPH METHODS */
     goFromGraphToImportance() {
-      this.state.client.recordEvent('back_to_importance', {
-          user: userID
-      });
         this.setState({
             activeTabIndex: 0
         });
@@ -447,32 +416,29 @@ class AppInterface extends React.Component {
         var graph = this.getGraphDataToLog(data.graph);
         //this.props.sendData("/addEdge", {"nodeFrom": firstNode, "nodeTo": secondNode });
         if (url == '/addEdge') {
-            this.state.client.recordEvent('graph_history', {
-                user: userID,
-                type: "add_edge",
-                info: [dataToSend.nodeFrom, dataToSend.nodeTo],
-                graph: graph
-            });
+
+            _LTracker.push({
+                'eventName': 'graph history',
+                'type': 'add edge',
+                'userId': userID,
+                'info': [dataToSend.nodeFrom, dataToSend.nodeTo],
+            })
         }
 
         //this.props.sendData("/redrawGraph", {features: [removedNode], removedEdges: this.state.removedEdges } )
         if (url == '/redrawGraph') {
-            this.state.client.recordEvent('graph_history', {
-                user: userID,
-                type: "remove_node",
-                info: dataToSend.features[0],
-                graph: graph
-            });
+
+            _LTracker.push({
+                'eventName': 'graph history',
+                'type': 'remove node',
+                'userId': userID,
+                'info': [dataToSend.nodeFrom, dataToSend.nodeTo],
+            })
         }
 
         // this.sendData("/initializeGraph", {forbiddenEdges: forbiddenEdgesInfo.forbiddenEdges,requiredEdges: requiredEdgesInfo.requiredEdges});
         if (url == "/initializeGraph") {
-            this.state.client.recordEvent('graph_history', {
-                user: userID,
-                type: "initial_graph",
-                info: dataToSend,
-                graph: graph
-            });
+
         }
 
         const currentGraphHistory = this.state.causalGraph.graphHistory.splice(0, this.state.graphIndex + 1);
@@ -513,13 +479,11 @@ class AppInterface extends React.Component {
       });
       var inputGraph = this.state.causalGraph.graphHistory[0];
       var graph = this.getGraphDataToLog(inputGraph);
-      this.state.client.recordEvent('graph_history', {
-          user: userID,
-          datasetName: this.state.datasetName,
-          type: "clear",
-          info: [],
-          graph: graph
-      });
+      _LTracker.push({
+        'eventName': 'clear graph',
+        'userId': userID,
+    })
+
       this.setState({
           graphIndex: 0
       });
@@ -712,10 +676,6 @@ class AppInterface extends React.Component {
     }
 
     goFromSelectionToGraph() {
-      this.state.client.recordEvent('back_to_graph', {
-         user: userID,
-      });
-
       this.setState({
           activeTabIndex: 1
       })
@@ -751,17 +711,20 @@ class AppInterface extends React.Component {
 
         let lastFeatureSelection = this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1];
 
-        this.state.client.recordEvent('classify_results', {
-           user: userID,
-           datasetName: this.state.datasetName,
-           MI: this.state.MICurrent,
-           MB: this.state.MBCurrent,
-           rankLoss: this.state.rankLossCurrent,
-           accuracy: +data.accuracy.toFixed(3),
-           precision: +data.precision.toFixed(3),
-           selectedFeatures: allFeatureNames,
-           coveredFeatures: Array.from(lastFeatureSelection.coveredFeatures)
-        });
+        _LTracker.push({
+            'eventName': 'classify results',
+            'type': 'remove node',
+            'userId': userID,
+            'info': [dataToSend.nodeFrom, dataToSend.nodeTo],
+            'MI': this.state.MICurrent,
+            'MB': this.state.MBCurrent,
+            'rankLoss': this.state.rankLossCurrent,
+            'accuracy': +data.accuracy.toFixed(3),
+            'precision': +data.precision.toFixed(3),
+            'selectedFeatures': allFeatureNames,
+            'coveredFeatures': Array.from(lastFeatureSelection.coveredFeatures)
+        })
+
 
         this.setState({
           rocCurve: this.state.rocCurve,
@@ -822,16 +785,6 @@ class AppInterface extends React.Component {
           if (this.state.MB.length >= 2 && this.state.MBCurrent == -1) {
               axisLength = axisLength + 1;
           }
-          console.log(this.state.featureSelectionHistory)
-          this.state.client.recordEvent('feature_selection_exploration', {
-              user: userID,
-              datasetName: this.state.datasetName,
-              selectedFeatures: this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1].selectedFeatureNames,
-              coveredFeatures: Array.from(this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1].coveredFeatures),
-              MI: parseFloat(data.MI.toFixed(3)),
-              MB: this.state.MBCurrent,
-              rankLoss: parseFloat(data.rankLoss.toFixed(3)),
-          });
 
           this.setState({
             MICurrent: parseFloat(data.MI.toFixed(3)),
@@ -849,7 +802,6 @@ class AppInterface extends React.Component {
       var graph = this.state.causalGraph.graphHistory[this.state.graphIndex].graph;
       var selectedFeatureIndexes = [];
       var coveredNodeIndexes = new Set();
-      //console.log(selectedFeatures);
       selectedFeatures.map(feature => {
           selectedFeatureIndexes.push(graph[feature].nodeIndex);
 
@@ -931,10 +883,11 @@ class AppInterface extends React.Component {
       Object.keys(classDisplay).map(key =>
         recordClassDisplay[key] = classDisplay[key].TP.display
       );
-      this.state.client.recordEvent('filter_class_display', {
-          user: userID,
-          classDisplay: recordClassDisplay
+      _LTracker.push({ 
+          'eventName': 'filter class display',
+          'classDisplay': recordClassDisplay
       });
+
       this.setState({
           classDisplay: classDisplay
       })
@@ -957,7 +910,6 @@ class AppInterface extends React.Component {
       }).then(function(response) {
           return response.json();
       }).then(data => {
-        console.log(data);
         this.state.metrics.precision.push(parseFloat(data.precision.toFixed(3)));
         this.state.metrics.accuracy.push(parseFloat(data.accuracy.toFixed(3)));
         this.state.metrics.accuracyTrain.push(parseFloat(data.accuracyTrain.toFixed(3)));
@@ -1028,13 +980,16 @@ class AppInterface extends React.Component {
       var MBCurrent = this.state.MBCurrent;
       var MICurrent = this.state.MICurrent;
       var rankLossCurrent = this.state.rankLossCurrent;
-      this.state.client.recordEvent('view_metrics', {
-        user: userID,
-        selectedFeatures: selectedFeatures,
-        MB: MBCurrent,
-        MI: MICurrent,
-        rankLoss: rankLossCurrent
-      })
+
+      _LTracker.push({ 
+        'eventName': 'view metrics' ,
+        'user': userID,
+        'selectedFeatures': selectedFeatures,
+        'MB': MBCurrent,
+        'MI': MICurrent,
+        'rankLoss': rankLossCurrent
+        });
+      
         this.setState({
             showAnalysis: !this.state.showAnalysis
         })
@@ -1052,20 +1007,24 @@ class AppInterface extends React.Component {
         var trialNum = parseInt(trialStr.substring(1));
         //console.log(trialNum)
         if (classifierNum == 1) {
-          this.state.client.recordEvent('compare_classifier', {
-            user: userID,
-            trial1: trialNum,
-            trial1Features: this.state.featureSelectionHistory[trialNum].selectedFeatureNames,
-            trial2: this.state.selectedTrial2,
-            accuracy1: this.state.metrics.accuracy[trialNum],
-            accuracy2: this.state.metrics.accuracy[this.state.selectedTrial2],
-            trial2Features: this.state.featureSelectionHistory[this.state.selectedTrial2].selectedFeatureNames
+
+
+          _LTracker.push({
+            'eventName': 'compare_classifier', 
+            'user': userID,
+            'trial1': trialNum,
+            'trial1Features': this.state.featureSelectionHistory[trialNum].selectedFeatureNames,
+            'trial2': this.state.selectedTrial2,
+            'accuracy1': this.state.metrics.accuracy[trialNum],
+            'accuracy2': this.state.metrics.accuracy[this.state.selectedTrial2],
+            'trial2Features': this.state.featureSelectionHistory[this.state.selectedTrial2].selectedFeatureNames
           });
             this.setState({
                 selectedTrial1: trialNum
             })
         } else {
-          this.state.client.recordEvent('compare_classifier', {
+          _LTracker.push({ 
+            'eventName': 'compare_classifier', 
             user: userID,
             trial1: trialNum,
             trial1Features: this.state.featureSelectionHistory[trialNum].selectedFeatureNames,
@@ -1194,7 +1153,6 @@ class AppInterface extends React.Component {
               </Tab>
                 <Tab linkClassName={"Causal Graph"}>
                   <CausalGraph
-                      client={this.state.client}
                       datasetName={this.state.datasetName}
                       dotSrc={currentGraphHistory.dotSrc}
                       sendData={this.sendData}

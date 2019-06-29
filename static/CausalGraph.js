@@ -154,22 +154,24 @@ class CausalGraph extends React.Component {
 
   removedEdgeFromGraph(nodeFrom, nodeTo) {
     var graph = this.props.getGraphDataToLog(this.props.graph);
-    this.props.client.recordEvent('graph_history', {
-        user: userID,
-        type: "remove_edge",
-        info: [nodeFrom, nodeTo],
-        graph: graph
+    _LTracker.push({
+        'eventName':'graph history',
+        'user': userID,
+        'type': "remove edge",
+        'info': [nodeFrom, nodeTo],
+        'graph': graph
     });
     this.props.sendData("/removeEdge", { nodeFrom: nodeFrom, nodeTo: nodeTo });
   }
 
   reverseEdgeFromGraph(nodeFrom, nodeTo) {
     var graph = this.props.getGraphDataToLog(this.props.graph);
-    this.props.client.recordEvent('graph_history', {
-        user: userID,
-        type: "reverse_edge",
-        info: [nodeFrom, nodeTo],
-        graph: graph
+    _LTracker.push({
+        'eventName': 'graph history',
+        'user': userID,
+        'type': "reverse edge",
+        'info': [nodeFrom, nodeTo],
+        'graph': graph
     });
 
     this.props.sendData("/reverseEdge", { nodeFrom: nodeFrom, nodeTo: nodeTo });
@@ -212,11 +214,12 @@ class CausalGraph extends React.Component {
         nodeTo = nodes[0]
     }
 
-    this.props.client.recordEvent('causal_graph_clicks', {
-        user: userID,
-        datasetName: this.state.datasetName,
-        type: "edge",
-        info: [nodeFrom, nodeTo]
+    _LTracker.push({
+        'eventName': 'causal graph clicks',
+        'user': userID,
+        'datasetName': this.state.datasetName,
+        'type': "edge",
+        'info': [nodeFrom, nodeTo]
     });
 
     if (this.state.removeEdge) {
@@ -289,7 +292,8 @@ class CausalGraph extends React.Component {
       else if (this.state.markovBlanketSelected) {
           this.highlightMB(nodeInfo);
 
-          this.props.client.recordEvent('causal_graph_clicks', {
+          _LTracker.push({
+              'eventName': 'causal graph clicks', 
               user: userID,
               datasetName: this.state.datasetName,
               info: element.key,
@@ -300,7 +304,8 @@ class CausalGraph extends React.Component {
           this.state.selectedNode = element.key;
       } else {
           this.highlightPath(nodeInfo);
-          this.props.client.recordEvent('causal_graph_clicks', {
+          _LTracker.push({
+              'eventName': 'causal graph clicks',
               user: userID,
               datasetName: this.state.datasetName,
               info: element.key,
