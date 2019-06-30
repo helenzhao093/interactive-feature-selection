@@ -78,7 +78,7 @@ def demo():
 def dataset_1():
     global DATA_FOLDER
     global DATASET_NAME
-    DATA_FOLDER = 'static/synthetic_data2/'
+    DATA_FOLDER = 'static/test_data/'
     DATASET_NAME = 'dataset1'
     return render_template('index.html')
 
@@ -106,7 +106,7 @@ def initialize_data():
     if os.path.exists(DATA_FOLDER + 'description.csv'):
         des = parse_description(DATA_FOLDER + 'description.csv')
     feature_names = parse_features(DATA_FOLDER + 'names.csv')
-    dataframe = pd.read_csv(DATA_FOLDER + 'datafile.csv')
+    dataframe = pd.read_csv(DATA_FOLDER + 'test_datafile.csv')
     global class_name
     class_name = dataframe.columns.values[-1]
     features = dataframe.drop([class_name], axis=1)

@@ -294,11 +294,11 @@ class CausalGraph extends React.Component {
 
           _LTracker.push({
               'eventName': 'causal graph clicks', 
-              user: userID,
-              datasetName: this.state.datasetName,
-              info: element.key,
-              type: "node",
-              markovBlanket: this.state.markovBlanketSelected
+              'user': userID,
+              'datasetName': this.state.datasetName,
+              'info': element.key,
+              'type': "node",
+              'markovBlanket': this.state.markovBlanketSelected
           });
 
           this.state.selectedNode = element.key;
@@ -306,11 +306,11 @@ class CausalGraph extends React.Component {
           this.highlightPath(nodeInfo);
           _LTracker.push({
               'eventName': 'causal graph clicks',
-              user: userID,
-              datasetName: this.state.datasetName,
-              info: element.key,
-              type: "node",
-              markovBlanket: this.state.markovBlanketSelected
+              'user': userID,
+              'datasetName': this.state.datasetName,
+              'info': element.key,
+              'type': "node",
+              'markovBlanket': this.state.markovBlanketSelected
           });
           this.state.selectedNode = element.key;
       }
