@@ -106,15 +106,17 @@ def initialize_data():
     if os.path.exists(DATA_FOLDER + 'description.csv'):
         des = parse_description(DATA_FOLDER + 'description.csv')
     feature_names = parse_features(DATA_FOLDER + 'names.csv')
-    dataframe = pd.read_csv(DATA_FOLDER + 'test_datafile.csv')
+    dataframe = pd.read_csv(DATA_FOLDER)
+    print datafram
     global class_name
     class_name = dataframe.columns.values[-1]
+    print class_name
     features = dataframe.drop([class_name], axis=1)
     target = pd.DataFrame(dataframe[class_name])#pd.read_csv(DATA_FOLDER + 'features.csv')#convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
     class_values = np.sort(dataframe[class_name].unique())#convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
 
     global classifier
-    classifier = Classifier(DATA_FOLDER + 'datafile.csv', class_name)
+    classifier = Classifier(DATA_FOLDER + 'test_datafile.csv', class_name)
 
     global FEATURE_DATA
     numeric_data = classifier.df
