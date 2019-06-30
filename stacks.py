@@ -106,7 +106,7 @@ def initialize_data():
     if os.path.exists(DATA_FOLDER + 'description.csv'):
         des = parse_description(DATA_FOLDER + 'description.csv')
     feature_names = parse_features(DATA_FOLDER + 'names.csv')
-    dataframe = pd.read_csv(DATA_FOLDER)
+    dataframe = pd.read_csv(DATA_FOLDER + 'train_datafile.csv')
     print datafram
     global class_name
     class_name = dataframe.columns.values[-1]
