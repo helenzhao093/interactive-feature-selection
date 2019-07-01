@@ -83,7 +83,7 @@ class Classifier:
             self.precision = 0
             self.recall = 0
             self.cm = []
-            self.cm = []
+            self.cm_normalized = []
             self.rocCurve = []
             self.auc = 0
 
