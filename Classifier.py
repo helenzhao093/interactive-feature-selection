@@ -32,7 +32,7 @@ class Classifier:
         self.df_train = self.process_discrete_features(df_train_og)
         self.df_test = self.process_discrete_features(df_test_og)
         self.df_validate = self.process_discrete_features(df_validate_og)
-        self.df_traintest = pd.concat([df_train, df_test])
+        self.df_traintest = pd.concat([self.df_train, self.df_test])
         
         # classify :
         # input is array of feature names
@@ -96,16 +96,16 @@ class Classifier:
         #self.set_average_scores(accuracy, accuracy_train, precision, recall)
 
     def get_roc_curve(self, X_train, X_test, y_train, y_test):
-        classes = sorted(list(set(y)))
+        classes = sorted(list(set(y_test)))
         n_classes = len(classes)
-        y_bin = label_binarize(y, classes=classes)
+        y_bin = label_binarize(y_test, classes=classes)
         # X_train, X_test, y_train, y_test = train_test_split(X, y_bin, test_size=0.33, random_state=0)
         y_score = self.clf_roc.fit(X_train, y_train).predict_proba(X_test)
         self.rocCurve = dict()
         self.auc = dict()
         for i in range(n_classes):
             class_label = self.class_labels[i]
-            fpr, tpr, threshold = roc_curve(y_test[:, i], y_score[:, i], drop_intermediate=False)
+            fpr, tpr, threshold = roc_curve(y_bin[:,i], y_score[:, i], drop_intermediate=False)
             # print threshold
             self.rocCurve[class_label] = []
             for i in range(len(fpr)):

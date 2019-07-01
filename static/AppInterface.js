@@ -697,7 +697,8 @@ class AppInterface extends React.Component {
       }).then(function(response) {
         return response.json();
       }).then(data => {
-        this.state.MI.push(this.state.MICurrent);
+        console.log(data);
+	this.state.MI.push(this.state.MICurrent);
         this.state.MB.push(this.state.MBCurrent);
         this.state.rocCurve.push(data.rocCurve);
         this.state.auc.push(data.auc);
@@ -711,11 +712,10 @@ class AppInterface extends React.Component {
 
         let lastFeatureSelection = this.state.featureSelectionHistory[this.state.featureSelectionHistory.length - 1];
 
-        _LTracker.push({
+        /*_LTracker.push({
             'eventName': 'classify results',
             'type': 'remove node',
             'userId': userID,
-            'info': [dataToSend.nodeFrom, dataToSend.nodeTo],
             'MI': this.state.MICurrent,
             'MB': this.state.MBCurrent,
             'rankLoss': this.state.rankLossCurrent,
@@ -723,7 +723,7 @@ class AppInterface extends React.Component {
             'precision': +data.precision.toFixed(3),
             'selectedFeatures': allFeatureNames,
             'coveredFeatures': Array.from(lastFeatureSelection.coveredFeatures)
-        })
+        })*/
 
 
         this.setState({

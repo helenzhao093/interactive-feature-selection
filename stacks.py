@@ -107,19 +107,17 @@ def initialize_data():
         des = parse_description(DATA_FOLDER + 'description.csv')
     feature_names = parse_features(DATA_FOLDER + 'names.csv')
     dataframe = pd.read_csv(DATA_FOLDER + 'train_datafile.csv')
-    print datafram
     global class_name
     class_name = dataframe.columns.values[-1]
-    print class_name
     features = dataframe.drop([class_name], axis=1)
     target = pd.DataFrame(dataframe[class_name])#pd.read_csv(DATA_FOLDER + 'features.csv')#convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
     class_values = np.sort(dataframe[class_name].unique())#convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
 
     global classifier
-    classifier = Classifier(DATA_FOLDER + 'test_datafile.csv', class_name)
+    classifier = Classifier(DATA_FOLDER, class_name)
 
     global FEATURE_DATA
-    numeric_data = classifier.df
+    numeric_data = classifier.df_train
     FEATURE_DATA = FeatureData(target, features, numeric_data, feature_names, class_values, class_name)
     interface_data = dict()
     interface_data['featureData'] = FEATURE_DATA.feature_data
@@ -134,7 +132,7 @@ def initialize_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
         global causalGraph
-        causalGraph = CausalGraph(classifier.df, data['forbiddenEdges'], data['requiredEdges'], class_name)
+        causalGraph = CausalGraph(classifier.df_train, data['forbiddenEdges'], data['requiredEdges'], class_name)
         interface_data = dict()
         get_graph_information(interface_data)
         return jsonify(interface_data)
@@ -334,4 +332,4 @@ def send_js(path):
     return send_from_directory('static', path)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80)
+    app.run(host="0.0.0.0", port=8889)
