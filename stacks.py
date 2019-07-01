@@ -82,10 +82,10 @@ def dataset_1():
     DATASET_NAME = 'dataset1'
     return render_template('index.html')
 
-@app.route("/dataset2")
+@app.route("/oab_dataset")
 def dataset_2():
     global DATA_FOLDER
-    DATA_FOLDER = 'static/synthetic_data1/'
+    DATA_FOLDER = 'static/oab_test/'
     DATASET_NAME = 'dataset2'
     return render_template('index.html')
 
