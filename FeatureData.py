@@ -417,11 +417,14 @@ class FeatureData:
     def calculate_mutual_information(self, feature_indexes, feature_names):
         if len(feature_indexes) == 0:
             return 0
-        X = self.features.loc[:,feature_names]
-        X = self.sort_selected_features(X)
-        #print X[0,:]
-        #print X[1,:]
-        self.MI = self.calculate_joint_probabily(X)
+        if len(feature_names) == 0:
+            self.MI = 0
+        else:
+            X = self.features.loc[:,feature_names]
+            X = self.sort_selected_features(X)
+            #print X[0,:]
+            #print X[1,:]
+            self.MI = self.calculate_joint_probabily(X)
         print ("MI: " + str(self.MI))
         # map { yvalue: p(y)}
 
