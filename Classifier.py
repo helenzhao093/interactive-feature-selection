@@ -127,8 +127,8 @@ class Classifier:
         #print self.rocCurve
 
     def init_confusion_matrix(self, y_true, y_pred):
-        self.cm = confusion_matrix(y_true, y_pred)
-        self.cm_normalized = self.cm.astype('float')/self.cm.sum(axis=1)[:, np.newaxis]
+        self.cm = confusion_matrix(y_true, y_pred).tolist()
+        self.cm_normalized = (self.cm.astype('float')/self.cm.sum(axis=1)[:, np.newaxis]).tolist()
         #print self.cm_normalized
 
     def set_average_scores(self, accuracy, accuracy_train, precision, recall):
