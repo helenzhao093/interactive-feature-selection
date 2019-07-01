@@ -236,8 +236,8 @@ def cal_scores_and_classify():
             interface_data['accuracyTrain'] = classifier.accuracy_train
             interface_data['precision'] = classifier.precision
             interface_data['recall'] = classifier.recall
-            interface_data['confusionMatrix'] = classifier.cm
-            interface_data['confusionMatrixNormalized'] = classifier.cm_normalized
+            interface_data['confusionMatrix'] = classifier.cm.tolist()
+            interface_data['confusionMatrixNormalized'] = classifier.cm_normalized.tolist()
             interface_data['rocCurve'] = classifier.rocCurve
             interface_data['auc'] = classifier.auc
             interface_data['MI'] = FEATURE_DATA.MI

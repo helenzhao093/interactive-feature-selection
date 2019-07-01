@@ -103,6 +103,7 @@ class Classifier:
         classes = sorted(list(set(y_test)))
         n_classes = len(classes)
         y_bin = label_binarize(y_test, classes=classes)
+        print y_bin
         # X_train, X_test, y_train, y_test = train_test_split(X, y_bin, test_size=0.33, random_state=0)
         y_score = self.clf_roc.fit(X_train, y_train).predict_proba(X_test)
         self.rocCurve = dict()
