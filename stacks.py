@@ -241,12 +241,12 @@ def cal_scores_and_classify():
             interface_data['rocCurve'] = classifier.rocCurve
             interface_data['auc'] = classifier.auc
             interface_data['MI'] = FEATURE_DATA.MI
-            
+
         interface_data['rankLoss'] = rank_loss
-        print ("accuracy: " + str(classifier.accuracy))
-        print ("accuracyTrain: " + str(classifier.accuracy_train))
+        #print ("accuracy: " + str(classifier.accuracy))
+        #print ("accuracyTrain: " + str(classifier.accuracy_train))
         #print ("MI: " + str(FEATURE_DATA.MI))
-        print ("rankLoss: " + str(rank_loss))
+        #print ("rankLoss: " + str(rank_loss))
         return jsonify(interface_data)
 
 @app.route("/calculateScores", methods=["POST"])
