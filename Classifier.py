@@ -55,25 +55,38 @@ class Classifier:
         return newdf
 
     def classify(self, feature_names):
-        X_train, y_train = self.get_X_and_y(feature_names, self.df_train)
-        X_traintest, y_traintest = self.get_X_and_y(feature_names, self.df_traintest)
-        X_test, y_test = self.get_X_and_y(feature_names, self.df_test)
-        X_validation, y_validation = self.get_X_and_y(feature_names, self.df_validate)
-        self.clf.fit(X_train, y_train)
-        accuracy_train = self.clf.score(X_train, y_train)
-        accuracy_test = self.clf.score(X_test, y_test) # testing accuracy
-        accuracy_traintest = self.clf.score(X_traintest, y_traintest)
-        accuracy_validation = self.clf.score(X_validation, y_validation) # validation accuracy
-        predicted = self.clf.predict(X_train)
-        self.proba = self.clf.predict_proba(X_train)
+        if len(feature_names) > 0:
+            X_train, y_train = self.get_X_and_y(feature_names, self.df_train)
+            X_traintest, y_traintest = self.get_X_and_y(feature_names, self.df_traintest)
+            X_test, y_test = self.get_X_and_y(feature_names, self.df_test)
+            X_validation, y_validation = self.get_X_and_y(feature_names, self.df_validate)
+            self.clf.fit(X_train, y_train)
+            accuracy_train = self.clf.score(X_train, y_train)
+            accuracy_test = self.clf.score(X_test, y_test) # testing accuracy
+            accuracy_traintest = self.clf.score(X_traintest, y_traintest)
+            accuracy_validation = self.clf.score(X_validation, y_validation) # validation accuracy
+            predicted = self.clf.predict(X_train)
+            self.proba = self.clf.predict_proba(X_train)
 
-        predicted_traintest = self.clf.predict(X_traintest)
-        self.predicted = predicted_traintest
-        self.init_confusion_matrix(y_traintest, predicted_traintest)
-        self.get_roc_curve(X_train, X_test, y_train, y_test)
+            predicted_traintest = self.clf.predict(X_traintest)
+            self.predicted = predicted_traintest
+            self.init_confusion_matrix(y_traintest, predicted_traintest)
+            self.get_roc_curve(X_train, X_test, y_train, y_test)
 
-        self.accuracy_train = accuracy_train
-        self.accuracy = accuracy_traintest
+            self.accuracy_train = accuracy_train
+            self.accuracy = accuracy_traintest
+            print 'roc curve'
+            self.rocCurve
+        else:
+            self.accuracy = 0
+            self.accuracy_train = 0
+            self.precision = 0
+            self.recall = 0
+            self.cm = []
+            self.cm = []
+            self.rocCurve = []
+            self.auc = 0
+
         #skf = StratifiedKFold(n_splits=5)
         #skf.get_n_splits(X, y)
         #accuracy = cross_val_score(self.clf, X, y, cv=skf)

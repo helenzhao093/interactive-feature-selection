@@ -214,10 +214,9 @@ def cal_scores_and_classify():
         print data['names']
         rank_loss = FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['names'])
         rank_loss_listwise = FEATURE_DATA.calculate_rank_loss_listwise(data['featureRank'], data['names'])
-        FEATURE_DATA.calculate_mutual_information(data['features'], data['names'])#calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
+        FEATURE_DATA.calculate_mutual_information(data['features'], data['names']) #calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
 
         classifier.classify(data['names'])
-
         interface_data = dict()
         interface_data['accuracy'] = classifier.accuracy
         interface_data['accuracyTrain'] = classifier.accuracy_train
