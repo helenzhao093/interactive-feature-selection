@@ -216,25 +216,36 @@ def cal_scores_and_classify():
         rank_loss_listwise = FEATURE_DATA.calculate_rank_loss_listwise(data['featureRank'], data['names'])
         FEATURE_DATA.calculate_mutual_information(data['features'], data['names']) #calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
 
-        classifier.classify(data['names'])
+        
         interface_data = dict()
-        interface_data['accuracy'] = classifier.accuracy
-        interface_data['accuracyTrain'] = classifier.accuracy_train
-        interface_data['precision'] = classifier.precision
-        interface_data['recall'] = classifier.recall
-        interface_data['confusionMatrix'] = classifier.cm
-        interface_data['confusionMatrixNormalized'] = classifier.cm_normalized
-        interface_data['rocCurve'] = classifier.rocCurve
-        interface_data['auc'] = classifier.auc
 
         if len(data['names']) == 0:
             interface_data['MI'] = 0
+            interface_data['accuracy'] = 0
+            interface_data['accuracyTrain'] = 0
+            interface_data['precision'] = 0
+            interface_data['recall'] = 0
+            interface_data['confusionMatrix'] = []
+            interface_data['confusionMatrixNormalized'] = []
+            interface_data['rocCurve'] = []
+            interface_data['auc'] = 0
+            interface_data['MI'] = 0
         else:
+            classifier.classify(data['names'])
+            interface_data['accuracy'] = classifier.accuracy
+            interface_data['accuracyTrain'] = classifier.accuracy_train
+            interface_data['precision'] = classifier.precision
+            interface_data['recall'] = classifier.recall
+            interface_data['confusionMatrix'] = classifier.cm
+            interface_data['confusionMatrixNormalized'] = classifier.cm_normalized
+            interface_data['rocCurve'] = classifier.rocCurve
+            interface_data['auc'] = classifier.auc
             interface_data['MI'] = FEATURE_DATA.MI
+            
         interface_data['rankLoss'] = rank_loss
         print ("accuracy: " + str(classifier.accuracy))
         print ("accuracyTrain: " + str(classifier.accuracy_train))
-        print ("MI: " + str(FEATURE_DATA.MI))
+        #print ("MI: " + str(FEATURE_DATA.MI))
         print ("rankLoss: " + str(rank_loss))
         return jsonify(interface_data)
 
