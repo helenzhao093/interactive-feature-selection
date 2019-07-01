@@ -227,7 +227,10 @@ def cal_scores_and_classify():
         interface_data['rocCurve'] = classifier.rocCurve
         interface_data['auc'] = classifier.auc
 
-        interface_data['MI'] = FEATURE_DATA.MI
+        if len(data['names']) == 0:
+            interface_data['MI'] = 0
+        else:
+            interface_data['MI'] = FEATURE_DATA.MI
         interface_data['rankLoss'] = rank_loss
         print ("accuracy: " + str(classifier.accuracy))
         print ("accuracyTrain: " + str(classifier.accuracy_train))
