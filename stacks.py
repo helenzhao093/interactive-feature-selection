@@ -16,6 +16,7 @@ import json
 from flask import Flask, render_template, flash, request, redirect, jsonify, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from scipy.stats import rankdata
+from datatime import datatime
 
 DATASET_NAME = ''
 DATA_FOLDER = 'static/test_data/'
@@ -42,6 +43,8 @@ p = None
 tetrad = None
 prior = None
 class_name = ""
+file = None
+trial_number = 0
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -131,6 +134,12 @@ def initialize_data():
 def initialize_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
+        userId = data['userId']
+        filename = "data" + userId + ".txt"
+        global file
+        global trial_number
+        trial_number = 0 
+        file = open(filename, "a+")
         global causalGraph
         causalGraph = CausalGraph(classifier.df_train, data['forbiddenEdges'], data['requiredEdges'], class_name)
         interface_data = dict()
@@ -141,7 +150,9 @@ def initialize_graph():
 def remove_edge_from_dot_src():
     if request.method == 'POST':
         data = json.loads(request.data)
-        print ("remove edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo']))
+        edge_removed = "remove edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo']))
+        file.write(edge_removed)
+        file.write("\n")
         causalGraph.remove_edge_from_graph(data['nodeFrom'], data['nodeTo'])
         interface_data = dict()
         get_graph_information(interface_data)
@@ -151,7 +162,9 @@ def remove_edge_from_dot_src():
 def reverse_edge():
     if request.method == 'POST':
         data = json.loads(request.data)
-        print ("reverse edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo']))
+        edge_reversed = "reverse edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo']))
+        file.write(edge_reversed)
+        file.write("\n")
         causalGraph.reverse_edge(data['nodeFrom'], data['nodeTo'])
         interface_data = dict()
         get_graph_information(interface_data)
@@ -161,7 +174,9 @@ def reverse_edge():
 def add_edge_to_causal_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
-        print ("add edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo']))
+        add_edge = "add edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo']))
+        file.write(add_edge)
+        file.write("\n")
         causalGraph.add_edge(data['nodeFrom'], data['nodeTo'])
         interface_data = dict()
         get_graph_information(interface_data)
@@ -171,7 +186,8 @@ def add_edge_to_causal_graph():
 def remove_nodes_from_causal_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
-        print ("remove node : " + str(data['features']))
+        remove_node = "remove node : " + str(data['features']))
+        file.write(remove_node)
         causalGraph.recalculate_causal_graph(data['features'], data['removedEdges'])
         interface_data = dict()
         get_graph_information(interface_data)
@@ -181,8 +197,7 @@ def remove_nodes_from_causal_graph():
 def undo_graph_edit():
     if request.method == 'POST':
         data = json.loads(request.data)
-        print "undo"
-        print data
+        file.write("undo\n")
         causalGraph.undo_last_edit(data)
         interface_data = dict()
         return jsonify(interface_data)
@@ -210,13 +225,12 @@ def get_graph_information(data_dict):
 def cal_scores_and_classify():
     if request.method == 'POST':
         data = json.loads(request.data)
-        print "Markov Blanket"
-        print data['names']
+        MB = "Markov Blanket: " + str(data['names'])
+        file.write(MB)
+        file.write("\n")
         rank_loss = FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['names'])
         rank_loss_listwise = FEATURE_DATA.calculate_rank_loss_listwise(data['featureRank'], data['names'])
         FEATURE_DATA.calculate_mutual_information(data['features'], data['names']) #calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
-
-        
         interface_data = dict()
 
         if len(data['names']) == 0:
@@ -230,6 +244,23 @@ def cal_scores_and_classify():
             interface_data['rocCurve'] = []
             interface_data['auc'] = 0
             interface_data['MI'] = 0
+            file.write("trial: " + str(trial_number))
+            timenow = datatime.now()
+            file.write("time: " + str(timenow))
+            file.write("\n")
+            file.write("accuracy: " + str(0))
+            file.write("\n")
+            file.write("accuracyTrain: " + str(0))
+            file.write("\n")
+            file.write("accuracyValidation: " + str(0))
+            file.write("\n")
+            file.write("MI: " + str(0))
+            file.write("\n")
+            file.write("rankLoss: " + str(0))
+            file.write("\n")
+            file.write("rankLoss: " + str(rank_loss))
+            file.write("\n")
+            file.write("\n")
         else:
             classifier.classify(data['names'])
             interface_data['accuracy'] = classifier.accuracy
@@ -241,12 +272,25 @@ def cal_scores_and_classify():
             interface_data['rocCurve'] = classifier.rocCurve
             interface_data['auc'] = classifier.auc
             interface_data['MI'] = FEATURE_DATA.MI
+            file.write("trial: " + str(trial_number))
+            timenow = datatime.now()
+            file.write("time: " + str(timenow))
+            file.write("\n")
+            file.write("accuracy: " + str(classifier.accuracy))
+            file.write("\n")
+            file.write("accuracyTrain: " + str(classifier.accuracy_train))
+            file.write("\n")
+            file.write("accuracyValidation: " + str(classifier.accuracy_validation))
+            file.write("\n")
+            file.write("MI: " + str(FEATURE_DATA.MI))
+            file.write("\n")
+            file.write("rankLoss: " + str(rank_loss))
+            file.write("\n")
+            file.write("\n")
+        trial_number += 1
 
         interface_data['rankLoss'] = rank_loss
-        #print ("accuracy: " + str(classifier.accuracy))
-        #print ("accuracyTrain: " + str(classifier.accuracy_train))
-        #print ("MI: " + str(FEATURE_DATA.MI))
-        #print ("rankLoss: " + str(rank_loss))
+        
         return jsonify(interface_data)
 
 @app.route("/calculateScores", methods=["POST"])
@@ -257,7 +301,7 @@ def send_new_calculated_MI():
         rank_loss_listwise = FEATURE_DATA.calculate_rank_loss_listwise(data['featureRank'], data['names'])
         FEATURE_DATA.calculate_mutual_information(data['features'], data['names'])#calculate_MI(FEATURE_DATA.features, feature_indexes, FEATURE_DATA.target)
         interface_data = dict()
-        print data["names"]
+        #print data["names"]
         interface_data['MI'] = FEATURE_DATA.MI
         interface_data['rankLoss'] = rank_loss
         return jsonify(interface_data)
@@ -276,9 +320,28 @@ def classify():
         data['confusionMatrixNormalized'] = classifier.cm_normalized.tolist()
         data['rocCurve'] = classifier.rocCurve
         data['auc'] = classifier.auc
-        print ("features: " + str(features['features']))
-        print ("accuracy: " + str(classifier.accuracy))
-        print ("accuracyTrain: " + str(classifier.accuracy_train))
+        file.write("trial: " + str(trial_number))
+        timenow = datatime.now()
+        file.write("time: " + str(timenow))
+        file.write("\n")
+        file.write("features: " + str(features['features']))
+        file.write("\n")
+        file.write("accuracy: " + str(classifier.accuracy))
+        file.write("\n")
+        file.write("accuracyTrain: " + str(classifier.accuracy_train))
+        file.write("\n")
+        file.write("accuracyValidation: " + str(classifier.accuracy_validation))
+        file.write("\n")
+        file.write("MI: " + str(FEATURE_DATA.MI))
+        file.write("\n")
+        file.write("AUC: " + str(classifier.auc))
+        file.write("\n")
+        file.write("\n")
+        trial_number += 1
+        
+        #print ("features: " + str(features['features']))
+        #print ("accuracy: " + str(classifier.accuracy))
+        #print ("accuracyTrain: " + str(classifier.accuracy_train))
     return jsonify(data)
 
 @app.route("/removeSelected", methods=['POST'])
@@ -292,7 +355,6 @@ def remove_selection():
 @app.route("/postHistogramZoom", methods=['POST'])
 def update_histogram_info_range():
     if request.method == 'POST':
-        print request.data
         new_range = request.get_json(data)
         HISTOGRAM.set_range(new_range['selection'])
     return jsonify(INTERFACE_DATA)

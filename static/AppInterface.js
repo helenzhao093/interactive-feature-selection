@@ -345,6 +345,7 @@ class AppInterface extends React.Component {
 
             // send prior to graph and initialize graph
             this.sendData("/initializeGraph", {
+                userId: userId,
                 forbiddenEdges: forbiddenEdgesInfo.forbiddenEdges,
                 requiredEdges: requiredEdgesInfo.requiredEdges
             });

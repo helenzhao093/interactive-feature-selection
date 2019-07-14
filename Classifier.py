@@ -74,9 +74,7 @@ class Classifier:
 
         self.accuracy_train = accuracy_train
         self.accuracy = accuracy_traintest
-        print 'roc curve'
-        self.rocCurve
-        
+        self.accuracy_validation = accuracy_validation        
 
         #skf = StratifiedKFold(n_splits=5)
         #skf.get_n_splits(X, y)
@@ -103,7 +101,6 @@ class Classifier:
         classes = sorted(list(set(y_test)))
         n_classes = len(classes)
         y_bin = label_binarize(y_test, classes=classes)
-        print y_bin
         # X_train, X_test, y_train, y_test = train_test_split(X, y_bin, test_size=0.33, random_state=0)
         y_score = self.clf_roc.fit(X_train, y_train).predict_proba(X_test)
         self.rocCurve = dict()
