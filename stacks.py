@@ -186,7 +186,7 @@ def add_edge_to_causal_graph():
 def remove_nodes_from_causal_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
-        remove_node = "remove node : " + str(data['features']))
+        remove_node = "remove node : " + str(data['features'])
         file.write(remove_node)
         causalGraph.recalculate_causal_graph(data['features'], data['removedEdges'])
         interface_data = dict()
