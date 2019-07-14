@@ -16,7 +16,7 @@ import json
 from flask import Flask, render_template, flash, request, redirect, jsonify, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from scipy.stats import rankdata
-from datatime import datatime
+from datetime import datetime
 
 DATASET_NAME = ''
 DATA_FOLDER = 'static/test_data/'
