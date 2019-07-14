@@ -43,7 +43,7 @@ p = None
 tetrad = None
 prior = None
 class_name = ""
-file = None
+filename = ""
 trial_number = None
 
 def allowed_file(filename):
@@ -134,10 +134,9 @@ def initialize_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
         userID = data['userID']
+        global filename
         filename = "data" + str(userID) + ".txt"
-        global file
-        file = open(filename, "a+")
-        file.write("hi\n")
+        #file = open(filename, "a+")
         global causalGraph
         causalGraph = CausalGraph(classifier.df_train, data['forbiddenEdges'], data['requiredEdges'], class_name)
         interface_data = dict()
@@ -149,8 +148,11 @@ def remove_edge_from_dot_src():
     if request.method == 'POST':
         data = json.loads(request.data)
         edge_removed = "remove edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo'])
+        global filename
+        file = open(filename, "a+")
         file.write(edge_removed)
         file.write("\n")
+        file.close()
         causalGraph.remove_edge_from_graph(data['nodeFrom'], data['nodeTo'])
         interface_data = dict()
         get_graph_information(interface_data)
@@ -161,8 +163,11 @@ def reverse_edge():
     if request.method == 'POST':
         data = json.loads(request.data)
         edge_reversed = "reverse edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo'])
+        global filename
+        file = open(filename, "a+")
         file.write(edge_reversed)
         file.write("\n")
+        file.close()
         causalGraph.reverse_edge(data['nodeFrom'], data['nodeTo'])
         interface_data = dict()
         get_graph_information(interface_data)
@@ -173,8 +178,11 @@ def add_edge_to_causal_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
         add_edge = "add edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo'])
+        global filename
+        file = open(filename, "a+")
         file.write(add_edge)
         file.write("\n")
+        file.close()
         causalGraph.add_edge(data['nodeFrom'], data['nodeTo'])
         interface_data = dict()
         get_graph_information(interface_data)
@@ -185,7 +193,10 @@ def remove_nodes_from_causal_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
         remove_node = "remove node : " + str(data['features'])
+        global filename
+        file = open(filename, "a+")
         file.write(remove_node)
+        file.close()
         causalGraph.recalculate_causal_graph(data['features'], data['removedEdges'])
         interface_data = dict()
         get_graph_information(interface_data)
@@ -195,7 +206,10 @@ def remove_nodes_from_causal_graph():
 def undo_graph_edit():
     if request.method == 'POST':
         data = json.loads(request.data)
+        global filename
+        file = open(filename, "a+")
         file.write("undo\n")
+        file.close()
         causalGraph.undo_last_edit(data)
         interface_data = dict()
         return jsonify(interface_data)
@@ -226,6 +240,8 @@ def cal_scores_and_classify():
     if request.method == 'POST':
         data = json.loads(request.data)
         MB = "Markov Blanket: " + str(data['names'])
+        global filename
+        file = open(filename, "a+")
         file.write(MB)
         file.write("\n")
         rank_loss = FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['names'])
@@ -288,7 +304,7 @@ def cal_scores_and_classify():
             file.write("\n")
             file.write("\n")
         trial_number += 1
-
+        file.close()
         interface_data['rankLoss'] = rank_loss
         
         return jsonify(interface_data)
@@ -310,6 +326,8 @@ def send_new_calculated_MI():
 def classify():
     global trial_number
     if request.method == 'POST':
+        global filename
+        file = open(filename, "a+")
         features = json.loads(request.data)
         classifier.classify(features['features'])
         data = dict()
@@ -338,6 +356,7 @@ def classify():
         file.write("AUC: " + str(classifier.auc))
         file.write("\n")
         file.write("\n")
+        file.close()
         trial_number += 1
         
         #print ("features: " + str(features['features']))
