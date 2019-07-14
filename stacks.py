@@ -115,9 +115,6 @@ def initialize_data():
     features = dataframe.drop([class_name], axis=1)
     target = pd.DataFrame(dataframe[class_name])#pd.read_csv(DATA_FOLDER + 'features.csv')#convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
     class_values = np.sort(dataframe[class_name].unique())#convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
-
-    global trial_number
-    trial_number = 0 
     global classifier
     classifier = Classifier(DATA_FOLDER, class_name)
 
@@ -140,6 +137,7 @@ def initialize_graph():
         filename = "data" + str(userID) + ".txt"
         global file
         file = open(filename, "a+")
+        file.write("hi\n")
         global causalGraph
         causalGraph = CausalGraph(classifier.df_train, data['forbiddenEdges'], data['requiredEdges'], class_name)
         interface_data = dict()
