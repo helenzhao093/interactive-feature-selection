@@ -223,6 +223,8 @@ def get_graph_information(data_dict):
 
 @app.route("/calculateScoresAndClassify", methods=["POST"])
 def cal_scores_and_classify():
+    global trial_number
+    trial_number = 0
     if request.method == 'POST':
         data = json.loads(request.data)
         MB = "Markov Blanket: " + str(data['names'])
@@ -245,7 +247,7 @@ def cal_scores_and_classify():
             interface_data['auc'] = 0
             interface_data['MI'] = 0
             file.write("trial: " + str(trial_number))
-            timenow = datatime.now()
+            timenow = datetime.now()
             file.write("time: " + str(timenow))
             file.write("\n")
             file.write("accuracy: " + str(0))
@@ -273,7 +275,7 @@ def cal_scores_and_classify():
             interface_data['auc'] = classifier.auc
             interface_data['MI'] = FEATURE_DATA.MI
             file.write("trial: " + str(trial_number))
-            timenow = datatime.now()
+            timenow = datetime.now()
             file.write("time: " + str(timenow))
             file.write("\n")
             file.write("accuracy: " + str(classifier.accuracy))
@@ -308,6 +310,7 @@ def send_new_calculated_MI():
 
 @app.route("/classify", methods=['POST'])
 def classify():
+    global trial_number
     if request.method == 'POST':
         features = json.loads(request.data)
         classifier.classify(features['features'])
@@ -321,7 +324,7 @@ def classify():
         data['rocCurve'] = classifier.rocCurve
         data['auc'] = classifier.auc
         file.write("trial: " + str(trial_number))
-        timenow = datatime.now()
+        timenow = datetime.now()
         file.write("time: " + str(timenow))
         file.write("\n")
         file.write("features: " + str(features['features']))
