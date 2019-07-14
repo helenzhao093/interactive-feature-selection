@@ -44,7 +44,7 @@ tetrad = None
 prior = None
 class_name = ""
 file = None
-trial_number = 0
+trial_number = None
 
 def allowed_file(filename):
     return '.' in filename and \
