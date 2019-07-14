@@ -336,7 +336,7 @@ class AppInterface extends React.Component {
 
             _LTracker.push({
                 'eventName': 'feature importance snapshot',
-                'userId': userID,
+                'userID': userID,
                 'lowestRankFeatures': forbiddenEdgesInfo.lowestRankFeatures,
                 'highestRankFeatures': requiredEdgesInfo.highestRankFeatures,
                 'featureNameToRank': featureRanks.featureNameToRankMap,

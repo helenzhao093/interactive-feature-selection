@@ -134,8 +134,8 @@ def initialize_data():
 def initialize_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
-        userId = data['userId']
-        filename = "data" + userId + ".txt"
+        userID = data['userID']
+        filename = "data" + str(userID) + ".txt"
         global file
         global trial_number
         trial_number = 0 
