@@ -150,7 +150,7 @@ def initialize_graph():
 def remove_edge_from_dot_src():
     if request.method == 'POST':
         data = json.loads(request.data)
-        edge_removed = "remove edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo']))
+        edge_removed = "remove edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo'])
         file.write(edge_removed)
         file.write("\n")
         causalGraph.remove_edge_from_graph(data['nodeFrom'], data['nodeTo'])
@@ -162,7 +162,7 @@ def remove_edge_from_dot_src():
 def reverse_edge():
     if request.method == 'POST':
         data = json.loads(request.data)
-        edge_reversed = "reverse edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo']))
+        edge_reversed = "reverse edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo'])
         file.write(edge_reversed)
         file.write("\n")
         causalGraph.reverse_edge(data['nodeFrom'], data['nodeTo'])
@@ -174,7 +174,7 @@ def reverse_edge():
 def add_edge_to_causal_graph():
     if request.method == 'POST':
         data = json.loads(request.data)
-        add_edge = "add edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo']))
+        add_edge = "add edge: " + str(data['nodeFrom']) + " -> " + str(data['nodeTo'])
         file.write(add_edge)
         file.write("\n")
         causalGraph.add_edge(data['nodeFrom'], data['nodeTo'])
