@@ -107,11 +107,12 @@ class Classifier:
         self.auc = dict()
         for i in range(n_classes):
             class_label = self.class_labels[i]
-            if y_bin[0].length == 0:
+            print y_bin[0]
+            if len(y_bin[0]) == 1:
                 y = y_bin[:,0]
             else:
                 y = y_bin[:,i]
-            fpr, tpr, threshold = roc_curve(y_bin[:,i], y_score[:, i], drop_intermediate=False)
+            fpr, tpr, threshold = roc_curve(y, y_score[:, i], drop_intermediate=False)
             # print threshold
             self.rocCurve[class_label] = []
             for i in range(len(fpr)):
