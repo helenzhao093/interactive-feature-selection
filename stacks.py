@@ -45,6 +45,7 @@ prior = None
 class_name = ""
 filename = ""
 trial_number = None
+rank_loss = 0
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -136,7 +137,6 @@ def initialize_graph():
         userID = data['userID']
         global filename
         filename = "data" + str(userID) + ".txt"
-        #file = open(filename, "a+")
         global causalGraph
         causalGraph = CausalGraph(classifier.df_train, data['forbiddenEdges'], data['requiredEdges'], class_name)
         interface_data = dict()
@@ -236,7 +236,9 @@ def get_graph_information(data_dict):
 @app.route("/calculateScoresAndClassify", methods=["POST"])
 def cal_scores_and_classify():
     global trial_number
+    global rank_loss
     trial_number = 0
+    rank_loss = 0
     if request.method == 'POST':
         data = json.loads(request.data)
         MB = "Markov Blanket: " + str(data['names'])
@@ -289,6 +291,7 @@ def cal_scores_and_classify():
             interface_data['auc'] = classifier.auc
             interface_data['MI'] = FEATURE_DATA.MI
             file.write("trial: " + str(trial_number))
+            file.write("\n")
             timenow = datetime.now()
             file.write("time: " + str(timenow))
             file.write("\n")
@@ -311,6 +314,7 @@ def cal_scores_and_classify():
 
 @app.route("/calculateScores", methods=["POST"])
 def send_new_calculated_MI():
+    global rank_loss
     if request.method == 'POST':
         data = json.loads(request.data)
         rank_loss = FEATURE_DATA.calculate_rank_loss(data['featureRank'], data['names'])
@@ -325,6 +329,7 @@ def send_new_calculated_MI():
 @app.route("/classify", methods=['POST'])
 def classify():
     global trial_number
+    global rank_loss
     if request.method == 'POST':
         global filename
         file = open(filename, "a+")
@@ -340,6 +345,7 @@ def classify():
         data['rocCurve'] = classifier.rocCurve
         data['auc'] = classifier.auc
         file.write("trial: " + str(trial_number))
+        file.write("\n")
         timenow = datetime.now()
         file.write("time: " + str(timenow))
         file.write("\n")
@@ -352,6 +358,8 @@ def classify():
         file.write("accuracyValidation: " + str(classifier.accuracy_validation))
         file.write("\n")
         file.write("MI: " + str(FEATURE_DATA.MI))
+        file.write("\n")
+        file.write("rankLoss: " + str(rank_loss))
         file.write("\n")
         file.write("AUC: " + str(classifier.auc))
         file.write("\n")
