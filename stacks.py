@@ -267,6 +267,7 @@ def cal_scores_and_classify():
             file.write("trial: " + str(trial_number))
             timenow = datetime.now()
             file.write("time: " + str(timenow))
+            file.write("\n")
             file.write("time elapse: " + str(timenow - prev_time))
             prev_time = timenow
             file.write("\n")
@@ -353,6 +354,7 @@ def classify():
         file.write("\n")
         timenow = datetime.now()
         file.write("time: " + str(timenow))
+        file.write("\n")
         file.write("time elapse: " + str(timenow - prev_time))
         prev_time = timenow
         file.write("\n")
