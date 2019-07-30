@@ -46,6 +46,7 @@ class_name = ""
 filename = ""
 trial_number = None
 rank_loss = 0
+prev_time = datetime.now()
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -237,6 +238,7 @@ def get_graph_information(data_dict):
 def cal_scores_and_classify():
     global trial_number
     global rank_loss
+    global prev_time
     trial_number = 0
     rank_loss = 0
     if request.method == 'POST':
@@ -265,6 +267,8 @@ def cal_scores_and_classify():
             file.write("trial: " + str(trial_number))
             timenow = datetime.now()
             file.write("time: " + str(timenow))
+            file.write("time elapse: " + str(timenow - prev_time))
+            prev_time = timenow
             file.write("\n")
             file.write("accuracy: " + str(0))
             file.write("\n")
@@ -330,6 +334,7 @@ def send_new_calculated_MI():
 def classify():
     global trial_number
     global rank_loss
+    global prev_time
     if request.method == 'POST':
         global filename
         file = open(filename, "a+")
@@ -348,6 +353,8 @@ def classify():
         file.write("\n")
         timenow = datetime.now()
         file.write("time: " + str(timenow))
+        file.write("time elapse: " + str(timenow - prev_time))
+        prev_time = timenow
         file.write("\n")
         file.write("features: " + str(features['features']))
         file.write("\n")
