@@ -1,0 +1,9 @@
+HistoricAvgTemp,LowTemp,HistoricAvgRainfall,AirPressure,Humidity,Precipitation,WeatherCondition
+60-69F,50-59F,>2in,29-29.5in,high,>2in,foggy
+80-89F,80-89F,1-2in,29-29.5in,high,1-2in,rainy
+80-89F,80-89F,0-1in,29.5-30in,high,0-1in,rainy
+60-69F,60-69F,>2in,29-29.5in,high,>2in,foggy
+80-89F,80-89F,0-1in,29.5-30in,medium,1-2in,rainy
+60-69F,60-69F,1-2in,29-29.5in,medium,1-2in,foggy
+50-59F,50-59F,>2in,29-29.5in,high,>2in,foggy
+80-89F,80-89F,>2in,>30in,medium,>2in,rainy

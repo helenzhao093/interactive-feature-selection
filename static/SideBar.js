@@ -12,7 +12,7 @@ class SideBarItem extends React.Component {
     }
 
     render() {
-        //console.log(this.props)
+        console.log(this.props)
         return (
             <div>
                 <button className={"sidebar-item"} onClick={() => this.props.toggleDisplay(this.props.index)}>{this.props.featureName}</button>
@@ -60,7 +60,7 @@ class SideBar extends React.Component {
     }
 
     render() {
-        //console.log(this.props.featureInfo);
+        console.log(this.props.featureInfo);
         return (
             <div className={"sidebar-right sidebar-card animate-right"} style={{display: this.props.show ? "block" : "none"}}>
                 <button className={"sidebar-item"} onClick={this.props.close}>{"Close x"}</button>

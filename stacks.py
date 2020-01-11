@@ -110,6 +110,7 @@ def initialize_data():
     des = dict()
     if os.path.exists(DATA_FOLDER + 'description.csv'):
         des = parse_description(DATA_FOLDER + 'description.csv')
+        print des
     feature_names = parse_features(DATA_FOLDER + 'names.csv')
     dataframe = pd.read_csv(DATA_FOLDER + 'train_datafile.csv')
     global class_name
@@ -138,6 +139,20 @@ def initialize_graph():
         userID = data['userID']
         global filename
         filename = "data" + str(userID) + ".txt"
+        file = open(filename, "a+")
+        file.write("forbidden edges: ")
+        for edge in data['forbiddenEdges']:
+            file.write(edge[0] + " -> " + edge[1])
+        file.write("\n")
+        file.write("required edges: ")
+        for edge in data['requiredEdges']:
+            file.write(edge[0] + " -> " + edge[1])
+        file.write("\n")
+        file.write("ranking: \n")
+        for rank in data['featureRankToNames'].keys():
+            file.write(str(rank) + " " + " ".join(data['featureRankToNames'][rank]))
+            file.write("\n")
+        file.close()
         global causalGraph
         causalGraph = CausalGraph(classifier.df_train, data['forbiddenEdges'], data['requiredEdges'], class_name)
         interface_data = dict()

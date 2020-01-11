@@ -25,11 +25,19 @@
 
 .sidebar-toggle {
     float: right !important;
-    font-size: 40px !important;
+    font-size: 20px !important;
     border: none;
     cursor: pointer;
     background: #20232a;
     color: #ffffff;
+    height: 64px;
+    width: 64px;
+}
+
+.sidebar-icon {
+    display: block;
+    padding:20px;
+    pointer-events: none;
 }
 
 .help-icon-tooltip {

@@ -1,12 +1,12 @@
 /*** @jsx React.DOM */
 
-
-_LTracker.push('Hello World');
+//_LTracker.push('Hello World');
 
 var IDFun = function () {
-    var userId = prompt('Please enter your ID.');
-    return parseInt(userId);
-    //return '_' + Math.random().toString(36).substr(2, 9);
+    let d = new Date();
+    return d.getMilliseconds().toString() + d.getMinutes().toString()
+    //var userId = prompt('Please enter your ID.');
+    //return parseInt(userId);
 };
 
 const userID = IDFun();
