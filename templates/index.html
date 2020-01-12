@@ -2,20 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Stacks</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='histogram.css')}}">
-    <script type="text/javascript" src="//cloudfront.loggly.com/js/loggly.tracker-latest.min.js" async></script>
-    <script>
-        var _LTracker = _LTracker || [];
-        _LTracker.push({'logglyKey': '0b9c419e-cb66-4790-8346-d811e57da298',
-        'sendConsoleErrors' : true,
-        'tag' : 'loggly-jslogger'  });
-    </script>
+    <title>IFS</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css')}}">
   </head>
   <body style="margin: 0;">
     <div id='root'></div>
-
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-dom.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
@@ -24,21 +15,19 @@
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://unpkg.com/viz.js@1.8.0/viz.js"></script>
     <script src="https://unpkg.com/d3-graphviz@0.1.2/build/d3-graphviz.js"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='index.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='AppInterface.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='CausalGraph.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='ExpertKnowledge.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='Tab.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='SideBar.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='ProgressGraph.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='PieChart.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='ConfusionMatrix.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='SunburstChart.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='Settings.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='FeatureParallelCoordinates.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='VerticalHistogram.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='FeatureHistogram.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='CheckboxMultiSelect.js') }}"></script>
-    <script type="text/jsx" src="{{ url_for('static', filename='RocCurve.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/AppInterface.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/CausalGraph.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/ExpertKnowledge.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/Tab.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/SideBar.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/ProgressGraph.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/PieChart.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/ConfusionMatrix.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/SunburstChart.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/Settings.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/FeatureParallelCoordinates.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/CheckboxMultiSelect.js') }}"></script>
+    <script type="text/jsx" src="{{ url_for('static', filename='js/RocCurve.js') }}"></script>
   </body>
 </html>
