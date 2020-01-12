@@ -1,4 +1,5 @@
 from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import precision_score
@@ -22,7 +23,7 @@ class Classifier:
         df_test_og = pd.read_csv(dirname + 'test_datafile.csv')
         df_validate_og = pd.read_csv(dirname + 'validation_datafile.csv')
 
-        self.clf = GaussianNB()
+        self.clf = RandomForestClassifier(max_depth=2, random_state=0) #GaussianNB()
         self.clf_roc = OneVsRestClassifier(GaussianNB())
         self.accuracy = 0
         self.precision = 0
