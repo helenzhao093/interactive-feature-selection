@@ -39,7 +39,7 @@ class RocCurve extends React.Component {
    var dashLines = Object.keys(this.props.rocCurveTwo).filter((label) => this.props.displayClass[label].TP.display == true );
 
 
-   var draw = this.getDrawFunction(this.state.fprScale, this.state.tprScale);//= d3.line().x(function(d) { return console.log(d); that.state.fprScale(d[0])}).y(function(d) { return that.state.tprScale(d[1])});
+   var draw = this.getDrawFunction(this.state.fprScale, this.state.tprScale);
    return(
      <svg id={'auc-graph-' + this.props.name} width={this.props.size[0]} height={this.props.size[1]}>
        <g transform={`translate(${this.state.margin.left},${this.state.margin.top})`}>

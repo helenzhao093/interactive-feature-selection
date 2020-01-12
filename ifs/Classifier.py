@@ -22,7 +22,7 @@ class Classifier:
         df_test_og = pd.read_csv(dirname + 'test_datafile.csv')
         df_validate_og = pd.read_csv(dirname + 'validation_datafile.csv')
 
-        self.clf = KNeighborsClassifier(3)
+        self.clf = GaussianNB()
         self.clf_roc = OneVsRestClassifier(GaussianNB())
         self.accuracy = 0
         self.precision = 0
@@ -59,7 +59,12 @@ class Classifier:
         X_traintest, y_traintest = self.get_X_and_y(feature_names, self.df_traintest)
         X_test, y_test = self.get_X_and_y(feature_names, self.df_test)
         X_validation, y_validation = self.get_X_and_y(feature_names, self.df_validate)
-        self.clf.fit(X_train, y_train)
+        #self.clf.fit(X_train, y_train)
+        skf = StratifiedKFold(n_splits=5)
+        for train_index, test_index in skf.split(X_traintest, y_traintest):
+            train, test = X_traintest[train_index], X_traintest[test_index]
+            self.clf.fit(train, test)
+
         accuracy_train = self.clf.score(X_train, y_train)
         accuracy_test = self.clf.score(X_test, y_test) # testing accuracy
         accuracy_traintest = self.clf.score(X_traintest, y_traintest)
@@ -68,12 +73,12 @@ class Classifier:
         self.proba = self.clf.predict_proba(X_train)
 
         predicted_traintest = self.clf.predict(X_traintest)
-        self.predicted = predicted_traintest
+        self.predicted = self.accuracy_train
         self.init_confusion_matrix(y_traintest, predicted_traintest)
-        self.get_roc_curve(X_train, X_test, y_train, y_test)
+        self.get_roc_curve()
 
-        self.accuracy_train = accuracy_train
-        self.accuracy = accuracy_traintest
+        self.accuracy_train = accuracy_traintest #accuracy_train
+        self.accuracy = accuracy_validation  #accuracy_traintest
         self.accuracy_validation = accuracy_validation        
 
         #skf = StratifiedKFold(n_splits=5)
@@ -97,12 +102,12 @@ class Classifier:
         #self.init_confusion_matrix(y, self.predicted)
         #self.set_average_scores(accuracy, accuracy_train, precision, recall)
 
-    def get_roc_curve(self, X_train, X_test, y_train, y_test):
-        classes = sorted(list(set(y_test)))
+    def get_roc_curve(self):
+        classes = sorted(list(set(self.y_traintest)))
         n_classes = len(classes)
-        y_bin = label_binarize(y_test, classes=classes)
+        y_bin = label_binarize(self.y_traintest, classes=classes)
         # X_train, X_test, y_train, y_test = train_test_split(X, y_bin, test_size=0.33, random_state=0)
-        y_score = self.clf_roc.fit(X_train, y_train).predict_proba(X_test)
+        y_score = self.clf.predict_proba(self.X_traintest)#self.clf_roc.fit(X_train, y_train).predict_proba(X_test)
         self.rocCurve = dict()
         self.auc = dict()
         for i in range(n_classes):
