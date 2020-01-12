@@ -11,6 +11,12 @@ IFS incorporates the human expert who understands the classification problem dom
 IFS Web application is running at http://35.192.120.176:8889/demo
 
 ## Tutorials 
+1. [Express Feature Importance](https://screencast-o-matic.com/watch/cqV3rX3ZtO)
+2. [Build Causal Graph](https://screencast-o-matic.com/watch/cqehqu00u4)
+3. [Feature Selection](https://screencast-o-matic.com/watch/cqV0nP3ZsW)
+4. [Feature Selection Analysis](https://screencast-o-matic.com/watch/cqV3rb3ZtL)
+5. [Performance Analysis](https://screencast-o-matic.com/watch/cqnXnj37X7)
+6. [Compare Classifiers](https://screencast-o-matic.com/watch/cqnXn73728)
 
 
 ## Components
@@ -31,5 +37,5 @@ Confusion matrix, ROC curve, and statistic metrics are shown to help the user an
 ![Performance Analysis](./images/PerformanceAnalysis.png)
 
 ### Dependencies
-Pycausal https://github.com/bd2kccd/py-causal
+[Pycausal](https://github.com/bd2kccd/py-causal)
 
