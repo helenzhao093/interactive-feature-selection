@@ -78,7 +78,7 @@ class Classifier:
         self.proba = self.clf.predict_proba(X_train)
 
         predicted_traintest = self.clf.predict(X_traintest)
-        self.predicted = self.accuracy_train
+        #self.predicted = predicted
         self.init_confusion_matrix(y_traintest, predicted_traintest)
         self.get_roc_curve()
 
