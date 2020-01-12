@@ -80,7 +80,7 @@ class Classifier:
         predicted_traintest = self.clf.predict(X_traintest)
         #self.predicted = predicted
         self.init_confusion_matrix(y_traintest, predicted_traintest)
-        self.get_roc_curve()
+        self.get_roc_curve(X_traintest, y_traintest)
 
         self.accuracy_train = round(sum(accuracy_traintest) * 1.0 / len(accuracy_traintest), 2) # #accuracy_train
         self.accuracy = round(sum(accuracy_validation) * 1.0 / len(accuracy_validation), 2)  #accuracy_validation  #accuracy_traintest
@@ -107,12 +107,12 @@ class Classifier:
         #self.init_confusion_matrix(y, self.predicted)
         #self.set_average_scores(accuracy, accuracy_train, precision, recall)
 
-    def get_roc_curve(self):
-        classes = sorted(list(set(self.y_traintest)))
+    def get_roc_curve(self, X_traintest, y_traintest):
+        classes = sorted(list(set(y_traintest)))
         n_classes = len(classes)
-        y_bin = label_binarize(self.y_traintest, classes=classes)
+        y_bin = label_binarize(y_traintest, classes=classes)
         # X_train, X_test, y_train, y_test = train_test_split(X, y_bin, test_size=0.33, random_state=0)
-        y_score = self.clf.predict_proba(self.X_traintest)#self.clf_roc.fit(X_train, y_train).predict_proba(X_test)
+        y_score = self.clf.predict_proba(X_traintest)#self.clf_roc.fit(X_train, y_train).predict_proba(X_test)
         self.rocCurve = dict()
         self.auc = dict()
         for i in range(n_classes):
