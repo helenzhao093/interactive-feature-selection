@@ -8,7 +8,7 @@ IFS incorporates the human expert who understands the classification problem dom
 4. The user uses the visualization of the traing results to iteratively select feature subsets and generate high performing and more transparent models. 
 
 ## Accessing
-IFS Web application is running at http://35.192.120.176:8889/demo
+To see access the web application with a pre-loaded dataset go to http://35.192.120.176:8889/demo
 
 ## Tutorials 
 1. [Express Feature Importance](https://screencast-o-matic.com/watch/cqV3rX3ZtO)
