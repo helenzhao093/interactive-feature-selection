@@ -227,12 +227,6 @@ class FeatureParallelCoordinates extends React.Component {
           logRange.push(featureValues[i]);
         }
       }
-      _LTracker.push({
-        'eventName' : 'filter_feature_range', 
-        'user': userID,
-        'feature': featureName,
-        'range': logRange
-      });
 
       this.setState({
           displayRanges: this.state.displayRanges,
