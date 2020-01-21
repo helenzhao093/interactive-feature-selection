@@ -1,0 +1,51 @@
+forbidden edges: Migraine -> LabelDB -> LabelCT_head -> LabelStopSE -> LabelNOF -> LabelConstipation -> LabelHysterectomy3 -> LabelPrior -> Label
+required edges: Age -> LabelDiuretic -> LabelSeverity -> LabelNumber_prev_prescription -> LabelDaily_Incontinence -> LabelDayVoid -> LabelNightVoid -> LabelPostmenopausal -> Label
+ranking: 
+1 Stroke NeruDisease Anxiety Tobacco StressIncontinence Ba
+0 Age Diuretic Severity Number_prev_prescription Daily_Incontinence DayVoid NightVoid Postmenopausal
+3 Migraine DB CT_head StopSE NOF Constipation Hysterectomy3 Prior
+2 BMI Hysterectomy1 Hysterectomy2 Sling
+reverse edge: Severity -> Diuretic
+reverse edge: Postmenopausal -> Age
+Markov Blanket: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'Daily_Incontinence', u'Number_prev_prescription', u'Severity', u'Diuretic', u'Age']
+trial: 0
+time: 2020-01-21 21:56:18.402660
+accuracy: 0.7
+accuracyTrain: 0.68
+accuracyValidation: 0.7
+MI: 0.9917658580774394
+rankLoss: 169.079515964
+
+trial: 1
+time: 2020-01-21 21:57:57.846816
+time elapse: 0:10:06.936337
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'Daily_Incontinence', u'Number_prev_prescription', u'Severity', u'Age', u'Stroke', u'Anxiety', u'NeruDisease', u'Diuretic', u'BMI', u'CT_head', u'Ba', u'NOF']
+accuracy: 0.63
+accuracyTrain: 0.72
+accuracyValidation: 0.63
+MI: 0.9917658580774394
+rankLoss: 187.487974288
+AUC: {0: 0.20306795131845845, 1: 0.7969320486815415}
+
+trial: 2
+time: 2020-01-21 21:58:47.149698
+time elapse: 0:00:49.302882
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'Daily_Incontinence', u'Number_prev_prescription', u'Severity', u'Age', u'Anxiety', u'NeruDisease', u'Diuretic', u'BMI', u'NOF']
+accuracy: 0.7
+accuracyTrain: 0.73
+accuracyValidation: 0.7
+MI: 0.9917658580774394
+rankLoss: 181.660807912
+AUC: {0: 0.19508113590263687, 1: 0.8049188640973631}
+
+trial: 3
+time: 2020-01-21 21:59:21.108209
+time elapse: 0:00:33.958511
+features: [u'NightVoid', u'DayVoid', u'Daily_Incontinence', u'Number_prev_prescription', u'Severity', u'Age', u'Diuretic', u'NOF']
+accuracy: 0.71
+accuracyTrain: 0.69
+accuracyValidation: 0.71
+MI: 0.9917658580774394
+rankLoss: 192.621986251
+AUC: {0: 0.22210953346855983, 1: 0.7778904665314402}
+

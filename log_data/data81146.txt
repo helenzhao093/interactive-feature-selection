@@ -1,0 +1,70 @@
+forbidden edges: 
+required edges: 
+ranking: 
+1 
+0 Age BMI Diuretic Stroke Severity NeruDisease Migraine Anxiety DB CT_head Tobacco Number_prev_prescription StopSE NOF Daily_Incontinence DayVoid NightVoid StressIncontinence Constipation Hysterectomy1 Hysterectomy2 Hysterectomy3 Sling Prior Postmenopausal Ba
+Markov Blanket: []
+trial: 0time: 2020-01-12 20:47:08.210087
+time elapse: 0:00:12.202018
+accuracy: 0
+accuracyTrain: 0
+accuracyValidation: 0
+MI: 0
+rankLoss: 0
+rankLoss: 0.0
+
+trial: 1
+time: 2020-01-12 20:47:11.982655
+time elapse: 0:00:03.772568
+features: [u'Age', u'BMI', u'Diuretic', u'Stroke', u'Severity', u'NeruDisease']
+accuracy: 0.62
+accuracyTrain: 0.59
+accuracyValidation: 0.62
+MI: 0.9917658580774394
+rankLoss: 0.0
+AUC: {0: 0.351369168356998, 1: 0.6486308316430021}
+
+trial: 2
+time: 2020-01-12 20:47:26.473491
+time elapse: 0:00:14.490836
+features: [u'Age', u'BMI', u'Diuretic', u'Stroke', u'Severity', u'NeruDisease', u'Migraine', u'Anxiety', u'DB', u'CT_head', u'Tobacco', u'Number_prev_prescription', u'StopSE', u'NOF', u'Daily_Incontinence', u'DayVoid', u'NightVoid', u'StressIncontinence', u'Constipation', u'Hysterectomy1', u'Hysterectomy2', u'Hysterectomy3', u'Sling', u'Prior', u'Postmenopausal', u'Ba']
+accuracy: 0.66
+accuracyTrain: 0.66
+accuracyValidation: 0.66
+MI: 0.9917658580774394
+rankLoss: 0.0
+AUC: {0: 0.22941176470588234, 1: 0.7705882352941176}
+
+trial: 3
+time: 2020-01-12 20:47:54.727192
+time elapse: 0:00:28.253701
+features: [u'Age', u'BMI', u'Diuretic', u'Stroke', u'Severity', u'NeruDisease', u'Migraine', u'Anxiety', u'DB', u'CT_head', u'Tobacco', u'Number_prev_prescription', u'StopSE', u'NOF', u'Daily_Incontinence', u'DayVoid', u'NightVoid', u'StressIncontinence']
+accuracy: 0.67
+accuracyTrain: 0.67
+accuracyValidation: 0.67
+MI: 0.9917658580774394
+rankLoss: 0.0
+AUC: {0: 0.23433062880324543, 1: 0.7656693711967546}
+
+trial: 4
+time: 2020-01-12 20:49:00.225949
+time elapse: 0:01:05.498757
+features: [u'Age', u'BMI', u'Diuretic', u'Stroke', u'Severity', u'NeruDisease', u'Migraine', u'Anxiety', u'DB', u'CT_head', u'Tobacco', u'Number_prev_prescription']
+accuracy: 0.62
+accuracyTrain: 0.64
+accuracyValidation: 0.62
+MI: 0.9917658580774394
+rankLoss: 0.0
+AUC: {0: 0.2761663286004057, 1: 0.7238336713995943}
+
+trial: 5
+time: 2020-01-12 20:49:11.477955
+time elapse: 0:00:11.252006
+features: [u'Age', u'BMI', u'Diuretic', u'Stroke', u'Severity', u'NeruDisease', u'Migraine']
+accuracy: 0.55
+accuracyTrain: 0.6
+accuracyValidation: 0.55
+MI: 0.9917658580774394
+rankLoss: 0.0
+AUC: {0: 0.34574036511156186, 1: 0.6542596348884382}
+

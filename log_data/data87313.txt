@@ -1,0 +1,27 @@
+forbidden edges: 
+required edges: Constipation -> Label
+ranking: 
+1 Anxiety Hysterectomy2
+0 Constipation
+3 
+2 Age BMI Diuretic Stroke Severity NeruDisease Migraine DB CT_head Tobacco Number_prev_prescription StopSE NOF Daily_Incontinence DayVoid NightVoid StressIncontinence Hysterectomy1 Hysterectomy3 Sling Prior Postmenopausal Ba
+Markov Blanket: [u'Constipation']
+trial: 0
+time: 2020-01-21 16:18:55.860427
+accuracy: 0.52
+accuracyTrain: 0.52
+accuracyValidation: 0.52
+MI: 0.020342016053407963
+rankLoss: 57.2985270771
+
+trial: 1
+time: 2020-01-21 16:19:27.158456
+time elapse: 7 days, 9:57:44.137875
+features: [u'Constipation', u'Age', u'BMI', u'Diuretic', u'Stroke', u'Severity', u'NeruDisease', u'Migraine', u'Anxiety']
+accuracy: 0.59
+accuracyTrain: 0.65
+accuracyValidation: 0.59
+MI: 0.9917658580774394
+rankLoss: 59.1765086095
+AUC: {0: 0.28734787018255575, 1: 0.7126521298174443}
+

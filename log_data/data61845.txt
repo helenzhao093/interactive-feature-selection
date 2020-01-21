@@ -1,0 +1,15 @@
+forbidden edges: 
+required edges: 
+ranking: 
+1 
+0 Age BMI Diuretic Stroke Severity NeruDisease Migraine Anxiety DB CT_head Tobacco Number_prev_prescription StopSE NOF Daily_Incontinence DayVoid NightVoid StressIncontinence Constipation Hysterectomy1 Hysterectomy2 Hysterectomy3 Sling Prior Postmenopausal Ba
+Markov Blanket: []
+trial: 0time: 2020-01-12 20:45:26.526168
+time elapse: 0:00:16.511735
+accuracy: 0
+accuracyTrain: 0
+accuracyValidation: 0
+MI: 0
+rankLoss: 0
+rankLoss: 0.0
+

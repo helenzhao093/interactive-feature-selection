@@ -1,0 +1,6 @@
+forbidden edges: 
+required edges: AirPressure -> WeatherCondition
+ranking: 
+1 HistoricAvgTemp LowTemp HistoricAvgRainfall Humidity Precipitation
+0 AirPressure
+2 
