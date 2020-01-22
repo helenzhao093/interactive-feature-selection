@@ -65,26 +65,34 @@ class Classifier:
         accuracy_test = []
         accuracy_traintest = []
         accuracy_validation = []
-        skf = StratifiedKFold(n_splits=5)
-        for train_index, test_index in skf.split(X_traintest, y_traintest):
-            train_x, test = X_traintest[train_index], X_traintest[test_index]
-            train_y, test_y = y_traintest[train_index], y_traintest[test_index]
-            self.clf.fit(train_x, train_y)
-            accuracy_train.append(self.clf.score(X_train, y_train))
-            accuracy_test.append(self.clf.score(X_test, y_test)) # testing accuracy
-            accuracy_traintest.append(self.clf.score(X_traintest, y_traintest))
-            accuracy_validation.append(self.clf.score(X_validation, y_validation))# validation accuracy
+
+        self.clf.fit(X_train, y_train)
+        accuracy_train.append(self.clf.score(X_train, y_train))
+        accuracy_test.append(self.clf.score(X_test, y_test)) # testing accuracy
+        accuracy_traintest.append(self.clf.score(X_traintest, y_traintest))
+        accuracy_validation.append(self.clf.score(X_validation, y_validation))# validation accuracy
+
+
+        #skf = StratifiedKFold(n_splits=5)
+        #for train_index, test_index in skf.split(X_traintest, y_traintest):
+        #    train_x, test = X_traintest[train_index], X_traintest[test_index]
+        #    train_y, test_y = y_traintest[train_index], y_traintest[test_index]
+        #    self.clf.fit(train_x, train_y)
+        #    accuracy_train.append(self.clf.score(X_train, y_train))
+        #    accuracy_test.append(self.clf.score(X_test, y_test)) # testing accuracy
+        #    accuracy_traintest.append(self.clf.score(X_traintest, y_traintest))
+        #    accuracy_validation.append(self.clf.score(X_validation, y_validation))# validation accuracy
 
         predicted = self.clf.predict(X_train)
         self.proba = self.clf.predict_proba(X_train)
 
-        predicted_traintest = self.clf.predict(X_traintest)
+        predicted_train = self.clf.predict(X_train)
         #self.predicted = predicted
-        self.init_confusion_matrix(y_traintest, predicted_traintest)
-        self.get_roc_curve(X_traintest, y_traintest)
+        self.init_confusion_matrix(y_train, predicted_train)
+        self.get_roc_curve(X_train, y_train)
 
-        self.accuracy_train = round(sum(accuracy_traintest) * 1.0 / len(accuracy_traintest), 2) # #accuracy_train
-        self.accuracy = round(sum(accuracy_validation) * 1.0 / len(accuracy_validation), 2)  #accuracy_validation  #accuracy_traintest
+        self.accuracy_train = round(sum(accuracy_train) * 1.0 / len(accuracy_train), 2) # #accuracy_train
+        self.accuracy = round(sum(accuracy_test) * 1.0 / len(accuracy_test), 2)  #accuracy_validation  #accuracy_traintest
         self.accuracy_validation = round(sum(accuracy_validation) * 1.0 / len(accuracy_validation), 2)      
 
         #skf = StratifiedKFold(n_splits=5)
