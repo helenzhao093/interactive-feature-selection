@@ -1,0 +1,29 @@
+Age: Age at which Anti-Cholinergic is first prescribed on a patient.
+BMI: Body Mass Index(kg/m2) at time that Anti-Cholinergic was prescribed.
+Diuretic: Diuretic refers to any medicines that promotes the production of urine. A value of 0 on this feature means that this sample has never used any Diuretic medicine, and 1 means the contrary.
+Stroke: Stroke is a damage to the brain from interruption of its blood supply. A value of 0 on this feature means that this sample has histories of suffering from stroke, and 1 means the contrary.
+SSRI: This feature refers to if this sample is currently using Selective serotonin reuptake inhibitor (SSRI), Serotonin and norepinephrine reuptake inhibitors (SNRI), or Atypical Antipsychotic drugs.
+NeruDisease: NeruDisease refers to if the sample has any history of Neurodegenerative condtions such as Parkinsons, MS, etc.
+Migraine: Migraine refers to if the patients has history of migraine, a headache of varying intensity, often accompanied by nausea and sensitivity to light and sound.
+Anxiety: Subjective report of patient if he or she feels anxious.
+Narcotic:
+Gabapentin: It refers to whether or not this sampling if using Gabapentin, nerve pain medication and anticonvulsant. related medicine.
+DB: DB literally stands for Diabetes. If this sample does not have Diabetes, value of DB will be set to 5.5 by default. If Diabetes is diagnosed, then value of DB is set to the actual level of Hemoglobin A1C (NbA1c).
+CT head: If the sample does CT scan or MRI on head within 12 months of starting medicine or prior to starting medicine , with presence of SVID, this feature equals to 2, and without presence of SVID, this feature equals to 1; otherwise it equals to 0.
+CT spine: If the sample does CT scan or MRI on spine within 12 months of starting medicine or prior to starting medicine , with presence of SVID, this feature equals to 2, and without presence of SVID, this feature equals to 1; otherwise it equals to 0.
+Tobacco: This feature equals to 2 if this sample is currently a smoke, equals to 1 if former smoker, and equals 0 if never smoked before.
+Number of Previous Prescription for Anti-Spasmodics: This feature is the count of previously tried Anti- Spasmodics medicines, not necessarily failed.
+StopSE: Among those previous prescription for Anti-Spasmodics, StopSE counts the number of medicines that are stopped because patient could not tolerate side-effects.
+NOF: NOF stands for number of previous failed medications. In other words, it is the count of number of medicines that this sample does not respond to.
+Daily Incontinence: The count of number of times this sample occasionally leaks urine.
+Day Void: The count of number of void during day time.
+Night Void: The count of number of void during night time.
+Stress Incontinence: This feature flags whether or not this sample is experiencing severe Incontinence.
+Constipation: This feature flags whether or not this sample is experiencing infrequent bowel movements, and small, hard-to-pass, stool.
+Prior Hysterectomy: This feature contains three elements: total Hysterectomy, Supracervical Hysterectomy, and none. Value of zero indicates that this sample previously has none Hysterectomy, value of 1 indicates that this sample has history of having total Hysterectomy, and value of 2 indicates that this sample previously has Supracervical Hysterectomy.
+Sling: This feature indicates if the sample has previously taken any sling surgeries.
+Prior: This feature indicate the prior Prolapse surgeries the sample has taken. Choices of Prolapse surgeries contain Apical Suspension with or without Mesh, Posterior repair, Perineorrhaphy, and none. Prior is the summation of all those indicators.
+Post-menopausal: This feature indicates whether or not the sample stops menstruating, marking the end of her reproductive period.
+Ba:. 
+DO:DO stands for Detrusor Overactivity on UDS. Choices contain DO with or without leak, no Detrusor Overactivity, SUI, and no SUI. DO is the summation of all those indicators.
+Medfailed: Medfailed indicates specifically which medicine(s) this sample has previously failed. Each combination is represented by a unique number.

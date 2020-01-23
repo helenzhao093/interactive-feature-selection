@@ -1,0 +1,26 @@
+Age: continuous.
+BMI: continuous.
+Diuretic: 0, 1.
+Stroke: 0, 1.
+Severity: 0, 1, 2, 3, 4, 5, 6, 7, 8.
+NeruDisease: 0, 1.
+Migraine: 0, 1.
+Anxiety: 0, 1.
+DB: continuous.
+CT_head: 0, 1, 2.
+Tobacco: 0, 1.
+Number_prev_prescription: 0, 1, 2, 3.
+StopSE: 0, 1.
+NOF: 0, 1, 2, 3, 4.
+Daily_Incontinence: continuous.
+DayVoid: continuous.
+NightVoid: continuous.
+StressIncontinence: 0, 1.
+Constipation: 0, 1.
+Hysterectomy1: 0, 1.
+Hysterectomy2: 0, 1.
+Hysterectomy3: 0, 1.
+Sling: 0, 1.
+Prior: 0, 1.
+Postmenopausal: 0, 1.
+Ba: -3, -2, -1, 0, 1, 2.
