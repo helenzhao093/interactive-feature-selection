@@ -85,7 +85,7 @@ def dataset_1():
 @app.route("/oab_dataset")
 def dataset_2():
     global DATA_FOLDER
-    DATA_FOLDER = 'static/data/oab_test/'
+    DATA_FOLDER = 'static/data/oab_2/'
     DATASET_NAME = 'dataset2'
     return render_template('index.html')
 
@@ -370,7 +370,7 @@ def classify():
         file.write("\n")
         file.write("features: " + str(features['features']))
         file.write("\n")
-        file.write("accuracy: " + str(classifier.accuracy))
+        file.write("accuracy: " + str(classifier.accuracy)) # test accuracy
         file.write("\n")
         file.write("accuracyTrain: " + str(classifier.accuracy_train))
         file.write("\n")

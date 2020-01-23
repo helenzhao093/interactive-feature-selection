@@ -66,23 +66,22 @@ class Classifier:
         accuracy_traintest = []
         accuracy_validation = []
 
-        #self.clf.fit(X_train, y_train)
-        #accuracy_train.append(self.clf.score(X_train, y_train))
+        self.clf.fit(X_train, y_train)
+        accuracy_train.append(self.clf.score(X_train, y_train))
+        accuracy_test.append(self.clf.score(X_test, y_test)) # testing accuracy
+        accuracy_traintest.append(self.clf.score(X_traintest, y_traintest))
+        #ccuracy_validation.append(self.clf.score(X_validation, y_validation))# validation accuracy
+
+
+        #skf = StratifiedKFold(n_splits=5)
+        #for train_index, test_index in skf.split(X_train, y_train):
+        #    train_x, test = X_train[train_index], X_train[test_index]
+        #    train_y, test_y = y_train[train_index], y_train[test_index]
+        #    self.clf.fit(train_x, train_y)
+        #    accuracy_train.append(self.clf.score(X_train, y_train))
         #accuracy_test.append(self.clf.score(X_test, y_test)) # testing accuracy
         #accuracy_traintest.append(self.clf.score(X_traintest, y_traintest))
         #accuracy_validation.append(self.clf.score(X_validation, y_validation))# validation accuracy
-
-
-        skf = StratifiedKFold(n_splits=5)
-        for train_index, test_index in skf.split(X_train, y_train):
-            train_x, test = X_train[train_index], X_train[test_index]
-            train_y, test_y = y_train[train_index], y_train[test_index]
-            self.clf.fit(train_x, train_y)
-            accuracy_train.append(self.clf.score(X_train, y_train))
-        
-        accuracy_test.append(self.clf.score(X_test, y_test)) # testing accuracy
-        accuracy_traintest.append(self.clf.score(X_traintest, y_traintest))
-        accuracy_validation.append(self.clf.score(X_validation, y_validation))# validation accuracy
 
         predicted = self.clf.predict(X_traintest)
         self.proba = self.clf.predict_proba(X_traintest)
