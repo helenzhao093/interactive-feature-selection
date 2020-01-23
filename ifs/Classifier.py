@@ -89,7 +89,7 @@ class Classifier:
 
         predicted_train = self.clf.predict(X_traintest)
         #self.predicted = predicted
-        self.init_confusion_matrix(y_train, predicted_train)
+        self.init_confusion_matrix(y_traintest, predicted_train)
         self.get_roc_curve(X_traintest, y_traintest)
 
         self.accuracy_train = round(sum(accuracy_train) * 1.0 / len(accuracy_train), 2) # #accuracy_train
