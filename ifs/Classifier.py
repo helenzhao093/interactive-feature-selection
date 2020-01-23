@@ -8,6 +8,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import cross_val_score
 from sklearn import preprocessing
+from sklearn.linear_model import LogisticRegression
 import pandas as pd
 import numpy as np
 
@@ -23,8 +24,8 @@ class Classifier:
         df_test_og = pd.read_csv(dirname + 'test_datafile.csv')
         df_validate_og = pd.read_csv(dirname + 'validation_datafile.csv')
 
-        self.clf = GaussianNB()
-        self.clf_roc = OneVsRestClassifier(GaussianNB())
+        self.clf = LogisticRegression()
+        self.clf_roc = OneVsRestClassifier(LogisticRegression())
         self.accuracy = 0
         self.precision = 0
         self.recall = 0
@@ -91,8 +92,11 @@ class Classifier:
         self.get_roc_curve(X_traintest, y_traintest)
 
         self.accuracy_train = round(sum(accuracy_train) * 1.0 / len(accuracy_train), 2) # #accuracy_train
+        print self.accuracy_train
         self.accuracy = round(sum(accuracy_test) * 1.0 / len(accuracy_test), 2)  #accuracy_validation  #accuracy_traintest
-        self.accuracy_validation = round(sum(accuracy_validation) * 1.0 / len(accuracy_validation), 2)      
+        print self.accuracy
+        self.accuracy_validation = round(sum(accuracy_validation) * 1.0 / len(accuracy_validation), 2)  
+        print self.accuracy_validation 
 
         #skf = StratifiedKFold(n_splits=5)
         #skf.get_n_splits(X, y)
