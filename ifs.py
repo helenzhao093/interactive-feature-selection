@@ -89,6 +89,13 @@ def dataset_2():
     DATASET_NAME = 'dataset2'
     return render_template('index.html')
 
+@app.route("/oab_dataset2")
+def dataset_oab2():
+    global DATA_FOLDER
+    DATA_FOLDER = 'static/data/oab_test/'
+    DATASET_NAME = 'dataset3'
+    return render_template('index.html')
+
 @app.route("/dataset3")
 def dataset_3():
     global DATA_FOLDER
