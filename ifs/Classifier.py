@@ -70,7 +70,7 @@ class Classifier:
         accuracy_train.append(self.clf.score(X_train, y_train))
         accuracy_test.append(self.clf.score(X_test, y_test)) # testing accuracy
         accuracy_traintest.append(self.clf.score(X_traintest, y_traintest))
-        #ccuracy_validation.append(self.clf.score(X_validation, y_validation))# validation accuracy
+        accuracy_validation.append(self.clf.score(X_validation, y_validation))# validation accuracy
 
 
         #skf = StratifiedKFold(n_splits=5)
@@ -85,7 +85,6 @@ class Classifier:
 
         predicted = self.clf.predict(X_traintest)
         self.proba = self.clf.predict_proba(X_traintest)
-
         predicted_train = self.clf.predict(X_traintest)
         #self.predicted = predicted
         self.init_confusion_matrix(y_traintest, predicted_train)
