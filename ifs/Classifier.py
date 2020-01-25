@@ -19,10 +19,10 @@ from sklearn.metrics import roc_curve, auc
 
 # read datafile with features + target in last column
 class Classifier:
-    def __init__(self, dirname, class_name):
-        df_train_og = pd.read_csv(dirname + 'train_datafile.csv')
-        df_test_og = pd.read_csv(dirname + 'test_datafile.csv')
-        df_validate_og = pd.read_csv(dirname + 'validation_datafile.csv')
+    def __init__(self, dirname, class_name, df_train_og, df_test_og, df_validate_og):
+        #df_train_og = pd.read_csv(dirname + 'train_datafile.csv')
+        #df_test_og = pd.read_csv(dirname + 'test_datafile.csv')
+        #df_validate_og = pd.read_csv(dirname + 'validation_datafile.csv')
 
         self.clf = LogisticRegression()
         self.clf_roc = OneVsRestClassifier(LogisticRegression())

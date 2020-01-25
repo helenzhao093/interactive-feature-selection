@@ -43,6 +43,10 @@ trial_number = None
 rank_loss = 0
 prev_time = datetime.now()
 
+df_train = None
+df_test = None
+df_validate = None
+
 def allowed_file(filename):
     return '.' in filename and \
             filename.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
@@ -85,15 +89,14 @@ def dataset_1():
 @app.route("/oab_dataset")
 def dataset_2():
     global DATA_FOLDER
-    DATA_FOLDER = 'static/data/oab_2/'
-    DATASET_NAME = 'dataset2'
-    return render_template('index.html')
-
-@app.route("/oab_dataset2")
-def dataset_oab2():
-    global DATA_FOLDER
+    global df_test
+    global df_train
+    global df_validate
     DATA_FOLDER = 'static/data/oab_test/'
-    DATASET_NAME = 'dataset3'
+    DATASET_NAME = 'dataset2'
+    df_train = pd.read_csv(DATA_FOLDER + 'train_datafile.csv')
+    df_test = pd.read_csv(DATA_FOLDER + 'test_datafile.csv')
+    df_validate = pd.read_csv(DATA_FOLDER + 'validation_datafile.csv')
     return render_template('index.html')
 
 @app.route("/dataset3")
@@ -114,14 +117,14 @@ def initialize_data():
         des = parse_description(DATA_FOLDER + 'description.csv')
         print des
     feature_names = parse_features(DATA_FOLDER + 'names.csv')
-    dataframe = pd.read_csv(DATA_FOLDER + 'train_datafile.csv')
+    dataframe = df_train #pd.read_csv(DATA_FOLDER + 'train_datafile.csv')
     global class_name
     class_name = dataframe.columns.values[-1]
     features = dataframe.drop([class_name], axis=1)
     target = pd.DataFrame(dataframe[class_name])#pd.read_csv(DATA_FOLDER + 'features.csv')#convert_csv_to_array(DATA_FOLDER + 'features.csv', False, csv.QUOTE_NONNUMERIC)
     class_values = np.sort(dataframe[class_name].unique())#convert_csv_to_array(DATA_FOLDER + 'classnames.csv', False, csv.QUOTE_ALL)
     global classifier
-    classifier = Classifier(DATA_FOLDER, class_name)
+    classifier = Classifier(DATA_FOLDER, class_name, df_train, df_test, df_validate)
 
     global FEATURE_DATA
     numeric_data = classifier.df_train
