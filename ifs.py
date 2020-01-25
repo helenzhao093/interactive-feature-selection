@@ -92,7 +92,7 @@ def dataset_1():
     index_list.remove(random_index)
     df_train = pd.read_csv(DATA_FOLDER + 'train_' + str(random_index) + '.csv')
     df_test = None
-    for index in random_index:
+    for index in index_list:
         temp = pd.read_csv(DATA_FOLDER + 'train_' + str(index) + '.csv')
         if df_test is None:
             df_test = temp
