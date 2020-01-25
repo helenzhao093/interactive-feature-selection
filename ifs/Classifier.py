@@ -20,9 +20,6 @@ from sklearn.metrics import roc_curve, auc
 # read datafile with features + target in last column
 class Classifier:
     def __init__(self, dirname, class_name, df_train_og, df_test_og, df_validate_og):
-        #df_train_og = pd.read_csv(dirname + 'train_datafile.csv')
-        #df_test_og = pd.read_csv(dirname + 'test_datafile.csv')
-        #df_validate_og = pd.read_csv(dirname + 'validation_datafile.csv')
 
         self.clf = LogisticRegression()
         self.clf_roc = OneVsRestClassifier(LogisticRegression())
@@ -61,7 +58,6 @@ class Classifier:
         X_traintest, y_traintest = self.get_X_and_y(feature_names, self.df_traintest)
         X_test, y_test = self.get_X_and_y(feature_names, self.df_test)
         X_validation, y_validation = self.get_X_and_y(feature_names, self.df_validate)
-        #self.clf.fit(X_train, y_train)
         accuracy_train = []
         accuracy_test = []
         accuracy_traintest = []
@@ -84,12 +80,12 @@ class Classifier:
         #accuracy_traintest.append(self.clf.score(X_traintest, y_traintest))
         #accuracy_validation.append(self.clf.score(X_validation, y_validation))# validation accuracy
 
-        predicted = self.clf.predict(X_traintest)
-        self.proba = self.clf.predict_proba(X_traintest)
-        predicted_train = self.clf.predict(X_traintest)
+        predicted = self.clf.predict(X_test)
+        self.proba = self.clf.predict_proba(X_test)
+        predicted_train = self.clf.predict(X_test)
         #self.predicted = predicted
-        self.init_confusion_matrix(y_traintest, predicted_train)
-        self.get_roc_curve(X_traintest, y_traintest)
+        self.init_confusion_matrix(y_test, predicted_train)
+        self.get_roc_curve(X_test, y_test)
 
         self.accuracy_train = round(sum(accuracy_train) * 1.0 / len(accuracy_train), 2) # #accuracy_train
         print self.accuracy_train
