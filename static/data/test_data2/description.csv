@@ -1,0 +1,11 @@
+motherhasjob: whether mother has a job (binary: no, yes).
+extracurriculars: participates in extracurricular activities (binary: no, yes).
+job: has a job (binary: no, yes).
+studytime: weekly study time (nominal: less_than_2hr, 2_to_5hr, 5_to_10hr, greater_than_10).
+age: student's age (numeric: from 14 to 18).
+fatherhasjob: whether father has a job (binary: no, yes).
+familyincome: family income (binary: below average, above average).
+extraclasses: extra paid classes within the course subject (binary: no, yes).
+familysupport: family educational support (binary: no, yes).
+college: admitted into college (binary: no, yes).
+scholarship: has scholarship for college (binary: no, yes).
