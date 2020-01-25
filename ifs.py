@@ -5,6 +5,7 @@ import os
 import requests
 import csv
 import pandas as pd
+import random
 from ifs.histogram import Histogram
 from ifs.FeatureData import FeatureData
 from ifs.parse_features import *
@@ -82,7 +83,22 @@ def demo():
 def dataset_1():
     global DATA_FOLDER
     global DATASET_NAME
-    DATA_FOLDER = 'static/data/test_data/'
+    global df_test
+    global df_train
+    global df_validate
+    DATA_FOLDER = 'static/data/test_data2/'
+    index_list = [1,2,3,4]
+    random_index = random.choice(index_list)
+    index_list.remove(random_index)
+    df_train = pd.read_csv(DATA_FOLDER + 'train_' + random_index + '.csv')
+    df_test = None
+    for index in random_index:
+        temp = pd.read_csv(DATA_FOLDER + 'train_' + index + '.csv')
+        if df_test is None:
+            df_test = temp
+        else:
+            df_test = pd.concat([df_test, temp], axis=0)
+    df_validate = pd.read_csv(DATA_FOLDER + 'validation_datafile.csv')
     DATASET_NAME = 'dataset1'
     return render_template('index.html')
 
