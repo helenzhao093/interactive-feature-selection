@@ -89,6 +89,8 @@ def dataset_1():
     DATA_FOLDER = 'static/data/test_data2/'
     index_list = [1,2,3,4]
     random_index = random.choice(index_list)
+    print('test dataset number')
+    print(random_index)
     index_list.remove(random_index)
     df_train = pd.read_csv(DATA_FOLDER + 'train_' + str(random_index) + '.csv')
     df_test = None
