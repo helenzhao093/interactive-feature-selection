@@ -1,7 +1,7 @@
 class AppInterface extends React.Component {
   constructor(props) {
     super(props);
-    var colorRange = ["#e31a1c", "#006400", "#F95700FF", "#00A4CCFF", "#c0392b", "#f1c40f", "#16a085", "#3498db", '#e88c5d', '#23a393' ];
+    var colorRange = ["#e31a1c", "#006400", "#CC8899", "#00A4CCFF", "#c0392b", "#f1c40f", "#16a085", "#3498db", '#e88c5d', '#23a393' ];
     var color = d3.scaleOrdinal()
         .range(colorRange)
         .domain(props.classNames);
