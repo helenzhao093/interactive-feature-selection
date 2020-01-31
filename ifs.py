@@ -39,6 +39,7 @@ p = None
 tetrad = None
 prior = None
 class_name = ""
+
 filename = ""
 trial_number = None
 rank_loss = 0
@@ -75,8 +76,14 @@ def uploaded_file():
 def demo():
     global DATA_FOLDER
     global DATASET_NAME
+    global df_test
+    global df_train
+    global df_validate
     DATA_FOLDER = 'static/demo/'
     DATASET_NAME = 'demo'
+    df_train = pd.read_csv(DATA_FOLDER + 'train_datafile.csv')
+    df_test = pd.read_csv(DATA_FOLDER + 'test_datafile.csv')
+    df_validate = pd.read_csv(DATA_FOLDER + 'validation_datafile.csv')
     return render_template('index.html')
 
 @app.route("/dataset1")
