@@ -166,7 +166,9 @@ def initialize_graph():
         data = json.loads(request.data)
         userID = data['userID']
         global filename
-        filename = "data" + str(userID) + ".txt"
+        global DATA_FOLDER
+        filename = "data_" + DATA_FOLDER + str(userID) + ".txt"
+        print(filename)
         file = open(filename, "a+")
         file.write("forbidden edges: ")
         for edge in data['forbiddenEdges']:
