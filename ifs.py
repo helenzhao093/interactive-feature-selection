@@ -79,7 +79,7 @@ def demo():
     global df_test
     global df_train
     global df_validate
-    DATA_FOLDER = 'static/demo/'
+    DATA_FOLDER = 'static/data/demo/'
     DATASET_NAME = 'demo'
     df_train = pd.read_csv(DATA_FOLDER + 'train_datafile.csv')
     df_test = pd.read_csv(DATA_FOLDER + 'test_datafile.csv')
