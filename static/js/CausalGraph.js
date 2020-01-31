@@ -95,7 +95,7 @@ class CausalGraph extends React.Component {
           let targetId = "#node" + String(this.props.graph[this.props.targetName].nodeIndex);
           d3.select(targetId).select('ellipse').attr("stroke", "royalblue").attr("stroke-width", 2);
 
-          svg.attr("width", 1000).attr("height", 500);
+          svg.attr("width", 1000).attr("height", 1000);
       }
   }
 
