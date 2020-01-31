@@ -79,7 +79,7 @@ def demo():
     global df_test
     global df_train
     global df_validate
-    DATA_FOLDER = 'static/data/demo/'
+    DATA_FOLDER = 'static/demo/'
     DATASET_NAME = 'demo'
     df_train = pd.read_csv(DATA_FOLDER + 'train_datafile.csv')
     df_test = pd.read_csv(DATA_FOLDER + 'test_datafile.csv')
@@ -166,8 +166,7 @@ def initialize_graph():
         data = json.loads(request.data)
         userID = data['userID']
         global filename
-        global DATA_FOLDER
-        filename = "data_" + DATA_FOLDER + str(userID) + ".txt"
+        filename = "data" + str(userID) + ".txt"
         print(filename)
         file = open(filename, "a+")
         file.write("forbidden edges: ")
