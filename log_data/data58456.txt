@@ -1,8 +1,0 @@
-forbidden edges: 
-required edges: 
-ranking: 
-1 Hysterectomy1
-0 
-3 
-2 Age BMI Diuretic Stroke Severity NeruDisease Migraine Anxiety DB CT_head Tobacco Number_prev_prescription StopSE NOF Daily_Incontinence DayVoid NightVoid StressIncontinence Constipation Hysterectomy2 Hysterectomy3 Sling Prior Postmenopausal Ba
-reverse edge: Hysterectomy2 -> Hysterectomy3
