@@ -1,0 +1,7 @@
+forbidden edges: 
+required edges: studytime -> GRADE
+ranking: 
+1 scholarship
+0 studytime
+3 
+2 motherhasjob extracurriculars job age fatherhasjob familyincome extraclasses familysupport college
