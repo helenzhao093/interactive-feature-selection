@@ -1,0 +1,133 @@
+forbidden edges: 
+required edges: studytime -> GRADEcollege -> GRADE
+ranking: 
+1 extracurriculars familysupport scholarship
+0 studytime college
+3 motherhasjob age fatherhasjob familyincome
+2 job extraclasses
+4 
+add edge: GRADE -> college
+add edge: college -> GRADE
+reverse edge: college -> GRADE
+reverse edge: college -> GRADE
+add edge: GRADE -> scholarship
+add edge: extracurriculars -> studytime
+add edge: studytime -> extracurriculars
+reverse edge: studytime -> extracurriculars
+add edge: extracurriculars -> studytime
+add edge: extracurriculars -> studytime
+add edge: extracurriculars -> studytime
+add edge: extraclasses -> motherhasjob
+remove edge: extraclasses -> motherhasjob
+add edge: familyincome -> motherhasjob
+remove edge: familyincome -> motherhasjob
+add edge: familyincome -> motherhasjob
+undo
+add edge: familyincome -> motherhasjob
+reverse edge: familyincome -> motherhasjob
+add edge: fatherhasjob -> familyincome
+add edge: familyincome -> age
+add edge: fatherhasjob -> age
+undo
+undo
+add edge: age -> job
+add edge: age -> college
+add edge: college -> job
+undo
+add edge: extracurriculars -> studytime
+add edge: studytime -> extracurriculars
+reverse edge: studytime -> extracurriculars
+add edge: studytime -> extracurriculars
+reverse edge: studytime -> extracurriculars
+reverse edge: studytime -> extracurriculars
+add edge: extracurriculars -> studytime
+add edge: studytime -> extracurriculars
+add edge: extracurriculars -> job
+add edge: familyincome -> job
+Markov Blanket: [u'scholarship', u'college', u'familyincome', u'age', u'studytime', u'job']
+trial: 0
+time: 2020-02-05 01:13:51.587661
+accuracy: 0.67
+accuracyTrain: 0.82
+accuracyValidation: 0.75
+MI: 1.7997446139355857
+rankLoss: 42.936205238
+
+trial: 1
+time: 2020-02-05 01:21:13.338588
+time elapse: 2 days, 5:27:41.312418
+features: [u'scholarship', u'college', u'studytime', u'job', u'familysupport', u'extracurriculars', u'extraclasses']
+accuracy: 0.75
+accuracyTrain: 0.84
+accuracyValidation: 0.77
+MI: 1.7906673722483846
+rankLoss: 28.6543503263
+AUC: {'A': 0.92139282735613, 'C': 0.9592770034843205, 'B': 0.9085365853658537, 'F': 0.8965314520870077}
+
+trial: 2
+time: 2020-02-05 01:26:02.317231
+time elapse: 0:04:48.978643
+features: [u'familysupport', u'age', u'college', u'extracurriculars', u'extraclasses']
+accuracy: 0.65
+accuracyTrain: 0.69
+accuracyValidation: 0.7
+MI: 1.8251550730751074
+rankLoss: 41.4935101971
+AUC: {'A': 0.8026480400333611, 'C': 0.9103876306620209, 'B': 0.7834277003484319, 'F': 0.8952087007642563}
+
+trial: 3
+time: 2020-02-05 01:27:45.525565
+time elapse: 0:01:43.208334
+features: [u'familysupport', u'age', u'college', u'extracurriculars', u'extraclasses', u'scholarship', u'fatherhasjob', u'studytime', u'job']
+accuracy: 0.76
+accuracyTrain: 0.88
+accuracyValidation: 0.78
+MI: 1.8813772669968105
+rankLoss: 36.3271751632
+AUC: {'A': 0.9124270225187657, 'C': 0.956990418118467, 'B': 0.8929660278745646, 'F': 0.8953556731334509}
+
+forbidden edges: 
+required edges: studytime -> GRADEextraclasses -> GRADE
+ranking: 
+1 extracurriculars familysupport college scholarship
+0 studytime extraclasses
+3 motherhasjob age fatherhasjob familyincome
+2 job
+4 
+reverse edge: job -> extracurriculars
+reverse edge: scholarship -> GRADE
+add edge: extracurriculars -> familysupport
+remove edge: extracurriculars -> familysupport
+add edge: extracurriculars -> familysupport
+reverse edge: extracurriculars -> familysupport
+Markov Blanket: [u'scholarship', u'extraclasses', u'studytime', u'job', u'extracurriculars']
+trial: 0
+time: 2020-02-05 01:37:57.562647
+accuracy: 0.67
+accuracyTrain: 0.84
+accuracyValidation: 0.74
+MI: 1.7407738040305702
+rankLoss: 30.6358582419
+
+trial: 1
+time: 2020-02-05 01:41:15.777487
+time elapse: 0:13:30.251922
+features: [u'familysupport', u'scholarship', u'extraclasses', u'studytime', u'job', u'age', u'college', u'fatherhasjob', u'extracurriculars']
+accuracy: 0.76
+accuracyTrain: 0.88
+accuracyValidation: 0.78
+MI: 1.9312708352146246
+rankLoss: 34.3271751632
+AUC: {'A': 0.9124270225187657, 'C': 0.956990418118467, 'B': 0.8929660278745646, 'F': 0.8953556731334509}
+
+trial: 2
+time: 2020-02-05 01:44:40.813483
+time elapse: 0:03:25.035996
+features: [u'familysupport', u'scholarship', u'extraclasses', u'studytime', u'age', u'college', u'fatherhasjob', u'job']
+accuracy: 0.75
+accuracyTrain: 0.86
+accuracyValidation: 0.78
+MI: 1.931270835214624
+rankLoss: 37.0110835351
+AUC: {'A': 0.9161801501251043, 'C': 0.9501306620209059, 'B': 0.8866506968641115, 'F': 0.9057907113462669}
+
