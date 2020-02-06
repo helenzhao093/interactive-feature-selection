@@ -1,0 +1,36 @@
+forbidden edges: age -> GRADE
+required edges: familyincome -> GRADEscholarship -> GRADE
+ranking: 
+1 studytime extraclasses
+0 familyincome scholarship
+3 motherhasjob job fatherhasjob
+2 extracurriculars familysupport college
+4 age
+add edge: extraclasses -> job
+remove edge: GRADE -> job
+add edge: familysupport -> extracurriculars
+reverse edge: job -> extracurriculars
+remove edge: extraclasses -> job
+add edge: extracurriculars -> GRADE
+reverse edge: familysupport -> familyincome
+reverse edge: scholarship -> college
+Markov Blanket: [u'scholarship', u'familyincome', u'extracurriculars']
+trial: 0
+time: 2020-02-05 04:36:44.069351
+accuracy: 0.62
+accuracyTrain: 0.69
+accuracyValidation: 0.72
+MI: 1.6826969099864113
+rankLoss: 37.8280939096
+
+trial: 1
+time: 2020-02-05 04:39:03.277848
+time elapse: 0:08:11.501352
+features: [u'scholarship', u'college', u'studytime', u'familysupport', u'familyincome', u'extracurriculars']
+accuracy: 0.78
+accuracyTrain: 0.84
+accuracyValidation: 0.82
+MI: 1.654850596084025
+rankLoss: 35.4343765321
+AUC: {'A': 0.9016889074228523, 'C': 0.9192073170731707, 'B': 0.9058144599303136, 'F': 0.9179894179894179}
+

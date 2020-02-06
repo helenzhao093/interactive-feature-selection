@@ -1,0 +1,128 @@
+forbidden edges: 
+required edges: Severity -> LabelNOF -> LabelDayVoid -> LabelNightVoid -> Label
+ranking: 
+1 Age BMI Diuretic Stroke NeruDisease DB Tobacco Number_prev_prescription StopSE Daily_Incontinence
+0 Severity NOF DayVoid NightVoid
+3 Hysterectomy1 Hysterectomy2 Hysterectomy3
+2 Migraine Anxiety CT_head StressIncontinence Constipation Sling Prior Postmenopausal Ba
+4 
+remove edge: Hysterectomy1 -> Hysterectomy3
+remove edge: Hysterectomy2 -> Hysterectomy3
+add edge: Hysterectomy2 -> Prior
+add edge: Hysterectomy3 -> Prior
+add edge: Sling -> Prior
+add edge: StressIncontinence -> Sling
+add edge: StopSE -> Number_prev_prescription
+add edge: DayVoid -> Severity
+add edge: NightVoid -> Severity
+add edge: CT_head -> NeruDisease
+add edge: CT_head -> Stroke
+add edge: DB -> Constipation
+add edge: Ba -> Prior
+add edge: Tobacco -> Stroke
+add edge: Age -> Stroke
+add edge: Age -> NeruDisease
+add edge: Diuretic -> DayVoid
+add edge: Diuretic -> DayVoid
+add edge: StopSE -> NOF
+add edge: Age -> Ba
+add edge: Constipation -> Prior
+add edge: StressIncontinence -> Daily_Incontinence
+add edge: DB -> Stroke
+Markov Blanket: [u'NightVoid', u'DayVoid', u'NOF', u'Severity']
+trial: 0
+time: 2020-02-05 19:47:36.327567
+accuracy: 0.65
+accuracyTrain: 0.71
+accuracyValidation: 0.66
+MI: 0.8080968895005829
+rankLoss: 186.770815311
+
+trial: 1
+time: 2020-02-05 19:49:42.293613
+time elapse: 0:39:06.253854
+features: [u'NightVoid', u'Age', u'DayVoid', u'NOF', u'Diuretic', u'NeruDisease', u'Number_prev_prescription', u'DB', u'Daily_Incontinence', u'Stroke', u'Constipation', u'StopSE', u'Severity']
+accuracy: 0.63
+accuracyTrain: 0.74
+accuracyValidation: 0.67
+MI: 0.9917658580774394
+rankLoss: 158.416847129
+AUC: {0: 0.3403405507672903, 1: 0.6596594492327096}
+
+trial: 2
+time: 2020-02-05 19:50:48.873785
+time elapse: 0:01:06.580172
+features: [u'NightVoid', u'Age', u'DayVoid', u'NOF', u'Number_prev_prescription', u'Daily_Incontinence', u'Constipation', u'StopSE', u'Diuretic', u'Severity']
+accuracy: 0.64
+accuracyTrain: 0.73
+accuracyValidation: 0.66
+MI: 0.9917658580774394
+rankLoss: 172.609992756
+AUC: {0: 0.32709690981711165, 1: 0.6729030901828884}
+
+trial: 3
+time: 2020-02-05 19:51:42.339601
+time elapse: 0:00:53.465816
+features: [u'NightVoid', u'DayVoid', u'NOF', u'Number_prev_prescription', u'StopSE', u'Severity']
+accuracy: 0.64
+accuracyTrain: 0.71
+accuracyValidation: 0.66
+MI: 0.8360689174726109
+rankLoss: 178.001872641
+AUC: {0: 0.30597014925373134, 1: 0.6940298507462687}
+
+trial: 4
+time: 2020-02-05 19:52:43.372471
+time elapse: 0:01:01.032870
+features: [u'NightVoid', u'DayVoid', u'NOF', u'Number_prev_prescription', u'BMI', u'Sling', u'StopSE', u'Age', u'DB', u'Diuretic', u'NeruDisease', u'Daily_Incontinence', u'Severity']
+accuracy: 0.64
+accuracyTrain: 0.71
+accuracyValidation: 0.66
+MI: 0.9917658580774394
+rankLoss: 158.416847129
+AUC: {0: 0.3186882488963632, 1: 0.6813117511036367}
+
+trial: 5
+time: 2020-02-05 19:53:14.791226
+time elapse: 0:00:31.418755
+features: [u'NightVoid', u'DayVoid', u'NOF', u'Number_prev_prescription', u'BMI', u'Sling', u'StopSE', u'Age', u'Daily_Incontinence', u'Prior', u'Ba', u'Severity']
+accuracy: 0.66
+accuracyTrain: 0.74
+accuracyValidation: 0.63
+MI: 0.9917658580774394
+rankLoss: 188.133060999
+AUC: {0: 0.31616565062013874, 1: 0.6838343493798613}
+
+trial: 6
+time: 2020-02-05 19:54:41.296364
+time elapse: 0:01:26.505138
+features: [u'NightVoid', u'DayVoid', u'Number_prev_prescription', u'Sling', u'Daily_Incontinence', u'Severity']
+accuracy: 0.64
+accuracyTrain: 0.66
+accuracyValidation: 0.69
+MI: 0.9637938301054114
+rankLoss: 199.900166177
+AUC: {0: 0.31963422324994745, 1: 0.6803657767500526}
+
+trial: 7
+time: 2020-02-05 19:54:55.290896
+time elapse: 0:00:13.994532
+features: [u'NightVoid', u'DayVoid', u'Sling', u'NOF', u'Daily_Incontinence', u'Severity']
+accuracy: 0.65
+accuracyTrain: 0.71
+accuracyValidation: 0.67
+MI: 0.9498078161193974
+rankLoss: 191.534186926
+AUC: {0: 0.29209585873449656, 1: 0.7079041412655034}
+
+trial: 8
+time: 2020-02-05 19:55:17.039123
+time elapse: 0:00:21.748227
+features: [u'NightVoid', u'DayVoid', u'NOF', u'Daily_Incontinence', u'StopSE', u'Number_prev_prescription', u'Severity']
+accuracy: 0.66
+accuracyTrain: 0.71
+accuracyValidation: 0.66
+MI: 0.9637938301054114
+rankLoss: 173.617401305
+AUC: {0: 0.30344755097750686, 1: 0.6965524490224932}
+

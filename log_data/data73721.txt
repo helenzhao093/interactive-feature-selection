@@ -1,0 +1,50 @@
+forbidden edges: age -> GRADE
+required edges: college -> GRADE
+ranking: 
+1 extracurriculars fatherhasjob familyincome
+0 college
+3 motherhasjob
+2 job studytime extraclasses familysupport scholarship
+4 age
+add edge: familyincome -> familysupport
+reverse edge: familysupport -> familyincome
+add edge: fatherhasjob -> familyincome
+add edge: familyincome -> motherhasjob
+add edge: familyincome -> college
+add edge: college -> scholarship
+remove edge: scholarship -> college
+remove edge: job -> extracurriculars
+remove edge: college -> GRADE
+remove edge: GRADE -> job
+add edge: college -> extracurriculars
+add edge: familyincome -> job
+add edge: college -> studytime
+add edge: college -> scholarship
+add edge: familyincome -> studytime
+undo
+add edge: studytime -> GRADE
+add edge: extracurriculars -> GRADE
+add edge: scholarship -> GRADE
+add edge: familysupport -> GRADE
+add edge: extraclasses -> GRADE
+add edge: familyincome -> GRADE
+Markov Blanket: [u'scholarship', u'familysupport', u'extraclasses', u'familyincome', u'studytime', u'extracurriculars']
+trial: 0
+time: 2020-02-05 04:25:48.318053
+accuracy: 0.65
+accuracyTrain: 0.69
+accuracyValidation: 0.69
+MI: 1.768932879153404
+rankLoss: 43.2735364029
+
+trial: 1
+time: 2020-02-05 04:30:51.776496
+time elapse: 2:46:10.963013
+features: [u'college', u'scholarship', u'studytime', u'familysupport', u'familyincome']
+accuracy: 0.59
+accuracyTrain: 0.76
+accuracyValidation: 0.62
+MI: 1.725151131742995
+rankLoss: 38.5988740732
+AUC: {'A': 0.8495621351125938, 'C': 0.9125653310104529, 'B': 0.8666158536585367, 'F': 0.9201940035273368}
+
