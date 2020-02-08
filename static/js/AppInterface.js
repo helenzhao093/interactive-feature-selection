@@ -1,7 +1,7 @@
 class AppInterface extends React.Component {
   constructor(props) {
     super(props);
-    var colorRange = ["#e31a1c", "#006400", "#3c1361", "#00A4CCFF", "#c0392b", "#f1c40f", "#16a085", "#3498db", '#e88c5d', '#23a393' ];
+    var colorRange = ["#e31a1c", "#33a02c", "#fdbf6f", "#a6cee3", "#c0392b", "#f1c40f", "#16a085", "#3498db", '#e88c5d', '#23a393' ];
     var color = d3.scaleOrdinal()
         .range(colorRange)
         .domain(props.classNames);
@@ -1151,7 +1151,7 @@ class AppInterface extends React.Component {
                     updateFeatureRank={(r, f) => this.updateFeatureRank(r, f)}
                     updateNumRanks={(r) => this.updateNumRanks(r)}
                     width={1000}
-                    height={500}
+                    height={1000}
                     nextStep={this.sendImportanceToGraph}
                     colorFunction={this.state.FIcolorFunction}
                 />
