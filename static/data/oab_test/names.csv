@@ -9,7 +9,7 @@ Anxiety: 0, 1.
 DB: continuous.
 CTHead: 0, 1, 2.
 Tobacco: 0, 1.
-NumberPrevPrescription: 0, 1, 2, 3.
+NumPrevPrescription: 0, 1, 2, 3.
 StopSE: 0, 1.
 NOF: 0, 1, 2, 3, 4.
 DailyIncontinence: continuous.
