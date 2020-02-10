@@ -1,4 +1,4 @@
-Age,BMI,Diuretic,Stroke,Severity,NeruDisease,Migraine,Anxiety,DB,CT_head,Tobacco,Number_prev_prescription,StopSE,NOF,Daily_Incontinence,DayVoid,NightVoid,StressIncontinence,Constipation,Hysterectomy1,Hysterectomy2,Hysterectomy3,Sling,Prior,Postmenopausal,Ba,Label
+Age,BMI,Diuretic,Stroke,Severity,NeruDisease,Migraine,Anxiety,DB,CTHead,Tobacco,NumPrevPrescription,StopSE,NOF,DailyIncontinence,DayVoid,NightVoid,StressIncontinence,Constipation,Hysterectomy0,Hysterectomy1,Hysterectomy2,Sling,Prior,Postmenopausal,Ba,Response
 38,36.03,0,0,4,1,0,1,5.5,1,1,0,0,0,3,10,0,0,0,0,0,1,0,0,0,-2,0
 39,29.71,0,0,4,1,0,0,5.5,2,1,0,0,0,0,25,12,0,0,0,0,1,0,0,0,-3,0
 20,20.03,0,0,1,0,0,1,5.5,0,1,0,0,0,0,20,1,0,1,0,0,1,0,0,0,-3,1
