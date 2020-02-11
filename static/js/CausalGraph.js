@@ -95,7 +95,7 @@ class CausalGraph extends React.Component {
           let targetId = "#node" + String(this.props.graph[this.props.targetName].nodeIndex);
           d3.select(targetId).select('ellipse').attr("stroke", "royalblue").attr("stroke-width", 2);
 
-          svg.attr("width", 1000).attr("height", 1000);
+          svg.attr("width", 1000).attr("height", 800)
       }
   }
 
@@ -292,7 +292,7 @@ class CausalGraph extends React.Component {
       else if (this.state.markovBlanketSelected) {
           this.highlightMB(nodeInfo);
 
-          _/*LTracker.push({
+          /*LTracker.push({
               'eventName': 'causal graph clicks', 
               'user': userID,
               'datasetName': this.state.datasetName,
@@ -435,7 +435,7 @@ class CausalGraph extends React.Component {
     let defaultSelect = (this.state.selectedInteraction == this.state.selectInteraction[0]) ? this.state.selectOptions[0] : this.state.editOptions[0];
     var secondSelectOnChange = (this.state.selectedInteraction == this.state.selectInteraction[0]) ? this.changeDisplay : this.changeEdit;
     return (
-      <div width={700} height={500}>
+      <div>
           <div className={"tools-bar"}>
               <span className={"causal-graph-toolbar-span"}>Graph Interactions: </span>
               <div className={"causal-graph-select-div"}>
@@ -468,7 +468,7 @@ class CausalGraph extends React.Component {
           </div>
         <div className={"causal-graph-container"}>
             <div className={"grid-item"} id={"graph"} style={{textAlign: "center"}}/>
-            <VerticalLegend style={{position: "absolute", marginLeft : "20", marginTop: "500"}} legend={legend} width={150}/>
+            <VerticalLegend /*style={{position: "absolute", marginLeft : "0", marginTop: "500"}}*/ legend={legend} width={150}/>
 
         </div>
       </div>
