@@ -1,9 +1,0 @@
-forbidden edges: age -> GRADE
-required edges: college -> GRADE
-ranking: 
-1 fatherhasjob familyincome
-0 college
-3 extraclasses
-2 extracurriculars studytime familysupport
-5 age
-4 motherhasjob job scholarship

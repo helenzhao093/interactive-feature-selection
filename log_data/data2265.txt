@@ -1,5 +1,6 @@
 forbidden edges: 
-required edges: familyincome -> GRADEscholarship -> GRADE
+required edges: familyincome -> GRADE
+scholarship -> GRADE
 ranking: 
 1 motherhasjob extracurriculars studytime age fatherhasjob familysupport college
 0 familyincome scholarship

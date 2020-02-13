@@ -1,0 +1,123 @@
+forbidden edges: 
+required edges: extraclasses -> GRADEscholarship -> GRADE
+ranking: 
+1 extracurriculars studytime familyincome familysupport college
+0 extraclasses scholarship
+3 
+2 motherhasjob job age fatherhasjob
+reverse edge: job -> extracurriculars
+add edge: extracurriculars -> familysupport
+add edge: familysupport -> extracurriculars
+reverse edge: extracurriculars -> familysupport
+add edge: college -> GRADE
+undo
+add edge: college -> GRADE
+undo
+Markov Blanket: [u'scholarship', u'extraclasses', u'job', u'extracurriculars']
+trial: 0
+time: 2020-02-02 19:32:04.011804
+accuracy: 0.68
+accuracyTrain: 0.84
+accuracyValidation: 0.73
+MI: 1.8059298260293948
+rankLoss: 32.2615429083
+
+trial: 1
+time: 2020-02-02 19:44:23.320313
+time elapse: 2 days, 13:06:41.293893
+features: [u'scholarship', u'job', u'extracurriculars', u'familyincome', u'familysupport', u'college', u'extraclasses']
+accuracy: 0.76
+accuracyTrain: 0.86
+accuracyValidation: 0.76
+MI: 1.6934854381859878
+rankLoss: 27.9334577856
+AUC: {'A': 0.8880316930775646, 'C': 0.9579703832752612, 'B': 0.8812064459930312, 'F': 0.8987360376249265}
+
+trial: 2
+time: 2020-02-02 19:47:06.572444
+time elapse: 0:02:43.252131
+features: [u'scholarship', u'job', u'extracurriculars', u'familyincome', u'familysupport', u'college']
+accuracy: 0.71
+accuracyTrain: 0.82
+accuracyValidation: 0.73
+MI: 1.6610184161293624
+rankLoss: 34.5988740732
+AUC: {'A': 0.8940783986655546, 'C': 0.9299869337979094, 'B': 0.8819686411149825, 'F': 0.8846266901822457}
+
+trial: 3
+time: 2020-02-02 19:49:52.324009
+time elapse: 0:02:45.751565
+features: [u'scholarship', u'job', u'extracurriculars', u'familysupport', u'age']
+accuracy: 0.71
+accuracyTrain: 0.82
+accuracyValidation: 0.7
+MI: 1.8342323147623087
+rankLoss: 42.0138309875
+AUC: {'A': 0.8729149291075896, 'C': 0.9259581881533102, 'B': 0.8715156794425086, 'F': 0.8858024691358024}
+
+trial: 4
+time: 2020-02-02 19:50:35.521671
+time elapse: 0:00:43.197662
+features: [u'scholarship', u'job', u'extracurriculars', u'familysupport', u'age', u'college']
+accuracy: 0.73
+accuracyTrain: 0.82
+accuracyValidation: 0.71
+MI: 1.8342323147623087
+rankLoss: 40.5711359466
+AUC: {'A': 0.8841743119266054, 'C': 0.9292247386759581, 'B': 0.8792465156794425, 'F': 0.8809523809523809}
+
+trial: 5
+time: 2020-02-02 19:52:34.776961
+time elapse: 0:01:59.255290
+features: [u'scholarship', u'job', u'extracurriculars', u'familysupport', u'age', u'college']
+accuracy: 0.73
+accuracyTrain: 0.82
+accuracyValidation: 0.71
+MI: 1.8342323147623087
+rankLoss: 40.5711359466
+AUC: {'A': 0.8841743119266054, 'C': 0.9292247386759581, 'B': 0.8792465156794425, 'F': 0.8809523809523809}
+
+trial: 6
+time: 2020-02-02 19:52:45.322798
+time elapse: 0:00:10.545837
+features: [u'scholarship', u'job', u'extracurriculars', u'familysupport', u'age', u'extraclasses']
+accuracy: 0.76
+accuracyTrain: 0.86
+accuracyValidation: 0.75
+MI: 1.9312708352146248
+rankLoss: 35.694991907
+AUC: {'A': 0.8666597164303587, 'C': 0.9458841463414634, 'B': 0.8652003484320557, 'F': 0.9021164021164022}
+
+trial: 7
+time: 2020-02-02 19:53:01.096379
+time elapse: 0:00:15.773581
+features: [u'scholarship', u'job', u'extracurriculars', u'familysupport', u'extraclasses']
+accuracy: 0.76
+accuracyTrain: 0.86
+accuracyValidation: 0.76
+MI: 1.8167883765526496
+rankLoss: 30.8188478674
+AUC: {'A': 0.8746872393661385, 'C': 0.9550304878048781, 'B': 0.8734756097560975, 'F': 0.9081422692533804}
+
+trial: 8
+time: 2020-02-02 19:53:23.819081
+time elapse: 0:00:22.722702
+features: [u'scholarship', u'extracurriculars', u'familysupport', u'extraclasses']
+accuracy: 0.7
+accuracyTrain: 0.71
+accuracyValidation: 0.76
+MI: 1.4440876194205947
+rankLoss: 25.9427038278
+AUC: {'A': 0.8082777314428691, 'C': 0.9378266550522648, 'B': 0.8055313588850175, 'F': 0.9059376837154615}
+
+trial: 9
+time: 2020-02-02 19:53:32.026170
+time elapse: 0:00:08.207089
+features: [u'scholarship', u'extracurriculars', u'familysupport', u'extraclasses', u'job']
+accuracy: 0.76
+accuracyTrain: 0.86
+accuracyValidation: 0.76
+MI: 1.74344902872748
+rankLoss: 30.8188478674
+AUC: {'A': 0.8746872393661385, 'C': 0.9550304878048781, 'B': 0.8734756097560975, 'F': 0.9081422692533804}
+
