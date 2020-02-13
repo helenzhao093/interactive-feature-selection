@@ -1,0 +1,276 @@
+forbidden edges: 
+required edges: Age -> ResponseStroke -> ResponseSeverity -> ResponseNeruDisease -> ResponseAnxiety -> ResponseDB -> ResponseNOF -> ResponseDailyIncontinence -> ResponseDayVoid -> ResponseNightVoid -> ResponsePostmenopausal -> Response
+ranking: 
+1 BMI Diuretic Migraine CTHead Tobacco NumPrevPrescription StopSE StressIncontinence Constipation Hysterectomy0 Hysterectomy1 Hysterectomy2 Sling Prior Ba
+0 Age Stroke Severity NeruDisease Anxiety DB NOF DailyIncontinence DayVoid NightVoid Postmenopausal
+2 
+add edge: Severity -> DayVoid
+add edge: Severity -> NightVoid
+add edge: Stroke -> NeruDisease
+remove edge: Hysterectomy1 -> Hysterectomy2
+remove edge: Hysterectomy0 -> Hysterectomy2
+remove edge: Hysterectomy0 -> Prior
+remove edge: CTHead -> Severity
+add edge: BMI -> Severity
+add edge: BMI -> StressIncontinence
+add edge: Tobacco -> StressIncontinence
+add edge: Sling -> StressIncontinence
+Markov Blanket: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'NOF', u'DB', u'Anxiety', u'NeruDisease', u'Severity', u'Stroke', u'Age']
+trial: 0
+time: 2020-02-11 18:08:34.886786
+accuracy: 0.67
+accuracyTrain: 0.76
+accuracyValidation: 0.66
+MI: 0.9917658580774394
+rankLoss: 74.5702787087
+
+forbidden edges: 
+required edges: Age -> ResponseStroke -> ResponseSeverity -> ResponseNeruDisease -> ResponseAnxiety -> ResponseNOF -> ResponseDailyIncontinence -> ResponseDayVoid -> ResponseNightVoid -> ResponsePostmenopausal -> Response
+ranking: 
+1 BMI Diuretic Migraine DB CTHead Tobacco NumPrevPrescription StopSE StressIncontinence Constipation Hysterectomy0 Hysterectomy1 Hysterectomy2 Sling Prior Ba
+0 Age Stroke Severity NeruDisease Anxiety NOF DailyIncontinence DayVoid NightVoid Postmenopausal
+2 
+add edge: Severity -> DayVoid
+add edge: Severity -> NightVoid
+remove edge: Hysterectomy0 -> Prior
+remove edge: Hysterectomy0 -> Hysterectomy2
+remove edge: Hysterectomy1 -> Hysterectomy2
+add edge: DB -> BMI
+add edge: Stroke -> NeruDisease
+add edge: Sling -> StressIncontinence
+add edge: StressIncontinence -> BMI
+add edge: Tobacco -> StressIncontinence
+add edge: BMI -> StressIncontinence
+add edge: StressIncontinence -> BMI
+reverse edge: StressIncontinence -> BMI
+reverse edge: StressIncontinence -> BMI
+reverse edge: DB -> BMI
+Markov Blanket: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'NOF', u'Anxiety', u'NeruDisease', u'Severity', u'Stroke', u'Age']
+trial: 0
+time: 2020-02-11 18:14:15.523290
+accuracy: 0.65
+accuracyTrain: 0.73
+accuracyValidation: 0.69
+MI: 0.9917658580774394
+rankLoss: 72.3105732933
+
+trial: 1
+time: 2020-02-11 18:17:00.539899
+time elapse: 3 days, 10:51:17.441925
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'NOF', u'Anxiety', u'Severity', u'Stroke', u'Age']
+accuracy: 0.64
+accuracyTrain: 0.69
+accuracyValidation: 0.68
+MI: 0.9917658580774394
+rankLoss: 81.079515964
+AUC: {0: 0.31805759932730715, 1: 0.6819424006726928}
+
+trial: 2
+time: 2020-02-11 18:17:25.775872
+time elapse: 0:00:25.235973
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'NOF', u'Anxiety', u'Severity', u'NeruDisease', u'Age']
+accuracy: 0.66
+accuracyTrain: 0.74
+accuracyValidation: 0.69
+MI: 0.9917658580774394
+rankLoss: 81.079515964
+AUC: {0: 0.31343283582089554, 1: 0.6865671641791046}
+
+trial: 3
+time: 2020-02-11 18:18:05.791589
+time elapse: 0:00:40.015717
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'NOF', u'Anxiety', u'Severity', u'Age']
+accuracy: 0.64
+accuracyTrain: 0.69
+accuracyValidation: 0.68
+MI: 0.9917658580774393
+rankLoss: 89.8484586346
+AUC: {0: 0.3191086819424007, 1: 0.6808913180575993}
+
+trial: 4
+time: 2020-02-11 18:19:04.832460
+time elapse: 0:00:59.040871
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'NOF', u'Stroke', u'Anxiety', u'NeruDisease', u'Severity', u'Age', u'StressIncontinence']
+accuracy: 0.65
+accuracyTrain: 0.75
+accuracyValidation: 0.68
+MI: 0.9917658580774394
+rankLoss: 77.7911624625
+AUC: {0: 0.3130124027748581, 1: 0.686987597225142}
+
+trial: 5
+time: 2020-02-11 18:19:37.316020
+time elapse: 0:00:32.483560
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'NOF', u'Stroke', u'Anxiety', u'NeruDisease', u'Severity', u'Age', u'NumPrevPrescription']
+accuracy: 0.64
+accuracyTrain: 0.72
+accuracyValidation: 0.67
+MI: 0.9917658580774394
+rankLoss: 77.7911624625
+AUC: {0: 0.3264662602480555, 1: 0.6735337397519445}
+
+trial: 6
+time: 2020-02-11 18:19:56.777751
+time elapse: 0:00:19.461731
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'Anxiety', u'Severity', u'Age']
+accuracy: 0.55
+accuracyTrain: 0.64
+accuracyValidation: 0.6
+MI: 0.9917658580774393
+rankLoss: 98.6174013053
+AUC: {0: 0.4029850746268657, 1: 0.5970149253731343}
+
+trial: 7
+time: 2020-02-11 18:20:42.275257
+time elapse: 0:00:45.497506
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'Anxiety', u'Severity', u'Age', u'NOF', u'NeruDisease', u'BMI']
+accuracy: 0.63
+accuracyTrain: 0.7
+accuracyValidation: 0.63
+MI: 0.9917658580774394
+rankLoss: 86.9066823402
+AUC: {0: 0.3264662602480555, 1: 0.6735337397519445}
+
+trial: 8
+time: 2020-02-11 18:21:31.135242
+time elapse: 0:00:48.859985
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'Anxiety', u'Severity', u'Age', u'NOF', u'NeruDisease', u'BMI', u'NumPrevPrescription']
+accuracy: 0.64
+accuracyTrain: 0.71
+accuracyValidation: 0.64
+MI: 0.9917658580774394
+rankLoss: 92.7338487164
+AUC: {0: 0.33109102375446714, 1: 0.6689089762455329}
+
+trial: 9
+time: 2020-02-11 18:22:27.026493
+time elapse: 0:00:55.891251
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'Anxiety', u'Severity', u'Age', u'NOF', u'NeruDisease', u'BMI', u'DB']
+accuracy: 0.64
+accuracyTrain: 0.71
+accuracyValidation: 0.62
+MI: 0.9917658580774394
+rankLoss: 92.7338487164
+AUC: {0: 0.32751734286314904, 1: 0.672482657136851}
+
+trial: 10
+time: 2020-02-11 18:22:48.583059
+time elapse: 0:00:21.556566
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'Anxiety', u'Age', u'NOF', u'BMI', u'DB']
+accuracy: 0.62
+accuracyTrain: 0.71
+accuracyValidation: 0.62
+MI: 0.9917658580774394
+rankLoss: 111.658042886
+AUC: {0: 0.33886903510615934, 1: 0.6611309648938406}
+
+trial: 11
+time: 2020-02-11 18:22:59.537794
+time elapse: 0:00:10.954735
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'Anxiety', u'Age', u'NOF', u'BMI']
+accuracy: 0.6
+accuracyTrain: 0.71
+accuracyValidation: 0.63
+MI: 0.9917658580774394
+rankLoss: 105.137722096
+AUC: {0: 0.3363464368299348, 1: 0.6636535631700651}
+
+trial: 12
+time: 2020-02-11 18:23:13.815530
+time elapse: 0:00:14.277736
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'Anxiety', u'Age', u'BMI']
+accuracy: 0.58
+accuracyTrain: 0.65
+accuracyValidation: 0.56
+MI: 0.9917658580774394
+rankLoss: 114.253241973
+AUC: {0: 0.4111835190245953, 1: 0.5888164809754046}
+
+trial: 13
+time: 2020-02-11 18:23:25.038730
+time elapse: 0:00:11.223200
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'Anxiety', u'Age', u'NeruDisease']
+accuracy: 0.57
+accuracyTrain: 0.64
+accuracyValidation: 0.61
+MI: 0.9917658580774393
+rankLoss: 98.6174013053
+AUC: {0: 0.3764977927265083, 1: 0.6235022072734917}
+
+trial: 14
+time: 2020-02-11 18:23:32.852389
+time elapse: 0:00:07.813659
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'Anxiety', u'Age', u'Severity']
+accuracy: 0.55
+accuracyTrain: 0.64
+accuracyValidation: 0.6
+MI: 0.9917658580774393
+rankLoss: 98.6174013053
+AUC: {0: 0.4029850746268657, 1: 0.5970149253731343}
+
+trial: 15
+time: 2020-02-11 18:23:41.583311
+time elapse: 0:00:08.730922
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'DailyIncontinence', u'Anxiety', u'Age']
+accuracy: 0.55
+accuracyTrain: 0.64
+accuracyValidation: 0.6
+MI: 0.9917658580774392
+rankLoss: 107.386343976
+AUC: {0: 0.3985705276434728, 1: 0.6014294723565272}
+
+trial: 16
+time: 2020-02-11 18:24:30.630648
+time elapse: 0:00:49.047337
+features: [u'Postmenopausal', u'NightVoid', u'DayVoid', u'Severity', u'Anxiety', u'Age', u'BMI', u'NeruDisease']
+accuracy: 0.55
+accuracyTrain: 0.67
+accuracyValidation: 0.58
+MI: 0.9917658580774394
+rankLoss: 105.137722096
+AUC: {0: 0.40992221988648303, 1: 0.590077780113517}
+
+trial: 17
+time: 2020-02-11 18:24:53.771703
+time elapse: 0:00:23.141055
+features: [u'Postmenopausal', u'Severity', u'Anxiety', u'Age', u'BMI', u'NeruDisease', u'NOF']
+accuracy: 0.66
+accuracyTrain: 0.71
+accuracyValidation: 0.62
+MI: 0.9917658580774394
+rankLoss: 114.253241973
+AUC: {0: 0.29829724616354847, 1: 0.7017027538364515}
+
+trial: 18
+time: 2020-02-11 18:25:20.791452
+time elapse: 0:00:27.019749
+features: [u'Postmenopausal', u'Severity', u'Anxiety', u'Age', u'BMI', u'NeruDisease', u'Tobacco']
+accuracy: 0.55
+accuracyTrain: 0.62
+accuracyValidation: 0.57
+MI: 0.9917658580774394
+rankLoss: 130.582237056
+AUC: {0: 0.4008829093966786, 1: 0.5991170906033213}
+
+trial: 19
+time: 2020-02-11 18:25:27.273831
+time elapse: 0:00:06.482379
+features: [u'Postmenopausal', u'Severity', u'Anxiety', u'Age', u'BMI', u'NeruDisease']
+accuracy: 0.58
+accuracyTrain: 0.63
+accuracyValidation: 0.56
+MI: 0.9917658580774394
+rankLoss: 123.368761851
+AUC: {0: 0.3762875762034896, 1: 0.6237124237965105}
+
+trial: 20
+time: 2020-02-11 18:25:55.811820
+time elapse: 0:00:28.537989
+features: [u'Postmenopausal', u'Anxiety', u'Age', u'NightVoid', u'BMI', u'NeruDisease']
+accuracy: 0.54
+accuracyTrain: 0.66
+accuracyValidation: 0.57
+MI: 0.9917658580774394
+rankLoss: 123.368761851
+AUC: {0: 0.4332562539415598, 1: 0.5667437460584402}
+

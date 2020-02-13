@@ -1,0 +1,25 @@
+forbidden edges: 
+required edges: 
+ranking: 
+1 
+0 motherhasjob extracurriculars job studytime age fatherhasjob familyincome extraclasses familysupport college scholarship
+Markov Blanket: [u'scholarship']
+trial: 0
+time: 2020-02-08 07:22:01.018298
+accuracy: 0.51
+accuracyTrain: 0.54
+accuracyValidation: 0.51
+MI: 0.41462153725878403
+rankLoss: 0.0
+
+trial: 1
+time: 2020-02-08 07:22:05.274951
+time elapse: 2 days, 11:26:48.235828
+features: [u'scholarship', u'motherhasjob', u'extracurriculars', u'job', u'studytime', u'age', u'fatherhasjob', u'familyincome', u'extraclasses', u'familysupport', u'college']
+accuracy: 0.75
+accuracyTrain: 0.75
+accuracyValidation: 0.77
+MI: 1.9260332473445478
+rankLoss: 0.0
+AUC: {'A': 0.9280591175831341, 'C': 0.9452272727272727, 'B': 0.8975, 'F': 0.9289370671484493}
+

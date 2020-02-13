@@ -1,0 +1,5 @@
+forbidden edges: 
+required edges: 
+ranking: 
+1 
+0 motherhasjob extracurriculars job studytime age fatherhasjob familyincome extraclasses familysupport college scholarship

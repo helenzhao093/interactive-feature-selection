@@ -1,0 +1,24 @@
+forbidden edges: 
+required edges: Age -> ResponseStroke -> ResponseSeverity -> ResponseNeruDisease -> ResponseAnxiety -> ResponseNOF -> ResponseDailyIncontinence -> ResponseDayVoid -> ResponseNightVoid -> ResponseHysterectomy0 -> ResponsePostmenopausal -> Response
+ranking: 
+1 BMI Diuretic Migraine DB CTHead Tobacco NumPrevPrescription StopSE StressIncontinence Constipation Hysterectomy1 Hysterectomy2 Sling Prior Ba
+0 Age Stroke Severity NeruDisease Anxiety NOF DailyIncontinence DayVoid NightVoid Hysterectomy0 Postmenopausal
+2 
+forbidden edges: 
+required edges: Age -> ResponseStroke -> ResponseSeverity -> ResponseNeruDisease -> ResponseAnxiety -> ResponseNOF -> ResponseDailyIncontinence -> ResponseDayVoid -> ResponseNightVoid -> ResponsePostmenopausal -> Response
+ranking: 
+1 BMI Diuretic Migraine DB CTHead Tobacco NumPrevPrescription StopSE StressIncontinence Constipation Hysterectomy0 Hysterectomy1 Hysterectomy2 Sling Prior Ba
+0 Age Stroke Severity NeruDisease Anxiety NOF DailyIncontinence DayVoid NightVoid Postmenopausal
+2 
+forbidden edges: 
+required edges: Age -> ResponseStroke -> ResponseSeverity -> ResponseNeruDisease -> ResponseAnxiety -> ResponseNOF -> ResponseDailyIncontinence -> ResponseDayVoid -> ResponseNightVoid -> ResponsePostmenopausal -> Response
+ranking: 
+1 BMI Diuretic Migraine DB CTHead Tobacco NumPrevPrescription StopSE StressIncontinence Constipation Hysterectomy0 Hysterectomy1 Hysterectomy2 Sling Prior Ba
+0 Age Stroke Severity NeruDisease Anxiety NOF DailyIncontinence DayVoid NightVoid Postmenopausal
+2 
+forbidden edges: 
+required edges: Age -> ResponseStroke -> ResponseSeverity -> ResponseNeruDisease -> ResponseAnxiety -> ResponseDB -> ResponseNOF -> ResponseDailyIncontinence -> ResponseDayVoid -> ResponseNightVoid -> ResponsePostmenopausal -> Response
+ranking: 
+1 BMI Diuretic Migraine CTHead Tobacco NumPrevPrescription StopSE StressIncontinence Constipation Hysterectomy0 Hysterectomy1 Hysterectomy2 Sling Prior Ba
+0 Age Stroke Severity NeruDisease Anxiety DB NOF DailyIncontinence DayVoid NightVoid Postmenopausal
+2 
