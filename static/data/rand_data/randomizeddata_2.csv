@@ -1,4 +1,4 @@
-motherhasjob,extracurriculars,job,studytime,age,fatherhasjob,familyincome,extraclasses,familysupport,college,scholarship,GRADE
+hasdog,extracurriculars,job,studytime,age,likeskateboarding,familyincome,extraclasses,familysupport,college,scholarship,GRADE
 no,no,yes,greater_than_10,17,yes,below_average,no,yes,yes,yes,A
 no,no,no,5_to_10hr,16,no,below_average,yes,yes,no,no,A
 no,no,yes,greater_than_10,15,yes,below_average,yes,yes,no,yes,A
