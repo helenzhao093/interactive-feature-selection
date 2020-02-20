@@ -93,14 +93,14 @@ def dataset_1():
     global df_test
     global df_train
     global df_validate
-    DATA_FOLDER = 'static/data/test_data2/'
+    DATA_FOLDER = 'static/data/rand_data/'
     index_list = [1,2,3,4]
     random_index = random.choice(index_list)
     index_list.remove(random_index)
-    df_train = pd.read_csv(DATA_FOLDER + 'train_' + str(random_index) + '.csv')
+    df_train = pd.read_csv(DATA_FOLDER + 'randomizeddata_' + str(random_index) + '.csv')
     df_test = None
     for index in index_list:
-        temp = pd.read_csv(DATA_FOLDER + 'train_' + str(index) + '.csv')
+        temp = pd.read_csv(DATA_FOLDER + 'randomizeddata_' + str(index) + '.csv')
         if df_test is None:
             df_test = temp
         else:
