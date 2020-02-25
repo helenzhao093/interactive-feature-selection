@@ -21,8 +21,8 @@ from sklearn.metrics import roc_curve, auc
 class Classifier:
     def __init__(self, dirname, class_name, df_train_og, df_test_og, df_validate_og):
 
-        self.clf = LogisticRegression()
-        self.clf_roc = OneVsRestClassifier(LogisticRegression())
+        self.clf = KNeighborsClassifier(n_neighbors=3)
+        #self.clf_roc = OneVsRestClassifier(LogisticRegression())
         self.accuracy = 0
         self.precision = 0
         self.recall = 0
@@ -62,7 +62,7 @@ class Classifier:
         accuracy_test = []
         accuracy_traintest = []
         accuracy_validation = []
-
+        self.clf = KNeighborsClassifier(n_neighbors=3)
         self.clf.fit(X_train, y_train)
         accuracy_train.append(self.clf.score(X_train, y_train))
         accuracy_test.append(self.clf.score(X_test, y_test)) # testing accuracy
