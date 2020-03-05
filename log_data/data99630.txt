@@ -1,0 +1,69 @@
+forbidden edges: 
+required edges: 
+ranking: 
+1 
+0 hasdog extracurriculars job studytime age likeskateboarding familyincome extraclasses familysupport college scholarship
+Markov Blanket: [u'scholarship', u'job']
+trial: 0
+time: 2020-02-20 06:30:36.128283
+accuracy: 0.5
+accuracyTrain: 0.69
+accuracyValidation: 0.64
+MI: 0.7977135140202748
+rankLoss: 0.0
+
+trial: 1
+time: 2020-02-20 06:30:42.495923
+time elapse: 0:00:22.072390
+features: [u'scholarship', u'job', u'hasdog', u'extracurriculars', u'studytime', u'age', u'likeskateboarding', u'familyincome', u'extraclasses', u'familysupport', u'college']
+accuracy: 0.61
+accuracyTrain: 0.88
+accuracyValidation: 0.69
+MI: 1.8750486412929217
+rankLoss: 0.0
+AUC: {'A': 0.7369683069224353, 'C': 0.9109320557491289, 'B': 0.8187064459930313, 'F': 0.8953556731334509}
+
+trial: 2
+time: 2020-02-20 06:30:52.197886
+time elapse: 0:00:09.701963
+features: [u'scholarship', u'job', u'hasdog', u'extracurriculars', u'studytime']
+accuracy: 0.49
+accuracyTrain: 0.67
+accuracyValidation: 0.63
+MI: 1.68527598205115
+rankLoss: 0.0
+AUC: {'A': 0.8030650542118432, 'C': 0.8630226480836237, 'B': 0.8471254355400697, 'F': 0.8540564373897708}
+
+trial: 3
+time: 2020-02-20 06:30:59.528843
+time elapse: 0:00:07.330957
+features: [u'scholarship', u'job', u'hasdog']
+accuracy: 0.5
+accuracyTrain: 0.69
+accuracyValidation: 0.64
+MI: 1.1479695351681891
+rankLoss: 0.0
+AUC: {'A': 0.7683486238532109, 'C': 0.844294425087108, 'B': 0.8219729965156795, 'F': 0.8514109347442682}
+
+trial: 4
+time: 2020-02-20 06:31:08.576520
+time elapse: 0:00:09.047677
+features: [u'scholarship', u'job']
+accuracy: 0.5
+accuracyTrain: 0.69
+accuracyValidation: 0.64
+MI: 0.7977135140202748
+rankLoss: 0.0
+AUC: {'A': 0.7717889908256881, 'C': 0.836890243902439, 'B': 0.8150043554006968, 'F': 0.8359788359788359}
+
+trial: 5
+time: 2020-02-20 06:31:25.057786
+time elapse: 0:00:16.481266
+features: [u'scholarship', u'job', u'extracurriculars', u'studytime', u'age', u'familyincome', u'extraclasses', u'familysupport', u'college']
+accuracy: 0.56
+accuracyTrain: 0.86
+accuracyValidation: 0.72
+MI: 1.8750486412929215
+rankLoss: 0.0
+AUC: {'A': 0.7278982485404504, 'C': 0.8595383275261325, 'B': 0.7985627177700348, 'F': 0.8885949441504997}
+

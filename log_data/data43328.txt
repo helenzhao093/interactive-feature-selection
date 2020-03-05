@@ -1,0 +1,25 @@
+forbidden edges: 
+required edges: 
+ranking: 
+1 
+0 hasdog extracurriculars job studytime age skateboards brownhair extraclasses familysupport college scholarship
+Markov Blanket: [u'scholarship']
+trial: 0
+time: 2020-02-25 01:28:56.221959
+accuracy: 0.25
+accuracyTrain: 0.29
+accuracyValidation: 0.29
+MI: 0.20310850949343973
+rankLoss: 0.0
+
+trial: 1
+time: 2020-02-25 01:28:59.241260
+time elapse: 0:00:33.414487
+features: [u'scholarship', u'hasdog', u'extracurriculars', u'job']
+accuracy: 0.51
+accuracyTrain: 0.59
+accuracyValidation: 0.51
+MI: 1.1783154524942205
+rankLoss: 0.0
+AUC: {'A': 0.7848432055749128, 'C': 0.753203661327231, 'B': 0.6222651222651223, 'F': 0.4825671487603305}
+

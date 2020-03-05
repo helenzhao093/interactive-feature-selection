@@ -1,0 +1,14 @@
+forbidden edges: 
+required edges: 
+ranking: 
+1 
+0 hasdog extracurriculars job studytime age likeskateboarding familyincome extraclasses familysupport college scholarship
+Markov Blanket: [u'scholarship', u'job']
+trial: 0
+time: 2020-02-20 06:28:33.660039
+accuracy: 0.5
+accuracyTrain: 0.69
+accuracyValidation: 0.64
+MI: 0.7977135140202748
+rankLoss: 0.0
+

@@ -1,0 +1,6 @@
+forbidden edges: 
+required edges: 
+ranking: 
+1 
+0 hasdog extracurriculars job studytime age likeskateboarding familyincome extraclasses familysupport college scholarship
+Markov Blanket: [u'scholarship', u'hasdog']

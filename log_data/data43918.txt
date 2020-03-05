@@ -1,0 +1,36 @@
+forbidden edges: 
+required edges: 
+ranking: 
+1 
+0 hasdog extracurriculars job studytime age likeskateboarding familyincome extraclasses familysupport college scholarship
+Markov Blanket: [u'scholarship', u'job']
+trial: 0
+time: 2020-02-21 05:18:44.478956
+accuracy: 0.56
+accuracyTrain: 0.63
+accuracyValidation: 0.64
+MI: 0.6105046548044244
+rankLoss: 0.0
+
+trial: 1
+time: 2020-02-21 05:19:16.526613
+time elapse: 22:24:13.426094
+features: [u'scholarship', u'job', u'hasdog', u'likeskateboarding', u'studytime', u'extraclasses', u'familysupport']
+accuracy: 0.61
+accuracyTrain: 0.76
+accuracyValidation: 0.68
+MI: 1.7680055290921763
+rankLoss: 0.0
+AUC: {'A': 0.7779399499582986, 'C': 0.9181184668989547, 'B': 0.8218641114982579, 'F': 0.8997648442092886}
+
+trial: 2
+time: 2020-02-21 05:19:48.227293
+time elapse: 0:00:31.700680
+features: [u'scholarship', u'job', u'hasdog', u'studytime', u'extraclasses', u'familysupport']
+accuracy: 0.6
+accuracyTrain: 0.76
+accuracyValidation: 0.67
+MI: 1.7988172638743587
+rankLoss: 0.0
+AUC: {'A': 0.7993119266055047, 'C': 0.9239982578397212, 'B': 0.8314459930313589, 'F': 0.896384479717813}
+

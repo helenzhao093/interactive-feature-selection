@@ -1,0 +1,14 @@
+forbidden edges: 
+required edges: 
+ranking: 
+1 
+0 motherhasjob extracurriculars job studytime age fatherhasjob familyincome extraclasses familysupport college scholarship
+Markov Blanket: [u'scholarship', u'job']
+trial: 0
+time: 2020-02-20 05:44:21.317416
+accuracy: 0.56
+accuracyTrain: 0.63
+accuracyValidation: 0.64
+MI: 0.6105046548044244
+rankLoss: 0.0
+

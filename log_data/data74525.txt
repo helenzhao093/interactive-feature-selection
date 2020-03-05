@@ -1,0 +1,80 @@
+forbidden edges: 
+required edges: 
+ranking: 
+1 
+0 hasdog extracurriculars job studytime age skateboards brownhair extraclasses familysupport college scholarship
+Markov Blanket: [u'familysupport']
+trial: 0
+time: 2020-02-25 06:25:31.891899
+accuracy: 0.29
+accuracyTrain: 0.35
+accuracyValidation: 0.29
+MI: 0.14889342566980884
+rankLoss: 0.0
+
+trial: 1
+time: 2020-02-25 06:25:34.918951
+time elapse: 0:00:15.591669
+features: [u'familysupport', u'hasdog', u'extracurriculars', u'job', u'studytime', u'age', u'skateboards']
+accuracy: 0.49
+accuracyTrain: 0.63
+accuracyValidation: 0.5
+MI: 1.8643780552668998
+rankLoss: 0.0
+AUC: {'A': 0.8232992827646164, 'C': 0.749659090909091, 'B': 0.7415909090909092, 'F': 0.6258657031014755}
+
+trial: 2
+time: 2020-02-25 06:25:41.588054
+time elapse: 0:00:06.669103
+features: [u'familysupport', u'hasdog', u'extracurriculars', u'job', u'studytime', u'age', u'skateboards', u'brownhair', u'extraclasses', u'college', u'scholarship']
+accuracy: 0.52
+accuracyTrain: 0.69
+accuracyValidation: 0.61
+MI: 1.9028395937284386
+rankLoss: 0.0
+AUC: {'A': 0.7716800695500977, 'C': 0.7819318181818182, 'B': 0.7784090909090908, 'F': 0.7226738934056007}
+
+trial: 3
+time: 2020-02-25 06:25:53.160234
+time elapse: 0:00:11.572180
+features: [u'familysupport', u'hasdog', u'extracurriculars', u'job', u'studytime']
+accuracy: 0.55
+accuracyTrain: 0.67
+accuracyValidation: 0.54
+MI: 1.4311218050172698
+rankLoss: 0.0
+AUC: {'A': 0.8285155400999782, 'C': 0.7410227272727273, 'B': 0.7113636363636363, 'F': 0.6734417344173442}
+
+trial: 4
+time: 2020-02-25 06:26:07.236608
+time elapse: 0:00:14.076374
+features: [u'familysupport', u'hasdog', u'college', u'scholarship', u'job', u'studytime']
+accuracy: 0.55
+accuracyTrain: 0.69
+accuracyValidation: 0.6
+MI: 1.5712028149238906
+rankLoss: 0.0
+AUC: {'A': 0.8820908498152575, 'C': 0.7688636363636363, 'B': 0.7788636363636363, 'F': 0.7034025895814514}
+
+trial: 5
+time: 2020-02-25 06:26:12.463763
+time elapse: 0:00:05.227155
+features: [u'familysupport', u'college', u'scholarship', u'job', u'studytime']
+accuracy: 0.49
+accuracyTrain: 0.63
+accuracyValidation: 0.54
+MI: 1.487269584604655
+rankLoss: 0.0
+AUC: {'A': 0.8392740708541622, 'C': 0.8048863636363636, 'B': 0.7144318181818182, 'F': 0.6894007828967179}
+
+trial: 6
+time: 2020-02-25 06:26:24.413281
+time elapse: 0:00:11.949518
+features: [u'college', u'scholarship', u'job', u'studytime', u'brownhair']
+accuracy: 0.61
+accuracyTrain: 0.67
+accuracyValidation: 0.67
+MI: 1.383232862792788
+rankLoss: 0.0
+AUC: {'A': 0.8486198652466854, 'C': 0.8445454545454545, 'B': 0.696590909090909, 'F': 0.7174043962661849}
+
